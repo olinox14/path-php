@@ -2,13 +2,95 @@
 
 namespace Path\Path;
 
+use InvalidArgumentException;
+
+/**
+ * Represents a file or directory path.
+ *
+ * @package olinox14/path
+ */
 class Path
 {
+    const F_OK = 0; // Check existence of the file
+    const R_OK = 4; // Check read permission of the file
+    const W_OK = 2; // Check write permission of the file
+    const X_OK = 1; // Check execute permission of the file
+
     protected string $path;
 
     public function __construct(string $path)
     {
         $this->path = $path;
+    }
+
+    public function append(string ...$parts): self
+    {
+        $this->path = join(DIRECTORY_SEPARATOR, array_merge([$this->path], $parts));
+        return $this;
+    }
+
+    /**
+     * Combine this path with one or several arguments
+     *
+     * @param string ...$parts
+     * @return string
+     */
+    public function joinpath(string ...$parts): string
+    {
+        return join(DIRECTORY_SEPARATOR, $parts);
+    }
+
+
+//    AI Generated below
+
+    /**
+     * Returns an absolute version of this path.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function abspath(string $path): string
+    {
+        return realpath($path);
+    }
+
+    /**
+     * Checks the access rights for a given file or directory.
+     *
+     * @param string $path The path to the file or directory.
+     * @param int $mode The access mode to check. Permitted values:
+     *        - F_OK: checks for the existence of the file or directory.
+     *        - R_OK: checks for read permission.
+     *        - W_OK: checks for write permission.
+     *        - X_OK: checks for execute permission.
+     * @return bool Returns true if the permission check is successful; otherwise, returns false.
+     * @throws InvalidArgumentException Throws an exception if an invalid mode is provided.
+     */
+    function access(string $path, int $mode): bool
+    {
+        return match ($mode) {
+            self::F_OK => file_exists($path),
+            self::R_OK => is_readable($path),
+            self::W_OK => is_writable($path),
+            self::X_OK => is_executable($path),
+            default => throw new InvalidArgumentException('Invalid mode'),
+        };
+    }
+
+    /**
+     * Retrieves the last access time of a file or directory.
+     *
+     * @param string $path The path to the file or directory.
+     *
+     * @return string|null The last access time of the file or directory in 'Y-m-d H:i:s' format. Returns null if the file or directory does not exist or on error.
+     */
+    function atime(string $path): ?string
+    {
+        $time = fileatime($path);
+        if ($time === false) {
+            return null;
+        }
+        return date('Y-m-d H:i:s', $time);
     }
 
     /**
@@ -97,8 +179,7 @@ class Path
     {
         if (is_file($this->path)) {
             unlink($this->path); //for file
-        }
-        else if (is_dir($this->path)) {
+        } else if (is_dir($this->path)) {
             rmdir($this->path); //for directory
         }
     }
@@ -114,8 +195,7 @@ class Path
     {
         if (is_file($this->path)) {
             copy($this->path, $destination);
-        }
-        else if (is_dir($this->path)) {
+        } else if (is_dir($this->path)) {
             // Copy dir needs special handling, not covered in this example.
         }
     }
@@ -239,5 +319,320 @@ class Path
     public function exists(): bool
     {
         return file_exists($this->path);
+    }
+
+    public static function glob(string $pattern)
+    {
+        foreach (glob($pattern) as $filename) {
+            yield new static($filename);
+        }
+    }
+
+    public function rmdir()
+    {
+        if (!is_dir($this->path)) {
+            throw new \RuntimeException("{$this->path} is not a directory");
+        }
+
+        $it = new RecursiveDirectoryIterator($this->path, RecursiveDirectoryIterator::SKIP_DOTS);
+        $files = new RecursiveIteratorIterator($it,
+            RecursiveIteratorIterator::CHILD_FIRST);
+
+        foreach ($files as $file) {
+            if ($file->isDir()) {
+                rmdir($file->getRealPath());
+            } else {
+                unlink($file->getRealPath());
+            }
+        }
+        rmdir($this->path);
+    }
+
+    public function open(string $mode = 'r')
+    {
+        if (!$this->isFile()) {
+            throw new \RuntimeException("{$this->path} is not a file");
+        }
+
+        $handle = fopen($this->path, $mode);
+        if ($handle === false) {
+            throw new \RuntimeException("Failed opening file {$this->path}");
+        }
+
+        return $handle;
+    }
+
+    /**
+     * Returns this path as a URI.
+     *
+     * @return string
+     */
+    public function as_uri(): string
+    {
+        throw new \Exception("Method not implemented");
+    }
+
+    /**
+     * Returns the group that owns the file.
+     *
+     * @return string
+     */
+    public function group(): string
+    {
+        throw new \Exception("Method not implemented");
+    }
+
+    /**
+     * Check whether this path is absolute.
+     *
+     * @return bool
+     */
+    public function is_absolute(): bool
+    {
+        return substr($this->path, 0, 1) === '/';
+    }
+
+    /**
+     * (Not supported in PHP). In Python, this would convert the path to POSIX style, but in PHP there's no equivalent.
+     * Therefore throwing an exception.
+     *
+     * @throws \RuntimeException
+     */
+    public function as_posix(): void
+    {
+        throw new \RuntimeException("Method 'as_posix' not supported in PHP");
+    }
+
+    /**
+     * Changes permissions of the file.
+     *
+     * @param int $mode The new permissions (octal).
+     * @return bool
+     */
+    public function chmod(int $mode): bool
+    {
+        return chmod($this->path, $mode);
+    }
+
+    /**
+     * Changes ownership of the file.
+     *
+     * @param string $user The new owner username.
+     * @param string $group The new owner group name.
+     * @return bool
+     */
+    public function chown(string $user, string $group): bool
+    {
+        return chown($this->path, $user) && chgrp($this->path, $group);
+    }
+
+    /**
+     * Checks if file is a block special file.
+     *
+     * @return bool
+     */
+    public function is_block_device(): bool
+    {
+        return function_exists('posix_isatty') && is_file($this->path) && posix_isatty($this->path);
+    }
+
+    /**
+     * Checks if file is a character special file.
+     *
+     * @return bool
+     */
+    public function is_char_device(): bool
+    {
+        return function_exists('filetype') && filetype($this->path) === 'char';
+    }
+
+    /**
+     * Checks if file is a Named Pipe (FIFO) special file.
+     *
+     * @return bool
+     */
+    public function is_fifo(): bool
+    {
+        return function_exists('filetype') && filetype($this->path) === 'fifo';
+    }
+
+    /**
+     * Checks if file is a socket.
+     *
+     * @return bool
+     */
+    public function is_socket(): bool
+    {
+        return function_exists('filetype') && 'socket' === filetype($this->path);
+    }
+
+    /**
+     * Checks if the file is a symbolic link.
+     *
+     * @return bool
+     */
+    public function is_symlink(): bool
+    {
+        return is_link($this->path);
+    }
+
+    /**
+     * Iterate over the files in this directory.
+     *
+     * @return \Generator
+     * @throws \RuntimeException if the path is not a directory.
+     */
+    public function iterdir()
+    {
+        if (!$this->isDir()) {
+            throw new \RuntimeException("{$this->path} is not a directory");
+        }
+
+        foreach (new \DirectoryIterator($this->path) as $fileInfo) {
+            if ($fileInfo->isDot()) continue;
+            yield $fileInfo->getFilename();
+        }
+    }
+
+
+
+    /**
+     * Change the mode of path to the numeric mode.
+     * This method does not follow symbolic links.
+     *
+     * @param int $mode
+     * @return bool
+     */
+    public function lchmod(int $mode): bool
+    {
+        if (!function_exists('lchmod')) {
+            return false;
+        }
+        return lchmod($this->path, $mode);
+    }
+
+    /**
+     * Change the owner and group id of path to the numeric uid and gid.
+     * This method does not follow symbolic links.
+     *
+     * @param int $uid User id
+     * @param int $gid Group id
+     * @return bool
+     */
+    public function lchown(int $uid, int $gid): bool
+    {
+        if (!function_exists('lchown')) {
+            return false;
+        }
+        return lchown($this->path, $uid) && lchgrp($this->path, $gid);
+    }
+
+    /**
+     * Create a hard link pointing to a path.
+     *
+     * @param string $target
+     * @return bool
+     */
+    public function link_to(string $target): bool
+    {
+        if (!function_exists('link')) {
+            return false;
+        }
+        return link($this->path, $target);
+    }
+
+    /**
+     * Like stat(), but do not follow symbolic links.
+     *
+     * @return array|false
+     */
+    public function lstat()
+    {
+        return lstat($this->path);
+    }
+
+    /**
+     * Returns the individual parts of this path.
+     *
+     * @return array
+     */
+    public function parts(): array
+    {
+        $separator = DIRECTORY_SEPARATOR;
+        return explode($separator, $this->path);
+    }
+
+    /**
+     * Opens the file in bytes mode, reads it, and closes the file.
+     *
+     * @return string
+     * @throws \RuntimeException
+     */
+    public function read_bytes(): string
+    {
+        $bytes = file_get_contents($this->path, FILE_BINARY);
+        if ($bytes === false) {
+            throw new \RuntimeException("Error reading file {$this->path}");
+        }
+
+        return $bytes;
+    }
+
+    /**
+     * Open the file in text mode, read it, and close the file
+     *
+     * @return string
+     * @throws \RuntimeException
+     */
+    public function read_text(): string
+    {
+        $text = file_get_contents($this->path);
+        if ($text === false) {
+            throw new \RuntimeException("Error reading file {$this->path}");
+        }
+
+        return $text;
+    }
+
+    /**
+     * Compute a version of this path that is relative to another path.
+     *
+     * @return string
+     * @throws \RuntimeException
+     */
+    public function relative_to(string $other_path): string
+    {
+        $path = $this->absolute();
+        $other = realpath($other_path);
+        if ($other === false) {
+            throw new \RuntimeException("$other_path does not exist or unable to get a real path");
+        }
+
+        $path_parts = explode(DIRECTORY_SEPARATOR, $path);
+        $other_parts = explode(DIRECTORY_SEPARATOR, $other);
+
+        while (count($path_parts) && count($other_parts) && ($path_parts[0] == $other_parts[0])) {
+            array_shift($path_parts);
+            array_shift($other_parts);
+        }
+
+        return str_repeat('..' . DIRECTORY_SEPARATOR, count($other_parts)) . implode(DIRECTORY_SEPARATOR, $path_parts);
+    }
+
+    /**
+     * Renames this file or directory to the given target.
+     *
+     * @param string $target
+     * @return bool
+     * @throws \RuntimeException
+     */
+    public function rename(string $target): bool
+    {
+        // Check if file or directory exists
+        if (!$this->isFile() && !$this->isDir()) {
+            throw new \RuntimeException("{$this->path} does not exist");
+        }
+
+        return rename($this->path, $target);
     }
 }

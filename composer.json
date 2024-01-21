@@ -1,6 +1,6 @@
 {
   "name": "olinox14/path",
-  "description": "Simple, intuitive and object-oriented file and path operations, inspired by the path?py python library",
+  "description": "Simple, intuitive and object-oriented file and path operations, inspired by the path.py python library",
   "type": "library",
   "license": "MIT",
   "authors": [
