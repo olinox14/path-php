@@ -174,9 +174,9 @@ class Path
     /**
      * Get the extension of the given path.
      *
-     * @return array|string Returns the extension of the path as a string if it exists, or an empty string otherwise.
+     * @return string Returns the extension of the path as a string if it exists, or an empty string otherwise.
      */
-    public function extension(): array|string
+    public function ext(): string
     {
         return pathinfo($this->path, PATHINFO_EXTENSION);
     }

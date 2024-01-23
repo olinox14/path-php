@@ -283,6 +283,11 @@ class PathTest extends TestCase
         );
     }
 
+    /**
+     * Test 'Path' class 'isFile' method to check if the file exists
+     *
+     * @return void
+     */
     public function testIsFileOnActualFile(): void
     {
         touch(self::TEMP_TEST_DIR . "/foo");
@@ -290,11 +295,21 @@ class PathTest extends TestCase
         $this->assertTrue((new Path('foo'))->isFile());
     }
 
+    /**
+     * Test 'Path' class 'isFile' method to check if a non-existent file exists
+     *
+     * @return void
+     */
     public function testIsFileOnNonExistentFile(): void
     {
         $this->assertFalse((new Path('foo'))->isFile());
     }
 
+    /**
+     * Test 'Path' class 'isFile' method to check if a file exists on the given directory
+     *
+     * @return void
+     */
     public function testIsFileOnExistentDir(): void
     {
         mkdir(self::TEMP_TEST_DIR . "/some_dir");
@@ -302,6 +317,11 @@ class PathTest extends TestCase
         $this->assertFalse((new Path('some_dir'))->isFile());
     }
 
+    /**
+     * Test 'Path' class 'isDir' method to check if the path is a directory
+     *
+     * @return void
+     */
     public function testIsDirOnActualDir(): void
     {
         mkdir(self::TEMP_TEST_DIR . "/some_dir");
@@ -309,6 +329,11 @@ class PathTest extends TestCase
         $this->assertTrue((new Path('some_dir'))->isDir());
     }
 
+    /**
+     * Test 'Path' class 'isDir' method to check if a file's path is a directory
+     *
+     * @return void
+     */
     public function testIsDirOnExistentFile(): void
     {
         touch(self::TEMP_TEST_DIR . "/foo");
@@ -316,8 +341,29 @@ class PathTest extends TestCase
         $this->assertFalse((new Path('some_dir'))->isDir());
     }
 
+    /**
+     * Test 'Path' class 'isDir' method on a non-existent directory
+     *
+     * @return void
+     */
     public function testIsDirOnNonExistentDir(): void
     {
         $this->assertFalse((new Path('some_dir'))->isDir());
+    }
+
+    public function testFileExtension(): void
+    {
+        $this->assertEquals(
+            'txt',
+            (new Path("foo.txt"))->ext()
+        );
+    }
+
+    public function testEmptyExtension(): void
+    {
+        $this->assertSame(
+            '',
+            (new Path("foo"))->ext()
+        );
     }
 }
