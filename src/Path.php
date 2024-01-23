@@ -14,13 +14,24 @@ use function Path\Path\lchmod;
  */
 class Path
 {
-    const F_OK = 0; // Check existence of the file
-    const R_OK = 4; // Check read permission of the file
-    const W_OK = 2; // Check write permission of the file
-    const X_OK = 1; // Check execute permission of the file
+    /**
+     * File exists
+     */
+    const F_OK = 0;
+    /**
+     * Has read permission on the file
+     */
+    const R_OK = 4;
+    /**
+     * Has write permission on the file
+     */
+    const W_OK = 2;
+    /**
+     * Has execute permission on the file
+     */
+    const X_OK = 1;
 
     protected string $path;
-
 
     /**
      * Joins two or more parts of a path together, inserting '/' as needed.
@@ -104,6 +115,7 @@ class Path
 
     /**
      * Checks the access rights for a given file or directory.
+     * From the python `os.access` method
      *
      * @param string $path The path to the file or directory.
      * @param int $mode The access mode to check. Permitted values:
@@ -114,14 +126,14 @@ class Path
      * @return bool Returns true if the permission check is successful; otherwise, returns false.
      * @throws InvalidArgumentException Throws an exception if an invalid mode is provided.
      */
-    function access(string $path, int $mode): bool
+    function access(int $mode): bool
     {
         return match ($mode) {
-            self::F_OK => file_exists($path),
-            self::R_OK => is_readable($path),
-            self::W_OK => is_writable($path),
-            self::X_OK => is_executable($path),
-            default => throw new InvalidArgumentException('Invalid mode'),
+            self::F_OK => file_exists($this->path),
+            self::R_OK => is_readable($this->path),
+            self::W_OK => is_writable($this->path),
+            self::X_OK => is_executable($this->path),
+            default => throw new \RuntimeException('Invalid mode'),
         };
     }
 

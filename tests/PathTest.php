@@ -14,6 +14,7 @@ class PathTest extends TestCase
     public function setUp(): void
     {
         mkdir(self::TEMP_TEST_DIR);
+        chdir(self::TEMP_TEST_DIR);
     }
 
     private function rmDirs(string $dir): void {
@@ -155,5 +156,114 @@ class PathTest extends TestCase
             self::TEMP_TEST_DIR . "/bar",
             (new Path('../bar'))->abspath()
         );
+    }
+
+    /**
+     * Test 'Path' class 'access' method to check existence of the file
+     */
+    public function testAccessCheckExistenceOfFile(): void
+    {
+        $filePath = self::TEMP_TEST_DIR . "/foo";
+        touch($filePath);
+        chmod($filePath, 777);
+
+        $result = (new Path('foo'))->access(Path::F_OK);
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Test 'Path' class 'access' method to check existence of the non-existent file
+     */
+    public function testAccessCheckExistenceOfNonExistingFile(): void
+    {
+        $result = (new Path('foo'))->access(Path::F_OK);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test 'Path' class 'access' method to check read permission of the file
+     */
+    public function testAccessCheckReadPermissionOfFile(): void
+    {
+        $filePath = self::TEMP_TEST_DIR . "/foo";
+        touch($filePath);
+        chmod($filePath, 777);
+
+        $result = (new Path('foo'))->access(Path::R_OK);
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Test 'Path' class 'access' method to check read permission of the file (no permission)
+     */
+    public function testAccessCheckReadPermissionOfFileNoRight(): void
+    {
+        $filePath = self::TEMP_TEST_DIR . "/foo";
+        touch($filePath);
+        chmod($filePath, 000);
+
+        $result = (new Path('foo'))->access(Path::R_OK);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test 'Path' class 'access' method to check write permission of the file
+     */
+    public function testAccessCheckWritePermissionOfFile(): void
+    {
+        $filePath = self::TEMP_TEST_DIR . "/foo";
+        touch($filePath);
+        chmod($filePath, 777);
+
+        $result = (new Path('foo'))->access(Path::W_OK);
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Test 'Path' class 'access' method to check write permission of the file (no permission)
+     */
+    public function testAccessCheckWritePermissionOfFileNoRight(): void
+    {
+        $filePath = self::TEMP_TEST_DIR . "/foo";
+        touch($filePath);
+        chmod($filePath, 000);
+
+        $result = (new Path('foo'))->access(Path::W_OK);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test 'Path' class 'access' method to check execute permission of the file
+     */
+    public function testAccessCheckExecutePermissionOfFile(): void
+    {
+        $filePath = self::TEMP_TEST_DIR . "/foo";
+        touch($filePath);
+        chmod($filePath, 777);
+
+        $result = (new Path('foo'))->access(Path::X_OK);
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Test 'Path' class 'access' method to check existence of the file
+     */
+    public function testAccessCheckExecutePermissionOfFileNoRight(): void
+    {
+        $filePath = self::TEMP_TEST_DIR . "/foo";
+        touch($filePath);
+        chmod($filePath, 000);
+
+        $result = (new Path('foo'))->access(Path::X_OK);
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test 'Path' class 'access' method with an invalid mode parameter
+     */
+    public function testAccessInvalidModeParameter(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        (new Path('foo'))->access(123);
     }
 }
