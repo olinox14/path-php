@@ -7,10 +7,35 @@ use PHPUnit\Framework\TestCase;
 
 class PathTest extends TestCase
 {
+    const TEMP_TEST_DIR = __DIR__ . "/temp";
+
     protected Path $pathClass;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
+        mkdir(self::TEMP_TEST_DIR);
+    }
+
+    private function rmDirs(string $dir): void {
+        // Remove and replace by a proper tempdir method
+        foreach(scandir($dir) as $file) {
+            if ('.' === $file || '..' === $file) continue;
+            if (is_dir($dir . DIRECTORY_SEPARATOR . $file)) $this->rmDirs($dir . DIRECTORY_SEPARATOR . $file);
+            else unlink($dir . DIRECTORY_SEPARATOR . $file);
+        }
+        rmdir($dir);
+    }
+
+    public function tearDown(): void
+    {
+        $this->rmDirs(self::TEMP_TEST_DIR);
+        chdir(__DIR__);
+    }
+
+    public function testToString(): void
+    {
+        $path = new Path('/foo/bar');
+        $this->assertEquals('/foo/bar', $path->__toString());
     }
 
     /**
@@ -70,6 +95,11 @@ class PathTest extends TestCase
         $this->assertFalse($path->eq(''));
     }
 
+    /**
+     * Test the append method of the Path class.
+     *
+     * @return void
+     */
     public function testAppend(): void
     {
         $path = new Path('/foo');
@@ -91,6 +121,39 @@ class PathTest extends TestCase
         // Absolute path passed in $parts
         $this->assertTrue(
             (new Path('/home'))->append('/user', 'documents')->eq('/user/documents')
+        );
+    }
+
+    /**
+     * Test the abspath method of the Path class.
+     *
+     * @return void
+     */
+    public function testAbsPath(): void
+    {
+        touch(self::TEMP_TEST_DIR . "/foo");
+        chdir(self::TEMP_TEST_DIR);
+
+        $this->assertEquals(
+            self::TEMP_TEST_DIR . "/foo",
+            (new Path('foo'))->abspath()
+        );
+    }
+
+    /**
+     * Test the abspath method of the Path class with a relative path.
+     *
+     * @return void
+     */
+    public function testAbsPathWithRelative(): void
+    {
+        mkdir(self::TEMP_TEST_DIR . "/foo");
+        touch(self::TEMP_TEST_DIR . "/bar");
+        chdir(self::TEMP_TEST_DIR . "/foo");
+
+        $this->assertEquals(
+            self::TEMP_TEST_DIR . "/bar",
+            (new Path('../bar'))->abspath()
         );
     }
 }

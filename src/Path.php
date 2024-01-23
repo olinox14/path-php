@@ -93,14 +93,13 @@ class Path
     }
 
     /**
-     * Returns an absolute version of this path.
+     * Returns an absolute version of the current path.
      *
-     * @param string $path
      * @return string
      */
-    public function abspath(string $path): string
+    public function abspath(): string
     {
-        return realpath($path);
+        return realpath($this->path);
     }
 
     /**
