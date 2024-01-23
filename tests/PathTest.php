@@ -282,4 +282,16 @@ class PathTest extends TestCase
             $atime
         );
     }
+
+    public function testIsFileOnActualFile(): void
+    {
+        touch(self::TEMP_TEST_DIR . "/foo");
+
+        $this->assertTrue((new Path('foo'))->isFile());
+    }
+
+    public function testIsFileOnNonExistentFile(): void
+    {
+        $this->assertFalse((new Path('foo'))->isFile());
+    }
 }
