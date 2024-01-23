@@ -166,7 +166,7 @@ class Path
      *
      * @return bool Returns true if the path is a directory, false otherwise.
      */
-    public function isDir()
+    public function isDir(): bool
     {
         return is_dir($this->path);
     }

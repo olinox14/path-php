@@ -294,4 +294,30 @@ class PathTest extends TestCase
     {
         $this->assertFalse((new Path('foo'))->isFile());
     }
+
+    public function testIsFileOnExistentDir(): void
+    {
+        mkdir(self::TEMP_TEST_DIR . "/some_dir");
+
+        $this->assertFalse((new Path('some_dir'))->isFile());
+    }
+
+    public function testIsDirOnActualDir(): void
+    {
+        mkdir(self::TEMP_TEST_DIR . "/some_dir");
+
+        $this->assertTrue((new Path('some_dir'))->isDir());
+    }
+
+    public function testIsDirOnExistentFile(): void
+    {
+        touch(self::TEMP_TEST_DIR . "/foo");
+
+        $this->assertFalse((new Path('some_dir'))->isDir());
+    }
+
+    public function testIsDirOnNonExistentDir(): void
+    {
+        $this->assertFalse((new Path('some_dir'))->isDir());
+    }
 }
