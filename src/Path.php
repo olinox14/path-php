@@ -1,8 +1,11 @@
 <?php
 
-namespace Path\Path;
+namespace Path;
 
 use InvalidArgumentException;
+use Path\Path\RecursiveDirectoryIterator;
+use Path\Path\RecursiveIteratorIterator;
+use function Path\Path\lchmod;
 
 /**
  * Represents a file or directory path.
@@ -18,30 +21,76 @@ class Path
 
     protected string $path;
 
+
+    /**
+     * Joins two or more parts of a path together, inserting '/' as needed.
+     * If any component is an absolute path, all previous path components
+     * will be discarded. An empty last part will result in a path that
+     * ends with a separator.
+     *
+     * TODO: see if necessary : https://github.com/python/cpython/blob/d22c066b802592932f9eb18434782299e80ca42e/Lib/posixpath.py#L81
+     *
+     * @param string ...$parts The parts of the path to be joined.
+     * @return string The resulting path after joining the parts using the directory separator.
+     */
+    public static function join(string $path, string ...$parts): string
+    {
+        foreach ($parts as $part) {
+            if (str_starts_with($part, DIRECTORY_SEPARATOR)) {
+                $path = $part;
+            } elseif (!$path || str_ends_with($path, DIRECTORY_SEPARATOR)) {
+                $path .= $part;
+            } else {
+                $path .= DIRECTORY_SEPARATOR . $part;
+            }
+        }
+        return $path;
+    }
+
     public function __construct(string $path)
     {
         $this->path = $path;
-    }
-
-    public function append(string ...$parts): self
-    {
-        $this->path = join(DIRECTORY_SEPARATOR, array_merge([$this->path], $parts));
         return $this;
     }
 
-    /**
-     * Combine this path with one or several arguments
-     *
-     * @param string ...$parts
-     * @return string
-     */
-    public function joinpath(string ...$parts): string
-    {
-        return join(DIRECTORY_SEPARATOR, $parts);
+    public function __toString(): string {
+        return $this->path;
     }
 
+    /**
+     * Retrieves the current path of the file or directory
+     *
+     * @return string The path of the file or directory
+     */
+    public function path(): string
+    {
+        return $this->path;
+    }
 
-//    AI Generated below
+    /**
+     * Checks if the given path is equal to the current path.
+     *
+     * @param string $path The path to compare against.
+     *
+     * @return bool Returns true if the given path is equal to the current path, false otherwise.
+     */
+    public function eq(string $path): bool {
+        return $path === $this->path;
+    }
+
+    /**
+     * Appends parts to the current path.
+     *
+     * @see Path::join()
+     *
+     * @param string ...$parts The parts to be appended to the current path.
+     * @return self Returns an instance of the class with the appended path.
+     */
+    public function append(string ...$parts): self
+    {
+        $this->path = self::join($this->path, ...$parts);
+        return $this;
+    }
 
     /**
      * Returns an absolute version of this path.
