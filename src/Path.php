@@ -182,18 +182,6 @@ class Path
     }
 
     /**
-     * Get the name of the file or path.
-     *
-     * @return array|string Returns the name of the file or path.
-     * If the path has an extension, it returns the name without the extension as a string.
-     * If the path doesn't have an extension, it returns the name as an array containing the directory name and the file name.
-     */
-    public function name(): array|string
-    {
-        return pathinfo($this->path, PATHINFO_FILENAME);
-    }
-
-    /**
      * Get the base name of the path.
      *
      * @return string The base name of the path.
@@ -201,6 +189,16 @@ class Path
     public function basename(): string
     {
         return pathinfo($this->path, PATHINFO_BASENAME);
+    }
+
+    /**
+     * Get the name of the file or path.
+     *
+     * @return string Returns the name of the file without its extension
+     */
+    public function name(): string
+    {
+        return pathinfo($this->path, PATHINFO_FILENAME);
     }
 
     /**

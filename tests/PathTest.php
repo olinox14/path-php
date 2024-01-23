@@ -351,6 +351,11 @@ class PathTest extends TestCase
         $this->assertFalse((new Path('some_dir'))->isDir());
     }
 
+    /**
+     * Test 'Path' class 'ext' method to get the extension of the file
+     *
+     * @return void
+     */
     public function testFileExtension(): void
     {
         $this->assertEquals(
@@ -359,11 +364,63 @@ class PathTest extends TestCase
         );
     }
 
+    /**
+     * Test 'Path' class 'ext' method to get the extension of the file
+     *
+     * @return void
+     */
     public function testEmptyExtension(): void
     {
-        $this->assertSame(
+        $this->assertEquals(
             '',
             (new Path("foo"))->ext()
         );
     }
+
+    /**
+     * Test 'Path' class 'basename' method to get the base name of a file
+     *
+     * @return void
+     */
+    public function testBaseName()
+    {
+        touch(self::TEMP_TEST_DIR . "/foo.txt");
+
+        $this->assertEquals(
+            'foo.txt',
+            (new Path("foo.txt"))->basename()
+        );
+    }
+
+    /**
+     * Test 'Path' class 'name' method to get the name of the file without extension
+     *
+     * @return void
+     */
+    public function testName()
+    {
+        touch(self::TEMP_TEST_DIR . "/foo");
+
+        $this->assertEquals(
+            'foo',
+            (new Path("foo"))->name()
+        );
+    }
+
+    /**
+     * Test 'Path' class 'name' method to get the name of the file with extension
+     *
+     * @return void
+     */
+    public function testNameWithExt()
+    {
+        touch(self::TEMP_TEST_DIR . "/foo.txt");
+
+        $this->assertEquals(
+            'foo',
+            (new Path("foo.txt"))->name()
+        );
+    }
+
+
 }
