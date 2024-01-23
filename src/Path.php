@@ -107,6 +107,7 @@ class Path
      * Returns an absolute version of the current path.
      *
      * @return string
+     * TODO: make an alias `realpath`
      */
     public function abspath(): string
     {
@@ -117,14 +118,13 @@ class Path
      * Checks the access rights for a given file or directory.
      * From the python `os.access` method
      *
-     * @param string $path The path to the file or directory.
      * @param int $mode The access mode to check. Permitted values:
      *        - F_OK: checks for the existence of the file or directory.
      *        - R_OK: checks for read permission.
      *        - W_OK: checks for write permission.
      *        - X_OK: checks for execute permission.
      * @return bool Returns true if the permission check is successful; otherwise, returns false.
-     * @throws InvalidArgumentException Throws an exception if an invalid mode is provided.
+     * TODO: complete unit tests
      */
     function access(int $mode): bool
     {
@@ -140,27 +140,15 @@ class Path
     /**
      * Retrieves the last access time of a file or directory.
      *
-     * @param string $path The path to the file or directory.
-     *
      * @return string|null The last access time of the file or directory in 'Y-m-d H:i:s' format. Returns null if the file or directory does not exist or on error.
      */
-    function atime(string $path): ?string
+    function atime(): ?string
     {
-        $time = fileatime($path);
+        $time = fileatime($this->path);
         if ($time === false) {
             return null;
         }
         return date('Y-m-d H:i:s', $time);
-    }
-
-    /**
-     * Resolve the path.
-     *
-     * @return bool|string Returns the resolved path as a string if successful, otherwise returns false.
-     */
-    public function resolve(): bool|string
-    {
-        return realpath($this->path);
     }
 
     /**
