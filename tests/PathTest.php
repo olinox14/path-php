@@ -2,9 +2,12 @@
 
 namespace Path\Tests;
 
+use Path\Exception\FileExistsException;
+use Path\Exception\FileNotFoundException;
 use Path\Path;
 use PHPUnit\Framework\TestCase;
 
+// TODO: tested args should be both typed Path and string
 class PathTest extends TestCase
 {
     const TEMP_TEST_DIR = __DIR__ . "/temp";
@@ -420,6 +423,125 @@ class PathTest extends TestCase
             'foo',
             (new Path("foo.txt"))->name()
         );
+    }
+
+    /**
+     * Test 'Path' class 'mkdir' method to create a directory
+     *
+     * @return void
+     * @throws FileExistsException
+     */
+    public function testMkDir(): void
+    {
+        $path = new Path(self::TEMP_TEST_DIR . "/foo");
+        $path->mkdir();
+        $this->assertTrue($path->isDir());
+    }
+
+    /**
+     * Test 'Path' class 'mkdir' method when directory already exists
+     *
+     * @throws FileExistsException If directory already exists
+     */
+    public function testMkDirExistingDir(): void {
+        mkdir(self::TEMP_TEST_DIR . "/foo");
+        $path = new Path(self::TEMP_TEST_DIR . "/foo");
+
+        $this->expectException(FileExistsException::class);
+        $this->expectExceptionMessage("Directory already exists : " . self::TEMP_TEST_DIR . "/foo");
+        
+        $path->mkdir();
+    }
+
+    /**
+     * Test 'Path' class 'mkdir' method to create a directory with existing directory and recursive option
+     *
+     * @return void
+     * @throws FileExistsException
+     */
+    public function testMkDirExistingDirAndRecursive(): void {
+        mkdir(self::TEMP_TEST_DIR . "/foo");
+        $path = new Path(self::TEMP_TEST_DIR . "/foo");
+
+        $path->mkdir(0777, true);
+        $this->assertTrue($path->isDir());
+    }
+
+    /**
+     * Test 'Path' class 'mkdir' method to create a directory when a file with the same name already exists
+     *
+     * @return void
+     * @throws FileExistsException When a file with the same name already exists
+     */
+    public function testMkDirExistingFile(): void {
+        touch(self::TEMP_TEST_DIR . "/foo");
+        $path = new Path(self::TEMP_TEST_DIR . "/foo");
+
+        $this->expectException(FileExistsException::class);
+        $this->expectExceptionMessage("A file with this name already exists : " . self::TEMP_TEST_DIR . "/foo");
+
+        $path->mkdir();
+    }
+
+    /**
+     * Test 'Path' class 'mkdir' method to create a directory recursively
+     *
+     * @return void
+     * @throws FileExistsException
+     */
+    public function testMkDirRecursive(): void {
+        $path = new Path(self::TEMP_TEST_DIR . "/foo/bar");
+        $path->mkdir(0777, true);
+        $this->assertTrue($path->isDir());
+    }
+
+    /**
+     * Test 'Path' class 'delete' method to delete a file.
+     *
+     * @return void
+     * @throws FileNotFoundException
+     */
+    public function testDeleteFileSuccess(): void
+    {
+        touch(self::TEMP_TEST_DIR . "/foo");
+        $path = new Path(self::TEMP_TEST_DIR . "/foo");
+
+        $this->assertTrue($path->isFile());
+        $path->delete();
+        $this->assertFalse($path->isFile());
+    }
+
+    /**
+     * Test 'Path' class 'delete' method to delete a directory successfully
+     *
+     * @return void
+     * @throws FileNotFoundException
+     */
+    public function testDeleteDirSuccess(): void
+    {
+        mkdir(self::TEMP_TEST_DIR . "/foo");
+        $path = new Path(self::TEMP_TEST_DIR . "/foo");
+
+        $this->assertTrue($path->isDir());
+        $path->delete();
+        $this->assertFalse($path->isDir());
+    }
+
+    /**
+     * Test 'Path' class 'delete' method to delete a non-existing file or dir
+     *
+     * @throws FileNotFoundException When the file does not exist
+     */
+    public function testDeleteNonExistingFile(): void
+    {
+        $path = new Path(self::TEMP_TEST_DIR . "/foo");
+
+        $this->assertFalse($path->isDir());
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage("File does not exist : " . self::TEMP_TEST_DIR . "/foo");
+
+        $path->delete();
     }
 
 

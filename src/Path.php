@@ -3,6 +3,8 @@
 namespace Path;
 
 use InvalidArgumentException;
+use Path\Exception\FileExistsException;
+use Path\Exception\FileNotFoundException;
 use Path\Path\RecursiveDirectoryIterator;
 use Path\Path\RecursiveIteratorIterator;
 use function Path\Path\lchmod;
@@ -58,6 +60,38 @@ class Path
         return $path;
     }
 
+    /**
+     * Copies a directory and its contents recursively from the source directory to the destination directory.
+     *
+     * @param string|self $src The source directory to be copied. It can be a string representing the directory path
+     *                         or an instance of the same class.
+     * @param string|self $dst The destination directory where the source directory and its contents will be copied.
+     *                         It can be a string representing the directory path or an instance of the same class.
+     *
+     * @return void
+     * TODO: see https://stackoverflow.com/a/12763962/4279120
+     */
+    private static function copy_dir(string|self $src, string|self $dst): void
+    {
+        // TODO: review
+        $src = (string)$src;
+        $dst = (string)$dst;
+
+        $dir = opendir($src);
+        @mkdir($dst);
+        while(( $file = readdir($dir)) !== false) {
+            if (( $file != '.' ) && ( $file != '..' )) {
+                if ( is_dir($src . '/' . $file) ) {
+                    self::copy_dir($src . '/' . $file, $dst . '/' . $file);
+                }
+                else {
+                    copy($src . '/' . $file, $dst . '/' . $file);
+                }
+            }
+        }
+        closedir($dir);
+    }
+
     public function __construct(string $path)
     {
         $this->path = $path;
@@ -81,12 +115,12 @@ class Path
     /**
      * Checks if the given path is equal to the current path.
      *
-     * @param string $path The path to compare against.
+     * @param string|Path $path The path to compare against.
      *
      * @return bool Returns true if the given path is equal to the current path, false otherwise.
      */
-    public function eq(string $path): bool {
-        return $path === $this->path;
+    public function eq(string|self $path): bool {
+        return (string)$path === $this->path;
     }
 
     /**
@@ -208,41 +242,58 @@ class Path
      * @param bool $recursive (optional) Indicates whether to create parent directories if they do not exist. Default is false.
      *
      * @return void
+     * @throws FileExistsException
      */
-    public function mkdir($mode = 0777, $recursive = false): void
+    public function mkdir(int $mode = 0777, bool $recursive = false): void
     {
-        if (!file_exists($this->path)) {
-            mkdir($this->path, $mode, $recursive);
+        // TODO: may we make $mode the second arg, and mimic the mode of the parent if not provided?
+        if ($this->isDir()) {
+            if (!$recursive) {
+                throw new FileExistsException("Directory already exists : " . $this);
+            } else {
+                return;
+            }
         }
+        if ($this->isFile()) {
+            throw new FileExistsException("A file with this name already exists : " . $this);
+        }
+
+        mkdir($this->path, $mode, $recursive);
     }
 
     /**
      * Deletes a file or a directory.
      *
      * @return void
+     * @throws FileNotFoundException
      */
     public function delete(): void
     {
-        if (is_file($this->path)) {
-            unlink($this->path); //for file
-        } else if (is_dir($this->path)) {
-            rmdir($this->path); //for directory
+        if ($this->isFile()) {
+            unlink($this->path);
+        } else if ($this->isDir()) {
+            rmdir($this->path);
+        } else {
+            throw new FileNotFoundException("File does not exist : " . $this);
         }
     }
 
     /**
      * Copies a file to a specified destination.
      *
-     * @param string $destination The path to the destination file or directory to copy to.
-     *
+     * @param string|Path $destination The path to the destination file or directory to copy to.
      * @return void
+     * @throws FileNotFoundException
+     * TODO: what about the follow_symlink condition?
      */
-    public function copy($destination): void
+    public function copy(string|self $destination): void
     {
-        if (is_file($this->path)) {
-            copy($this->path, $destination);
-        } else if (is_dir($this->path)) {
-            // Copy dir needs special handling, not covered in this example.
+        if ($this->isFile()) {
+            copy($this->path, (string)$destination);
+        } else if ($this->isDir()) {
+            self::copy_dir($this, $destination);
+        } else {
+            throw new FileNotFoundException("File or dir does not exist : " . $this);
         }
     }
 
