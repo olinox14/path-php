@@ -402,10 +402,14 @@ class Path
     /**
      * Calculates the size of a file.
      *
-     * @return bool|int The size of the file in bytes. Returns false if the file does not exist or on failure.
+     * @return int The size of the file in bytes.
+     * @throws FileNotFoundException
      */
-    public function size(): bool|int
+    public function size(): int
     {
+        if (!$this->isFile()) {
+            throw new FileNotFoundException("File does not exist : " . $this->path);
+        }
         return filesize($this->path);
     }
 
@@ -416,40 +420,52 @@ class Path
      */
     public function parent(): string
     {
+        // TODO: check on special cases
         return dirname($this->path);
     }
 
     /**
-     * Retrieves the contents of a file.
+     * Retrieves the content of a file.
      *
-     * @return bool|string The contents of the file as a string. Returns false if the file does not exist or on failure.
+     * @return bool|string The content of the file as a string.
+     * @throws FileNotFoundException
      */
-    public function getContents(): bool|string
+    public function getContent(): bool|string
     {
+        if (!$this->isFile()) {
+            throw new FileNotFoundException("File does not exist : " . $this->path);
+        }
+        // TODO: review use-cases
         return file_get_contents($this->path);
     }
 
     /**
      * Writes contents to a file.
      *
-     * @param mixed $contents The contents to be written to the file.
+     * @param string $content The contents to be written to the file.
      * @return void
      */
-    public function putContents($contents): void
+    public function putContent(string $content): void
     {
-        file_put_contents($this->path, $contents);
+        // TODO: review use-cases
+        // TODO: complete the input types
+        // TODO: add a condition on the creation of the file if not existing
+        file_put_contents($this->path, $content);
     }
 
     /**
      * Appends contents to a file.
      *
-     * @param string $contents The contents to append to the file.
+     * @param string $content The contents to append to the file.
      *
      * @return void
      */
-    public function appendContents($contents): void
+    public function appendContent(string $content): void
     {
-        file_put_contents($this->path, $contents, FILE_APPEND);
+        // TODO: review use-cases
+        // TODO: complete the input types
+        // TODO: add a condition on the creation of the file if not existing
+        file_put_contents($this->path, $content, FILE_APPEND);
     }
 
     /**

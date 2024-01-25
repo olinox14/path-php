@@ -795,7 +795,7 @@ class PathTest extends TestCase
      *
      * @return void
      */
-    public function testTouchFileDoesNotExist()
+    public function testTouchFileDoesNotExist(): void
     {
         $src = self::TEMP_TEST_DIR . "/foo.txt";
         $path = new Path($src);
@@ -805,7 +805,7 @@ class PathTest extends TestCase
         $this->assertTrue(is_file($src));
     }
 
-    public function testTouchFileExistsNothingChange() {
+    public function testTouchFileExistsNothingChange(): void {
         $src = self::TEMP_TEST_DIR . "/foo.txt";
         touch($src);
 
@@ -817,7 +817,7 @@ class PathTest extends TestCase
         $this->assertTrue(is_file($src));
     }
 
-    public function testTouchFileExistsUpdateMtimeWithInt() {
+    public function testTouchFileExistsUpdateMtimeWithInt(): void {
         $src = self::TEMP_TEST_DIR . "/foo.txt";
         touch($src);
 
@@ -832,7 +832,7 @@ class PathTest extends TestCase
         );
     }
 
-    public function testTouchFileExistsUpdateMtimeWithDatetime() {
+    public function testTouchFileExistsUpdateMtimeWithDatetime(): void {
         $src = self::TEMP_TEST_DIR . "/foo.txt";
         touch($src);
 
@@ -847,7 +847,7 @@ class PathTest extends TestCase
         );
     }
 
-    public function testTouchFileExistsUpdateAtimeWithInt() {
+    public function testTouchFileExistsUpdateAtimeWithInt(): void {
         $src = self::TEMP_TEST_DIR . "/foo.txt";
         touch($src);
 
@@ -862,7 +862,7 @@ class PathTest extends TestCase
         );
     }
 
-    public function testTouchFileExistsUpdateAtimeWithDatetime() {
+    public function testTouchFileExistsUpdateAtimeWithDatetime(): void {
         $src = self::TEMP_TEST_DIR . "/foo.txt";
         touch($src);
 
@@ -874,6 +874,133 @@ class PathTest extends TestCase
         $this->assertEquals(
             $dateTime->getTimestamp(),
             fileatime($src)
+        );
+    }
+
+    public function testLastModified(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        $dateTime = new \DateTime("2000-01-01");
+
+        touch($src, $dateTime->getTimestamp());
+
+        $path = new Path($src);
+
+        $this->assertEquals(
+            $dateTime->getTimestamp(),
+            $path->lastModified()
+        );
+    }
+
+    /**
+     * Test 'Path' class 'size' method to get the size of the file
+     *
+     * @return void
+     * @throws FileNotFoundException
+     */
+    public function testSize(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+
+        file_put_contents($src, "nova");
+
+        $path = new Path($src);
+
+        $this->assertEquals(
+            4,
+            $path->size()
+        );
+    }
+
+    /**
+     * Test 'Path' class 'size' method to get the size of the file
+     *
+     * @return void
+     * @throws FileNotFoundException
+     */
+    public function testSizeNotExistingFile(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+
+        $path = new Path($src);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage("File does not exist : " . $src);
+
+        $path->size();
+    }
+
+    public function testParent(): void
+    {
+        $this->assertEquals(
+            '/foo/bar',
+            (new Path('/foo/bar/baz'))->parent()
+        );
+        $this->assertEquals(
+            '/foo/bar',
+            (new Path('/foo/bar/baz.txt'))->parent()
+        );
+        $this->assertEquals(
+            '/',
+            (new Path('/foo'))->parent()
+        );
+    }
+
+    /**
+     * Test 'Path' class 'getContent' method to retrieve the content of a file
+     *
+     * @return void
+     * @throws FileNotFoundException
+     */
+    public function testGetContent(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+
+        file_put_contents($src, "nova");
+
+        $path = new Path($src);
+
+        $this->assertEquals(
+            "nova",
+            $path->getContent()
+        );
+    }
+
+    /**
+     * Test 'Path' class 'getContent' method to get the content of a non-existing file
+     *
+     * @throws FileNotFoundException If the file does not exist
+     */
+    public function testGetContentNotExistingFile(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+
+        $path = new Path($src);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage("File does not exist : " . $src);
+
+        $path->getContent();
+    }
+
+    public function testPutContent(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+
+        $path = new Path($src);
+        $path->putContent("ocarina");
+
+        $this->assertEquals(
+            "ocarina",
+            file_get_contents($src)
+        );
+    }
+
+    public function testAppendContent(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+        file_put_contents($src, "oca");
+
+        $path = new Path($src);
+        $path->appendContent("rina");
+
+        $this->assertEquals(
+            "ocarina",
+            file_get_contents($src)
         );
     }
 }
