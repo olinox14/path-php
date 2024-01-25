@@ -43,11 +43,15 @@ class Path
      *
      * TODO: see if necessary : https://github.com/python/cpython/blob/d22c066b802592932f9eb18434782299e80ca42e/Lib/posixpath.py#L81
      *
+     * @param string|Path $path The base path
      * @param string ...$parts The parts of the path to be joined.
      * @return string The resulting path after joining the parts using the directory separator.
      */
-    public static function join(string $path, string ...$parts): string
+    public static function join(string|self $path, string|self ...$parts): string
     {
+        $path = (string)$path;
+        $parts = array_map(fn($x) => (string)$x, $parts);
+
         foreach ($parts as $part) {
             if (str_starts_with($part, DIRECTORY_SEPARATOR)) {
                 $path = $part;
@@ -70,27 +74,66 @@ class Path
      *
      * @return void
      * TODO: see https://stackoverflow.com/a/12763962/4279120
+     *
+     * @throws FileNotFoundException
+     * @throws FileExistsException
      */
-    private static function copy_dir(string|self $src, string|self $dst): void
+    public static function copy_dir(string|self $src, string|self $dst): void
     {
-        // TODO: review
         $src = (string)$src;
         $dst = (string)$dst;
 
+        if (!is_dir($src)) {
+            throw new FileNotFoundException("Directory does not exist : " . $src);
+        }
+        if (!is_dir($dst)) {
+            throw new FileNotFoundException("Directory does not exist : " . $dst);
+        }
+        $newDir = self::join($dst, pathinfo($src, PATHINFO_FILENAME));
+        if (file_exists($newDir)) {
+            throw new FileExistsException("Directory already exists : " . $newDir);
+        }
+
+        self::_copy_dir($src, $dst);
+    }
+
+    /**
+     * [internal] Recursively copies a directory from source to destination.
+     *
+     * @param string $src The path to the source directory.
+     * @param string $dst The path to the destination directory.
+     * @return void
+     * @throws FileNotFoundException If a file within the source directory does not exist.
+     */
+    private static function _copy_dir(string $src, string $dst): void
+    {
         $dir = opendir($src);
-        @mkdir($dst);
-        while(( $file = readdir($dir)) !== false) {
-            if (( $file != '.' ) && ( $file != '..' )) {
-                if ( is_dir($src . '/' . $file) ) {
-                    self::copy_dir($src . '/' . $file, $dst . '/' . $file);
+        if (!is_dir($dst)) {
+            mkdir($dst);
+        }
+        try {
+            while (($file = readdir($dir)) !== false) {
+                if ($file === '.' || $file === '..') {
+                    continue;
                 }
-                else {
-                    copy($src . '/' . $file, $dst . '/' . $file);
+
+                $path = self::join($src, $file);
+                $newPath = self::join($dst, $file);
+
+                if (is_dir($path)) {
+                    self::_copy_dir($path, $newPath);
+                } else if(is_file($path)) {
+                    copy($path, $newPath);
+                } else {
+                    throw new FileNotFoundException("File does not exist : " . $path);
                 }
             }
+        } finally {
+            closedir($dir);
         }
-        closedir($dir);
     }
+
+
 
     public function __construct(string $path)
     {

@@ -67,6 +67,71 @@ class PathTest extends TestCase
     }
 
     /**
+     * Test 'Path' class 'copy_dir' method to copy a directory
+     *
+     * @return void
+     * @throws FileExistsException
+     * @throws FileNotFoundException
+     */
+    public function testCopyDir(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $srcContent = $src . DIRECTORY_SEPARATOR . "foo.txt";
+        $dst = self::TEMP_TEST_DIR . "/some_other_dir";
+
+        mkdir($src);
+        mkdir($dst);
+        touch($srcContent);
+
+        Path::copy_dir($src, $dst);
+
+        $this->assertTrue(
+            file_exists($srcContent)
+        );
+    }
+
+    /**
+     * Test 'Path' class 'copy_dir' method when the destination directory does not exist
+     *
+     * @throws FileNotFoundException|FileExistsException
+     */
+    public function testCopyDirWhenDestinationDirectoryNotExists(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $dst = self::TEMP_TEST_DIR . "/non_existing_dir";
+
+        mkdir($src);
+        touch($src . DIRECTORY_SEPARATOR . "foo.txt");
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage("Directory does not exist : " . $dst);
+
+        Path::copy_dir($src, $dst);
+    }
+
+    /**
+     * Test 'Path' class 'copy_dir' method when the destination directory already exists.
+     *
+     * @throws FileNotFoundException|FileExistsException if the destination directory already exists.
+     */
+    public function testCopyDirWhenDirectoryAlreadyExistsAtDestination(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $dst = self::TEMP_TEST_DIR . "/other_dir";
+
+        mkdir($src);
+        touch($src . DIRECTORY_SEPARATOR . "foo.txt");
+
+        mkdir($dst);
+        mkdir($dst . DIRECTORY_SEPARATOR . "some_dir");
+
+        $this->expectException(FileExistsException::class);
+        $this->expectExceptionMessage("Directory already exists : " . $dst);
+
+        Path::copy_dir($src, $dst);
+    }
+
+    /**
      * Test `eq` method with equal paths.
      *
      * Check that the method returns the correct result when the paths are equal.
