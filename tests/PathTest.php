@@ -692,6 +692,32 @@ class PathTest extends TestCase
      * @throws FileExistsException
      * @throws FileNotFoundException
      */
+    public function testCopyDirDestAlreadyExists(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $srcContent = $src . DIRECTORY_SEPARATOR . "foo.txt";
+        $dst = self::TEMP_TEST_DIR . "/some_other_dir";
+        $dstContent = $dst . DIRECTORY_SEPARATOR . "foo.txt";
+
+        mkdir($src);
+        touch($srcContent);
+        mkdir($dst);
+        mkdir($dstContent);
+
+        $this->expectException(FileExistsException::class);
+        $this->expectExceptionMessage("File or dir already exists : " . $dstContent);
+
+        $path = new Path($srcContent);
+        $path->copy($dst);
+    }
+
+    /**
+     * Test 'Path' class 'copy' method when the source file does not exist.
+     *
+     * @return void
+     * @throws FileExistsException
+     * @throws FileNotFoundException
+     */
     public function testCopyFileDestAlreadyExists(): void
     {
         $src = self::TEMP_TEST_DIR . "/some_dir";
@@ -705,9 +731,62 @@ class PathTest extends TestCase
         touch($dstContent);
 
         $this->expectException(FileExistsException::class);
-        $this->expectExceptionMessage("File already exists : " . $dstContent);
+        $this->expectExceptionMessage("File or dir already exists : " . $dstContent);
 
         $path = new Path($srcContent);
         $path->copy($dst);
+    }
+
+    /**
+     * Test 'Path' class 'move' method to move a file from source directory to destination directory
+     * @throws FileExistsException
+     */
+    public function testMoveWithFile(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $srcContent = $src . DIRECTORY_SEPARATOR . "foo.txt";
+        $dst = self::TEMP_TEST_DIR . "/some_other_dir";
+        $dstContent = $dst . DIRECTORY_SEPARATOR . "foo.txt";
+
+        mkdir($src);
+        touch($srcContent);
+        mkdir($dst);
+
+        $path = new Path($srcContent);
+        $path->move($dst);
+
+        $this->assertFalse(
+            file_exists($srcContent)
+        );
+        $this->assertTrue(
+            file_exists($dstContent)
+        );
+    }
+
+    /**
+     * Test 'Path' class 'move' method to move a directory to a different location
+     *
+     * @return void
+     * @throws FileExistsException
+     */
+    public function testMoveWithDir(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $srcContent = $src . DIRECTORY_SEPARATOR . "foo.txt";
+        $dst = self::TEMP_TEST_DIR . "/some_other_dir";
+        $dstContent = $dst . DIRECTORY_SEPARATOR . "foo.txt";
+
+        mkdir($src);
+        touch($srcContent);
+
+        $path = new Path($src);
+        $path->move($dst);
+
+        $this->assertFalse(
+            file_exists($srcContent)
+        );
+        $this->assertTrue(
+            file_exists($dstContent)
+        );
     }
 }

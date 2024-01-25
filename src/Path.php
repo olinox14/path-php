@@ -339,8 +339,8 @@ class Path
             if (is_dir($destination)) {
                 $destination = self::join($destination, $this->basename());
             }
-            if (is_file($destination)) {
-                throw new FileExistsException("File already exists : " . $destination);
+            if (file_exists($destination)) {
+                throw new FileExistsException("File or dir already exists : " . $destination);
             }
             copy($this->path, $destination);
         } else if ($this->isDir()) {
@@ -356,10 +356,18 @@ class Path
      * @param string|Path $destination The new location where the file or directory should be moved to.
      *
      * @return void
+     * @throws FileExistsException
      */
     public function move(string|self $destination): void
     {
-        rename($this->path, (string)$destination);
+        $destination = (string)$destination;
+        if (is_dir($destination)) {
+            $destination = self::join($destination, $this->basename());
+        }
+        if (file_exists($destination)) {
+            throw new FileExistsException("File or dir already exists : " . $destination);
+        }
+        rename($this->path, $destination);
     }
 
     /**
