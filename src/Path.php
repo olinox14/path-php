@@ -64,6 +64,10 @@ class Path
         return $path;
     }
 
+    public function withFile(string|self $path, string $mode = 'r') {
+        //TODO: do a 'with open' like method
+    }
+
     /**
      * Copies a directory and its contents recursively from the source directory to the destination directory.
      *
@@ -322,17 +326,23 @@ class Path
     }
 
     /**
-     * Copies a file to a specified destination.
+     * Copies a file or directory to the specified destination.
      *
-     * @param string|Path $destination The path to the destination file or directory to copy to.
-     * @return void
-     * @throws FileNotFoundException
-     * TODO: what about the follow_symlink condition?
+     * @param string|self $destination The destination path or object to copy the file or directory to.
+     * @throws FileNotFoundException If the source file or directory does not exist.
+     * @throws FileExistsException
      */
     public function copy(string|self $destination): void
     {
         if ($this->isFile()) {
-            copy($this->path, (string)$destination);
+            $destination = (string)$destination;
+            if (is_dir($destination)) {
+                $destination = self::join($destination, $this->basename());
+            }
+            if (is_file($destination)) {
+                throw new FileExistsException("File already exists : " . $destination);
+            }
+            copy($this->path, $destination);
         } else if ($this->isDir()) {
             self::copy_dir($this, $destination);
         } else {
@@ -343,13 +353,13 @@ class Path
     /**
      * Moves a file or directory to a new location.
      *
-     * @param string $destination The new location where the file or directory should be moved to.
+     * @param string|Path $destination The new location where the file or directory should be moved to.
      *
      * @return void
      */
-    public function move($destination): void
+    public function move(string|self $destination): void
     {
-        rename($this->path, $destination);
+        rename($this->path, (string)$destination);
     }
 
     /**
@@ -757,22 +767,5 @@ class Path
         }
 
         return str_repeat('..' . DIRECTORY_SEPARATOR, count($other_parts)) . implode(DIRECTORY_SEPARATOR, $path_parts);
-    }
-
-    /**
-     * Renames this file or directory to the given target.
-     *
-     * @param string $target
-     * @return bool
-     * @throws \RuntimeException
-     */
-    public function rename(string $target): bool
-    {
-        // Check if file or directory exists
-        if (!$this->isFile() && !$this->isDir()) {
-            throw new \RuntimeException("{$this->path} does not exist");
-        }
-
-        return rename($this->path, $target);
     }
 }

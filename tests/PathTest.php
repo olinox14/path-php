@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 class PathTest extends TestCase
 {
     const TEMP_TEST_DIR = __DIR__ . "/temp";
+    // TODO: consider using sys_get_temp_dir()
 
     protected Path $pathClass;
 
@@ -80,13 +81,13 @@ class PathTest extends TestCase
         $dst = self::TEMP_TEST_DIR . "/some_other_dir";
 
         mkdir($src);
-        mkdir($dst);
         touch($srcContent);
+        mkdir($dst);
 
         Path::copy_dir($src, $dst);
 
         $this->assertTrue(
-            file_exists($srcContent)
+            file_exists($dst . DIRECTORY_SEPARATOR . "foo.txt")
         );
     }
 
@@ -609,5 +610,104 @@ class PathTest extends TestCase
         $path->delete();
     }
 
+    /**
+     * Test 'Path' class 'copy_dir' method to copy a file
+     *
+     * @return void
+     * @throws FileExistsException
+     * @throws FileNotFoundException
+     */
+    public function testCopyWithFile(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $srcContent = $src . DIRECTORY_SEPARATOR . "foo.txt";
+        $dst = self::TEMP_TEST_DIR . "/some_other_dir";
 
+        mkdir($src);
+        mkdir($dst);
+        touch($srcContent);
+
+        $path = new Path($srcContent);
+        $path->copy($dst);
+
+        $this->assertTrue(
+            file_exists($dst . DIRECTORY_SEPARATOR . "foo.txt")
+        );
+    }
+
+    /**
+     * Test 'Path' class 'copy_dir' method to copy a directory
+     *
+     * @return void
+     * @throws FileExistsException
+     * @throws FileNotFoundException
+     */
+    public function testCopyWithDir(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $srcContent = $src . DIRECTORY_SEPARATOR . "foo.txt";
+        $dst = self::TEMP_TEST_DIR . "/some_other_dir";
+
+        mkdir($src);
+        mkdir($dst);
+        touch($srcContent);
+
+        $path = new Path($src);
+        $path->copy($dst);
+
+        $this->assertTrue(
+            file_exists($srcContent)
+        );
+    }
+
+    /**
+     * Test 'Path' class 'copy' method when the source file does not exist.
+     *
+     * @return void
+     * @throws FileExistsException
+     * @throws FileNotFoundException
+     */
+    public function testCopyFileNotExists(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $srcContent = $src . DIRECTORY_SEPARATOR . "foo.txt";
+        $dst = self::TEMP_TEST_DIR . "/some_other_dir";
+
+        mkdir($src);
+        mkdir($dst);
+        touch($srcContent);
+
+        $path = new Path($src);
+        $path->copy($dst);
+
+        $this->assertTrue(
+            file_exists($srcContent)
+        );
+    }
+
+    /**
+     * Test 'Path' class 'copy' method when the source file does not exist.
+     *
+     * @return void
+     * @throws FileExistsException
+     * @throws FileNotFoundException
+     */
+    public function testCopyFileDestAlreadyExists(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/some_dir";
+        $srcContent = $src . DIRECTORY_SEPARATOR . "foo.txt";
+        $dst = self::TEMP_TEST_DIR . "/some_other_dir";
+        $dstContent = $dst . DIRECTORY_SEPARATOR . "foo.txt";
+
+        mkdir($src);
+        touch($srcContent);
+        mkdir($dst);
+        touch($dstContent);
+
+        $this->expectException(FileExistsException::class);
+        $this->expectExceptionMessage("File already exists : " . $dstContent);
+
+        $path = new Path($srcContent);
+        $path->copy($dst);
+    }
 }
