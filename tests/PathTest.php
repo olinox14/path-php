@@ -789,4 +789,91 @@ class PathTest extends TestCase
             file_exists($dstContent)
         );
     }
+
+    /**
+     * Test 'Path' class 'touch' method to create a file that does not exist
+     *
+     * @return void
+     */
+    public function testTouchFileDoesNotExist()
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        $path = new Path($src);
+
+        $this->assertFalse(is_file($src));
+        $path->touch();
+        $this->assertTrue(is_file($src));
+    }
+
+    public function testTouchFileExistsNothingChange() {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+
+        $this->assertTrue(is_file($src));
+
+        $path = new Path($src);
+        $path->touch();
+
+        $this->assertTrue(is_file($src));
+    }
+
+    public function testTouchFileExistsUpdateMtimeWithInt() {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+
+        $path = new Path($src);
+        $timestamp = 1000;
+
+        $path->touch($timestamp);
+
+        $this->assertEquals(
+            $timestamp,
+            filemtime($src)
+        );
+    }
+
+    public function testTouchFileExistsUpdateMtimeWithDatetime() {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+
+        $path = new Path($src);
+        $dateTime = new \DateTime("2000-01-01");
+
+        $path->touch($dateTime);
+
+        $this->assertEquals(
+            $dateTime->getTimestamp(),
+            filemtime($src)
+        );
+    }
+
+    public function testTouchFileExistsUpdateAtimeWithInt() {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+
+        $path = new Path($src);
+        $timestamp = 1000;
+
+        $path->touch($timestamp, $timestamp);
+
+        $this->assertEquals(
+            $timestamp,
+            fileatime($src)
+        );
+    }
+
+    public function testTouchFileExistsUpdateAtimeWithDatetime() {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+
+        $path = new Path($src);
+        $dateTime = new \DateTime("2000-01-01");
+
+        $path->touch($dateTime, $dateTime);
+
+        $this->assertEquals(
+            $dateTime->getTimestamp(),
+            fileatime($src)
+        );
+    }
 }

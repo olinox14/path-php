@@ -373,16 +373,20 @@ class Path
     /**
      * Updates the access and modification time of a file or creates a new empty file if it doesn't exist.
      *
-     * @param int|null $time (optional) The access and modification time to set. Default is the current time.
-     * @param int|null $atime (optional) The access time to set. Default is the value of $time.
+     * @param int|\DateTime|null $time (optional) The access and modification time to set. Default is the current time.
+     * @param int|\DateTime|null $atime (optional) The access time to set. Default is the value of $time.
      *
      * @return void
      */
-    public function touch($time = null, $atime = null): void
+    public function touch(int|\DateTime $time = null, int|\DateTime $atime = null): void
     {
-        if (!file_exists($this->path)) {
-            touch($this->path, $time, $atime);
+        if ($time instanceof \DateTime) {
+            $time = $time->getTimestamp();
         }
+        if ($atime instanceof \DateTime) {
+            $atime = $atime->getTimestamp();
+        }
+        touch($this->path, $time, $atime);
     }
 
     /**
