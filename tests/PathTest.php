@@ -1003,4 +1003,152 @@ class PathTest extends TestCase
             file_get_contents($src)
         );
     }
+
+    /**
+     * Test 'Path' class 'getPermissions' method to retrieve the file permissions
+     *
+     * @return void
+     * @throws FileNotFoundException
+     */
+    public function testGetPermissions(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+        chmod($src, 0777);
+
+        $path = new Path($src);
+        $this->assertEquals(
+            777,
+            $path->getPermissions()
+        );
+    }
+
+    /**
+     * Test 'Path' class 'getPermissions' method to retrieve file permissions
+     * @throws FileNotFoundException
+     */
+    public function testGetPermissionsAlt(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+        chmod($src, 0755);
+
+        $path = new Path($src);
+
+        $this->assertEquals(
+            755,
+            $path->getPermissions()
+        );
+    }
+
+    /**
+     * Test 'Path' class 'getPermissions' method to retrieve file permissions
+     * @throws FileNotFoundException
+     */
+    public function testGetPermissionsFileNotExists(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+
+        $path = new Path($src);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage("File or dir does not exist : " . $src);
+
+        $path->getPermissions();
+    }
+
+    /**
+     * Test 'Path' class 'setPermissions' method to change the permissions of a file
+     * @throws FileNotFoundException
+     */
+    public function testSetPermissions(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+        chmod($src, 0777);
+
+        $path = new Path($src);
+        $result = $path->setPermissions(0666);
+
+        $this->assertTrue($result);
+
+        $this->assertEquals(
+            '0666',
+            substr(sprintf('%o', fileperms($src)), -4)
+        );
+    }
+
+    /**
+     * Test 'Path' class 'setPermissions' method when file does not exist
+     *
+     * @throws FileNotFoundException If the file does not exist
+     */
+    public function testSetPermissionsFileNotExists(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+
+        $path = new Path($src);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage("File or dir does not exist : " . $src);
+
+        $path->setPermissions(777);
+    }
+
+    public function testExistsExistingFile(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+
+        $path = new Path($src);
+
+        $this->assertTrue(
+            $path->exists()
+        );
+    }
+
+    public function testExistsExistingDir(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo";
+        mkdir($src);
+
+        $path = new Path($src);
+
+        $this->assertTrue(
+            $path->exists()
+        );
+    }
+
+    public function testExistsNonExistingFile(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+
+        $path = new Path($src);
+
+        $this->assertFalse(
+            $path->exists()
+        );
+    }
+
+    public function testGlob(): void
+    {
+        $src = self::TEMP_TEST_DIR;
+        touch($src . "/foo.txt");
+        touch($src . "/bar.txt");
+        touch($src . "/pic.png");
+
+        $path = new Path($src);
+
+        $results = [];
+
+        foreach ($path->glob('*.txt') as $filename) {
+            $results[] = (string)$filename;
+        }
+
+        $this->assertEquals(
+            ['bar.txt', 'foo.txt'],
+            $results
+        );
+    }
+
 }

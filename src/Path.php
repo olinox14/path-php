@@ -2,6 +2,7 @@
 
 namespace Path;
 
+use Generator;
 use InvalidArgumentException;
 use Path\Exception\FileExistsException;
 use Path\Exception\FileNotFoundException;
@@ -471,21 +472,32 @@ class Path
     /**
      * Retrieves the permissions of a file or directory.
      *
-     * @return string The permissions of the file or directory in octal notation. Returns an empty string if the file or directory does not exist.
+     * @return int The permissions of the file or directory in octal notation.
+     * @throws FileNotFoundException
      */
-    public function getPermissions(): string
+    public function getPermissions(): int
     {
-        return substr(sprintf('%o', fileperms($this->path)), -4);
+        if (!$this->isFile()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this->path);
+        }
+        return (int)substr(sprintf('%o', fileperms($this->path)), -4);
     }
+
+    // TODO; add some more user-friendly methods to get permissions (read, write, exec...)
 
     /**
      * Changes the permissions of a file or directory.
      *
      * @param int $permissions The new permissions to set. The value should be an octal number.
      * @return bool Returns true on success, false on failure.
+     * @throws FileNotFoundException
      */
-    public function changePermissions($permissions): bool
+    public function setPermissions(int $permissions): bool
     {
+        if (!$this->isFile()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this->path);
+        }
+        clearstatcache(); // TODO: check for a better way of dealing with PHP cache
         return chmod($this->path, $permissions);
     }
 
@@ -499,7 +511,13 @@ class Path
         return file_exists($this->path);
     }
 
-    public static function glob(string $pattern)
+    /**
+     * Retrieves a list of files and directories that match a specified pattern.
+     *
+     * @param string $pattern The pattern to search for.
+     * @return Generator An iterable list of objects representing files and directories that match the pattern.
+     */
+    public static function glob(string $pattern): Generator
     {
         foreach (glob($pattern) as $filename) {
             yield new static($filename);
