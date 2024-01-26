@@ -1095,6 +1095,11 @@ class PathTest extends TestCase
         $path->setPermissions(777);
     }
 
+    /**
+     * Test 'Path' class 'exists' method to check existence of the file
+     *
+     * @return void
+     */
     public function testExistsExistingFile(): void
     {
         $src = self::TEMP_TEST_DIR . "/foo.txt";
@@ -1107,6 +1112,11 @@ class PathTest extends TestCase
         );
     }
 
+    /**
+     * Test 'Path' class 'exists' method to check existence of the directory
+     *
+     * @return void
+     */
     public function testExistsExistingDir(): void
     {
         $src = self::TEMP_TEST_DIR . "/foo";
@@ -1119,6 +1129,11 @@ class PathTest extends TestCase
         );
     }
 
+    /**
+     * Test 'Path' class 'exists' method to check existence of a non-existing file
+     *
+     * @return void
+     */
     public function testExistsNonExistingFile(): void
     {
         $src = self::TEMP_TEST_DIR . "/foo.txt";
@@ -1130,6 +1145,11 @@ class PathTest extends TestCase
         );
     }
 
+    /**
+     * Test 'Path' class 'glob' method to match and retrieve file names in a directory
+     *
+     * @return void
+     */
     public function testGlob(): void
     {
         $src = self::TEMP_TEST_DIR;
@@ -1151,4 +1171,64 @@ class PathTest extends TestCase
         );
     }
 
+    /**
+     * Test 'Path' class 'rmdir' method to remove a directory and its contents
+     *
+     * @return void
+     * @throws FileNotFoundException
+     */
+    public function testRmDir(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo";
+        mkdir($src);
+
+        $path = new Path($src);
+        $path->rmdir();
+
+        $this->assertFalse(
+            is_dir($src)
+        );
+    }
+
+    public function testRmDirIsFile(): void {
+        $src = self::TEMP_TEST_DIR . "/foo";
+        touch($src);
+
+        $path = new Path($src);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage($src . " is not a directory");
+
+        $path->rmdir();
+    }
+
+    public function testRmDirNonExistingDir(): void {
+        $src = self::TEMP_TEST_DIR . "/foo";
+
+        $path = new Path($src);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage($src . " is not a directory");
+
+        $path->rmdir();
+    }
+
+    /**
+     * Test 'Path' class 'rmdir' method to remove a directory and its contents recursively
+     *
+     * @return void
+     * @throws FileNotFoundException
+     */
+    public function testRmDirRecursive(): void {
+        $src = self::TEMP_TEST_DIR . "/foo/bar";
+        mkdir($src, 0777, true);
+        touch($src . "/file.txt");
+
+        $path = new Path($src);
+        $path->rmdir(true);
+
+        $this->assertFalse(
+            is_dir($src)
+        );
+    }
 }

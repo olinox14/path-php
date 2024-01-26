@@ -3,12 +3,8 @@
 namespace Path;
 
 use Generator;
-use InvalidArgumentException;
 use Path\Exception\FileExistsException;
 use Path\Exception\FileNotFoundException;
-use Path\Path\RecursiveDirectoryIterator;
-use Path\Path\RecursiveIteratorIterator;
-use function Path\Path\lchmod;
 
 /**
  * Represents a file or directory path.
@@ -138,7 +134,27 @@ class Path
         }
     }
 
+    /** @noinspection SpellCheckingInspection */
+    private static function _rrmdir(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
 
+        foreach (scandir($dir) as $object) {
+            if ($object == "." || $object == "..") {
+                continue;
+            }
+
+            if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir."/".$object)) {
+                self::_rrmdir($dir . DIRECTORY_SEPARATOR . $object);
+            }
+            else {
+                unlink($dir . DIRECTORY_SEPARATOR . $object);
+            }
+        }
+        rmdir($dir);
+    }
 
     public function __construct(string $path)
     {
@@ -524,24 +540,22 @@ class Path
         }
     }
 
-    public function rmdir()
+    /**
+     * Removes a directory and its contents recursively.
+     *
+     * @throws FileNotFoundException
+     */
+    public function rmdir(bool $recursive = false): void
     {
         if (!is_dir($this->path)) {
-            throw new \RuntimeException("{$this->path} is not a directory");
+            throw new FileNotFoundException("{$this->path} is not a directory");
         }
 
-        $it = new RecursiveDirectoryIterator($this->path, RecursiveDirectoryIterator::SKIP_DOTS);
-        $files = new RecursiveIteratorIterator($it,
-            RecursiveIteratorIterator::CHILD_FIRST);
-
-        foreach ($files as $file) {
-            if ($file->isDir()) {
-                rmdir($file->getRealPath());
-            } else {
-                unlink($file->getRealPath());
-            }
+        if ($recursive) {
+            self::_rrmdir($this->path);
+        } else {
+            rmdir($this->path);
         }
-        rmdir($this->path);
     }
 
     public function open(string $mode = 'r')
