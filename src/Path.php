@@ -5,6 +5,9 @@ namespace Path;
 use Generator;
 use Path\Exception\FileExistsException;
 use Path\Exception\FileNotFoundException;
+use Path\Exception\IOException;
+use RuntimeException;
+use Throwable;
 
 /**
  * Represents a file or directory path.
@@ -31,6 +34,8 @@ class Path
     const X_OK = 1;
 
     protected string $path;
+
+    protected mixed $handle;
 
     /**
      * Joins two or more parts of a path together, inserting '/' as needed.
@@ -159,6 +164,7 @@ class Path
     public function __construct(string $path)
     {
         $this->path = $path;
+        $this->handle = null;
         return $this;
     }
 
@@ -231,7 +237,7 @@ class Path
             self::R_OK => is_readable($this->path),
             self::W_OK => is_writable($this->path),
             self::X_OK => is_executable($this->path),
-            default => throw new \RuntimeException('Invalid mode'),
+            default => throw new RuntimeException('Invalid mode'),
         };
     }
 
@@ -445,15 +451,18 @@ class Path
      * Retrieves the content of a file.
      *
      * @return bool|string The content of the file as a string.
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException|IOException
      */
     public function getContent(): bool|string
     {
         if (!$this->isFile()) {
             throw new FileNotFoundException("File does not exist : " . $this->path);
         }
-        // TODO: review use-cases
-        return file_get_contents($this->path);
+        $text = file_get_contents($this->path);
+        if ($text === false) {
+            throw new IOException("Error reading file {$this->path}");
+        }
+        return $text;
     }
 
     /**
@@ -518,6 +527,25 @@ class Path
     }
 
     /**
+     * Changes ownership of the file.
+     *
+     * @param string $user The new owner username.
+     * @param string $group The new owner group name.
+     * @return bool
+     * @throws FileNotFoundException
+     */
+    public function setOwner(string $user, string $group): bool
+    {
+        if (!$this->isFile()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this->path);
+        }
+        clearstatcache(); // TODO: check for a better way of dealing with PHP cache
+        return
+            chown($this->path, $user) &&
+            chgrp($this->path, $group);
+    }
+
+    /**
      * Checks if a file exists.
      *
      * @return bool Returns true if the file exists, false otherwise.
@@ -558,38 +586,43 @@ class Path
         }
     }
 
-    public function open(string $mode = 'r')
+    /**
+     * Opens a file in the specified mode.
+     *
+     * @param string $mode The mode in which to open the file. Defaults to 'r'.
+     * @return resource|false Returns a file pointer resource on success, or false on failure.
+     * @throws FileNotFoundException If the path does not refer to a file.
+     * @throws IOException If the file fails to open.
+     */
+    public function open(string $mode = 'r'): mixed
     {
         if (!$this->isFile()) {
-            throw new \RuntimeException("{$this->path} is not a file");
+            throw new FileNotFoundException("{$this->path} is not a file");
         }
 
         $handle = fopen($this->path, $mode);
         if ($handle === false) {
-            throw new \RuntimeException("Failed opening file {$this->path}");
+            throw new IOException("Failed opening file {$this->path}");
         }
 
         return $handle;
     }
 
     /**
-     * Returns this path as a URI.
+     * Calls a callback with a file handle opened with the specified mode and closes the handle afterward.
      *
-     * @return string
+     * @param callable $callback The callback function to be called with the file handle.
+     * @param string $mode The mode in which to open the file. Defaults to 'r'.
+     * @throws Throwable If an exception is thrown within the callback function.
      */
-    public function as_uri(): string
+    public function with(callable $callback, string $mode = 'r'): void
     {
-        throw new \Exception("Method not implemented");
-    }
-
-    /**
-     * Returns the group that owns the file.
-     *
-     * @return string
-     */
-    public function group(): string
-    {
-        throw new \Exception("Method not implemented");
+        $handle = $this->open($mode);
+        try {
+            $callback($handle);
+        } finally {
+            fclose($handle);
+        }
     }
 
     /**
@@ -597,34 +630,26 @@ class Path
      *
      * @return bool
      */
-    public function is_absolute(): bool
+    public function isAbs(): bool
     {
-        return substr($this->path, 0, 1) === '/';
+        return str_starts_with($this->path, '/');
     }
 
     /**
-     * (Not supported in PHP). In Python, this would convert the path to POSIX style, but in PHP there's no equivalent.
-     * Therefore throwing an exception.
-     *
-     * @throws \RuntimeException
-     */
-    public function as_posix(): void
-    {
-        throw new \RuntimeException("Method 'as_posix' not supported in PHP");
-    }
-
-    /**
+     * > Alias for Path->setPermissions() method
      * Changes permissions of the file.
      *
      * @param int $mode The new permissions (octal).
      * @return bool
+     * @throws FileNotFoundException
      */
     public function chmod(int $mode): bool
     {
-        return chmod($this->path, $mode);
+        return $this->setPermissions($mode);
     }
 
     /**
+     * > Alias for Path->setOwner() method
      * Changes ownership of the file.
      *
      * @param string $user The new owner username.
@@ -633,47 +658,7 @@ class Path
      */
     public function chown(string $user, string $group): bool
     {
-        return chown($this->path, $user) && chgrp($this->path, $group);
-    }
-
-    /**
-     * Checks if file is a block special file.
-     *
-     * @return bool
-     */
-    public function is_block_device(): bool
-    {
-        return function_exists('posix_isatty') && is_file($this->path) && posix_isatty($this->path);
-    }
-
-    /**
-     * Checks if file is a character special file.
-     *
-     * @return bool
-     */
-    public function is_char_device(): bool
-    {
-        return function_exists('filetype') && filetype($this->path) === 'char';
-    }
-
-    /**
-     * Checks if file is a Named Pipe (FIFO) special file.
-     *
-     * @return bool
-     */
-    public function is_fifo(): bool
-    {
-        return function_exists('filetype') && filetype($this->path) === 'fifo';
-    }
-
-    /**
-     * Checks if file is a socket.
-     *
-     * @return bool
-     */
-    public function is_socket(): bool
-    {
-        return function_exists('filetype') && 'socket' === filetype($this->path);
+        return $this->setOwner($user, $group);
     }
 
     /**
@@ -681,7 +666,7 @@ class Path
      *
      * @return bool
      */
-    public function is_symlink(): bool
+    public function isLink(): bool
     {
         return is_link($this->path);
     }
@@ -689,62 +674,33 @@ class Path
     /**
      * Iterate over the files in this directory.
      *
-     * @return \Generator
-     * @throws \RuntimeException if the path is not a directory.
+     * @return Generator
+     * @throws FileNotFoundException if the path is not a directory.
      */
-    public function iterdir()
+    public function iterDir(): Generator
     {
         if (!$this->isDir()) {
-            throw new \RuntimeException("{$this->path} is not a directory");
+            throw new FileNotFoundException("{$this->path} is not a directory");
         }
 
         foreach (new \DirectoryIterator($this->path) as $fileInfo) {
-            if ($fileInfo->isDot()) continue;
+            // TODO: use the DirectoryIterator everywhere else?
+            if ($fileInfo->isDot()) {
+                continue;
+            }
             yield $fileInfo->getFilename();
         }
-    }
-
-
-
-    /**
-     * Change the mode of path to the numeric mode.
-     * This method does not follow symbolic links.
-     *
-     * @param int $mode
-     * @return bool
-     */
-    public function lchmod(int $mode): bool
-    {
-        if (!function_exists('lchmod')) {
-            return false;
-        }
-        return lchmod($this->path, $mode);
-    }
-
-    /**
-     * Change the owner and group id of path to the numeric uid and gid.
-     * This method does not follow symbolic links.
-     *
-     * @param int $uid User id
-     * @param int $gid Group id
-     * @return bool
-     */
-    public function lchown(int $uid, int $gid): bool
-    {
-        if (!function_exists('lchown')) {
-            return false;
-        }
-        return lchown($this->path, $uid) && lchgrp($this->path, $gid);
     }
 
     /**
      * Create a hard link pointing to a path.
      *
-     * @param string $target
+     * @param string|Path $target
      * @return bool
      */
-    public function link_to(string $target): bool
+    public function link(string|self $target): bool
     {
+        $target = (string)$target;
         if (!function_exists('link')) {
             return false;
         }
@@ -756,76 +712,61 @@ class Path
      *
      * @return array|false
      */
-    public function lstat()
+    public function lstat(): bool|array
     {
         return lstat($this->path);
     }
 
     /**
      * Returns the individual parts of this path.
+     * The eventual leading directory separator is kept.
+     *
+     * Ex:
+     *
+     *     Path('/foo/bar/baz').parts()
+     *     >>> '/', 'foo', 'bar', 'baz'
      *
      * @return array
      */
     public function parts(): array
     {
-        $separator = DIRECTORY_SEPARATOR;
-        return explode($separator, $this->path);
-    }
-
-    /**
-     * Opens the file in bytes mode, reads it, and closes the file.
-     *
-     * @return string
-     * @throws \RuntimeException
-     */
-    public function read_bytes(): string
-    {
-        $bytes = file_get_contents($this->path, FILE_BINARY);
-        if ($bytes === false) {
-            throw new \RuntimeException("Error reading file {$this->path}");
+        $parts = [];
+        if (str_starts_with($this->path, DIRECTORY_SEPARATOR)) {
+            $parts[] = DIRECTORY_SEPARATOR;
         }
-
-        return $bytes;
-    }
-
-    /**
-     * Open the file in text mode, read it, and close the file
-     *
-     * @return string
-     * @throws \RuntimeException
-     */
-    public function read_text(): string
-    {
-        $text = file_get_contents($this->path);
-        if ($text === false) {
-            throw new \RuntimeException("Error reading file {$this->path}");
-        }
-
-        return $text;
+        $parts += explode(DIRECTORY_SEPARATOR, $this->path);
+        return $parts;
     }
 
     /**
      * Compute a version of this path that is relative to another path.
      *
+     * @param string|Path $basePath
      * @return string
-     * @throws \RuntimeException
+     * @throws FileNotFoundException
      */
-    public function relative_to(string $other_path): string
+    public function getRelativePath(string|self $basePath): string
     {
-        $path = $this->absolute();
-        $other = realpath($other_path);
-        if ($other === false) {
-            throw new \RuntimeException("$other_path does not exist or unable to get a real path");
+        if (!$this->exists()) {
+            throw new FileNotFoundException("{$this->path} is not a file or directory");
         }
 
-        $path_parts = explode(DIRECTORY_SEPARATOR, $path);
-        $other_parts = explode(DIRECTORY_SEPARATOR, $other);
+        $path = $this->abspath();
+        $basePath = (string)$basePath;
 
-        while (count($path_parts) && count($other_parts) && ($path_parts[0] == $other_parts[0])) {
-            array_shift($path_parts);
-            array_shift($other_parts);
+        $realBasePath = realpath($basePath);
+        if ($realBasePath === false) {
+            throw new FileNotFoundException("$basePath does not exist or unable to get a real path");
         }
 
-        return str_repeat('..' . DIRECTORY_SEPARATOR, count($other_parts)) . implode(DIRECTORY_SEPARATOR, $path_parts);
+        $pathParts = explode(DIRECTORY_SEPARATOR, $path);
+        $baseParts = explode(DIRECTORY_SEPARATOR, $realBasePath);
+
+        while (count($pathParts) && count($baseParts) && ($pathParts[0] == $baseParts[0])) {
+            array_shift($pathParts);
+            array_shift($baseParts);
+        }
+
+        return str_repeat('..' . DIRECTORY_SEPARATOR, count($baseParts)) . implode(DIRECTORY_SEPARATOR, $pathParts);
     }
 }

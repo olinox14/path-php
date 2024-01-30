@@ -20,7 +20,8 @@
     }
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.6"
+    "phpunit/phpunit": "^9.6",
+    "ext-posix": "*"
   },
   "minimum-stability": "dev",
   "prefer-stable": true

@@ -4,6 +4,7 @@ namespace Path\Tests;
 
 use Path\Exception\FileExistsException;
 use Path\Exception\FileNotFoundException;
+use Path\Exception\IOException;
 use Path\Path;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +18,8 @@ class PathTest extends TestCase
 
     public function setUp(): void
     {
-        mkdir(self::TEMP_TEST_DIR);
+        clearstatcache();
+        mkdir(self::TEMP_TEST_DIR, 0777, true);
         chdir(self::TEMP_TEST_DIR);
     }
 
@@ -1086,7 +1088,6 @@ class PathTest extends TestCase
     public function testSetPermissionsFileNotExists(): void
     {
         $src = self::TEMP_TEST_DIR . "/foo.txt";
-
         $path = new Path($src);
 
         $this->expectException(FileNotFoundException::class);
@@ -1229,6 +1230,233 @@ class PathTest extends TestCase
 
         $this->assertFalse(
             is_dir($src)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testOpen(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+
+        $path = new Path($src);
+
+        $handle = $path->open();
+
+        $this->assertIsResource($handle);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testOpenNotExistingFile(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+
+        $path = new Path($src);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage(self::TEMP_TEST_DIR . "/foo.txt is not a file");
+
+        $path->open();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testOpenIsDir(): void {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        $path = new Path($src);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage(self::TEMP_TEST_DIR . "/foo.txt is not a file");
+
+        $path->open();
+    }
+
+    public function testIsAbs() {
+        $path1 = new Path('/absolute/path');
+        $this->assertTrue($path1->isAbs());
+
+        $path2 = new Path('relative/path');
+        $this->assertFalse($path2->isAbs());
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testChmod(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        $path = $this
+            ->getMockBuilder(Path::class)
+            ->onlyMethods(['setPermissions'])
+            ->setConstructorArgs([$src])
+            ->getMock();
+
+        $path->expects(self::once())->method('setPermissions')->with(0770);
+
+        $path->chmod(0770);
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testChown(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        $path = $this
+            ->getMockBuilder(Path::class)
+            ->onlyMethods(['setOwner'])
+            ->setConstructorArgs([$src])
+            ->getMock();
+
+        $path->expects(self::once())->method('setOwner')->with(2, 2);
+
+        $path->chown(2, 2);
+    }
+
+    public function testIsLink(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+        $path1 = new Path($src);
+
+        $target = self::TEMP_TEST_DIR . "/link.txt";
+        symlink($src, $target);
+        $path2 = new Path($target);
+
+        $this->assertFalse($path1->isLink());
+        $this->assertTrue($path2->isLink());
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testIterDir(): void {
+        $dir = self::TEMP_TEST_DIR . "/foo";
+        mkdir($dir);
+
+        $file1 = $dir . "/file1.ext";
+        touch($file1);
+
+        $file2 = $dir . "/file2.ext";
+        touch($file2);
+
+        $subDir = $dir . "/sub_dir";
+        mkdir($subDir);
+
+        $path = new Path($dir);
+
+        // TODO: test the generator behavior without array conversion
+        $this->assertEquals(
+            ['file1.ext', 'file2.ext', 'sub_dir'],
+            iterator_to_array($path->iterDir())
+        );
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testIterDirNotExisting(): void {
+        $dir = self::TEMP_TEST_DIR . "/foo";
+        $path = new Path($dir);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage($dir . " is not a directory");
+
+        iterator_to_array($path->iterDir());
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testIterDirIsFile(): void {
+        $src = self::TEMP_TEST_DIR . "/foo";
+        touch($src);
+        $path = new Path($src);
+
+        $this->expectException(FileNotFoundException::class);
+        $this->expectExceptionMessage($src . " is not a directory");
+
+        iterator_to_array($path->iterDir());
+    }
+
+    public function testLink(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+
+        $dst = self::TEMP_TEST_DIR . "/link.txt";
+
+        $path = new Path($src);
+
+        $path->link($dst);
+        $this->assertTrue(file_exists($dst));
+    }
+
+    public function testLinkWithPath(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        touch($src);
+
+        $dst = self::TEMP_TEST_DIR . "/link.txt";
+
+        $path = new Path($src);
+
+        $path->link(new Path($dst));
+        $this->assertTrue(file_exists($dst));
+    }
+
+    public function testLstat(): void
+    {
+        $src = self::TEMP_TEST_DIR . "/foo.txt";
+        file_put_contents($src,'foo');
+
+        $path = new Path($src);
+
+        self::assertSame(
+            lstat($src),
+            $path->lstat()
+        );
+    }
+
+    public function testParts(): void
+    {
+        $path = new Path("foo/bar/my_file.txt");
+
+        self::assertEquals(
+            ['foo', 'bar', 'my_file.txt'],
+            $path->parts()
+        );
+    }
+
+    public function testPartsWithLeadingSeparator(): void
+    {
+        $path = new Path("/foo/bar/my_file.txt");
+
+        self::assertEquals(
+            ['/', 'foo', 'bar', 'my_file.txt'],
+            $path->parts()
+        );
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testGetRelativePath()
+    {
+        $src = self::TEMP_TEST_DIR . "/foo";
+        touch($src);
+
+        $path = new Path($src);
+
+        $this->assertSame(
+            "foo",
+            $path->getRelativePath(self::TEMP_TEST_DIR)
         );
     }
 }
