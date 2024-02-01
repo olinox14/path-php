@@ -37,6 +37,11 @@ class Path
 
     protected mixed $handle;
 
+    public static function here(): self
+    {
+        return new self(__DIR__);
+    }
+
     /**
      * Joins two or more parts of a path together, inserting '/' as needed.
      * If any component is an absolute path, all previous path components
@@ -64,10 +69,6 @@ class Path
             }
         }
         return $path;
-    }
-
-    public function withFile(string|self $path, string $mode = 'r') {
-        //TODO: do a 'with open' like method
     }
 
     /**
@@ -110,6 +111,7 @@ class Path
      * @param string $dst The path to the destination directory.
      * @return void
      * @throws FileNotFoundException If a file within the source directory does not exist.
+     * @throws IOException
      */
     private static function _copy_dir(string $src, string $dst): void
     {
@@ -129,7 +131,10 @@ class Path
                 if (is_dir($path)) {
                     self::_copy_dir($path, $newPath);
                 } else if(is_file($path)) {
-                    copy($path, $newPath);
+                    $success = copy($path, $newPath);
+                    if (!$success) {
+                        throw new IOException("Error copying file {$path} to {$newPath}");
+                    }
                 } else {
                     throw new FileNotFoundException("File does not exist : " . $path);
                 }
@@ -256,6 +261,34 @@ class Path
     }
 
     /**
+     * Retrieves the creation time of a file or directory.
+     *
+     * @return string|null The creation time of the file or directory in 'Y-m-d H:i:s' format, or null if the time could not be retrieved.
+     */
+    function ctime(): ?string
+    {
+        $time = filectime($this->path);
+        if ($time === false) {
+            return null;
+        }
+        return date('Y-m-d H:i:s', $time);
+    }
+
+    /**
+     * Retrieves the last modified time of a file or directory.
+     *
+     * @return string|null The last modified time of the file or directory in the format 'Y-m-d H:i:s', or null if the time cannot be determined.
+     */
+    function mtime(): ?string
+    {
+        $time = filemtime($this->path);
+        if ($time === false) {
+            return null;
+        }
+        return date('Y-m-d H:i:s', $time);
+    }
+
+    /**
      * Check if the path refers to a regular file.
      *
      * @return bool Returns true if the path refers to a regular file, otherwise returns false.
@@ -296,6 +329,29 @@ class Path
     }
 
     /**
+     * Changes the current working directory.
+     *
+     * @param string|self $path The path to the directory to change into.
+     *                          It can be either a string containing the path or an instance of the same class.
+     * @return bool True on success, false on failure.
+     */
+    public function cd(string|self $path): bool
+    {
+        return chdir((string)$path);
+    }
+
+    /**
+     * > alias for Path->cd($path)
+     *
+     * @param string|Path $path
+     * @return bool
+     */
+    public function chdir(string|self $path): bool
+    {
+        return $this->cd($path);
+    }
+
+    /**
      * Get the name of the file or path.
      *
      * @return string Returns the name of the file without its extension
@@ -303,6 +359,16 @@ class Path
     public function name(): string
     {
         return pathinfo($this->path, PATHINFO_FILENAME);
+    }
+
+    public function normcase()
+    {
+        // TODO: implement https://docs.python.org/3/library/os.path.html#os.path.normcase
+    }
+
+    public function normpath()
+    {
+        // TODO: implement https://docs.python.org/3/library/os.path.html#os.path.normpath
     }
 
     /**
@@ -349,28 +415,72 @@ class Path
     }
 
     /**
-     * Copies a file or directory to the specified destination.
+     * Copy data and mode bits (“cp src dst”). Return the file’s destination.
+     * The destination may be a directory.
+     * If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’s “cp -P src dst”.
      *
-     * @param string|self $destination The destination path or object to copy the file or directory to.
-     * @throws FileNotFoundException If the source file or directory does not exist.
+     * @param string|self $destination The destination path or object to copy the file to.
+     * @throws FileNotFoundException If the source file does not exist or is not a file.
      * @throws FileExistsException
+     * @throws IOException
      */
-    public function copy(string|self $destination): void
+    public function copy(string|self $destination, bool $follow_symlinks = false): self
     {
+        if (!$this->isFile()) {
+            throw new FileNotFoundException("File does not exist or is not a file : " . $this);
+        }
+
+        $destination = (string)$destination;
+        if (is_dir($destination)) {
+            $destination = self::join($destination, $this->basename());
+        }
+
+        if (file_exists($destination)) {
+            throw new FileExistsException("File already exists : " . $destination);
+        }
+
+        $success = copy($this->path, $destination);
+        if (!$success) {
+            throw new IOException("Error copying file {$this->path} to {$destination}");
+        }
+
+        return new self($destination);
+    }
+
+    /**
+     * Copies the content of a file or directory to the specified destination.
+     *
+     * @param string|self $destination The destination path or directory to copy the content to.
+     * @param bool $follow_symlinks (Optional) Whether to follow symbolic links.
+     * @return self The object on which the method is called.
+     * @throws FileExistsException If the destination path or directory already exists.
+     * @throws FileNotFoundException If the source file or directory does not exist.
+     * @throws IOException
+     */
+    public function copy_tree(string|self $destination, bool $follow_symlinks = false): self
+    {
+        // TODO: voir à faire la synthèse de copytree et https://path.readthedocs.io/en/latest/api.html#path.Path.merge_tree
         if ($this->isFile()) {
             $destination = (string)$destination;
             if (is_dir($destination)) {
                 $destination = self::join($destination, $this->basename());
             }
+
             if (file_exists($destination)) {
                 throw new FileExistsException("File or dir already exists : " . $destination);
             }
-            copy($this->path, $destination);
+
+            $success = copy($this->path, $destination);
+            if (!$success) {
+                throw new IOException("Error copying file {$this->path} to {$destination}");
+            }
         } else if ($this->isDir()) {
             self::copy_dir($this, $destination);
         } else {
             throw new FileNotFoundException("File or dir does not exist : " . $this);
         }
+
+        return new self($destination);
     }
 
     /**
@@ -383,6 +493,7 @@ class Path
      */
     public function move(string|self $destination): void
     {
+        // TODO: comparer à https://path.readthedocs.io/en/latest/api.html#path.Path.move
         $destination = (string)$destination;
         if (is_dir($destination)) {
             $destination = self::join($destination, $this->basename());
@@ -439,12 +550,83 @@ class Path
     /**
      * Retrieves the parent directory of a file or directory path.
      *
-     * @return string The parent directory of the specified path.
+     * @return self The parent directory of the specified path.
      */
-    public function parent(): string
+    public function parent(): self
     {
         // TODO: check on special cases
-        return dirname($this->path);
+        return new self(dirname($this->path));
+    }
+
+    /**
+     * Alias for Path->parent() method
+     *
+     * @return self
+     */
+    public function dirname(): self
+    {
+        return $this->parent();
+    }
+
+    /**
+     * List of this directory’s subdirectories.
+     *
+     * The elements of the list are Path objects. This does not walk recursively into subdirectories (but see walkdirs()).
+     *
+     * Accepts parameters to iterdir().
+     *
+     * @return array
+     * @throws FileNotFoundException
+     */
+    public function dirs(): array
+    {
+        if (!is_dir($this->path)) {
+            throw new FileNotFoundException("Directory does not exist: " . $this->path);
+        }
+
+        $dirs = [];
+
+        foreach (scandir($this->path) as $filename) {
+            if ('.' === $filename) continue;
+            if ('..' === $filename) continue;
+
+            if (is_dir(self::join($this->path, $filename))) {
+                $dirs[] = $filename;
+            }
+        }
+
+        return $dirs;
+    }
+
+    /**
+     * Retrieves an array of files present in the directory.
+     *
+     * @return array An array of files present in the directory.
+     * @throws FileNotFoundException If the directory specified in the path does not exist.
+     */
+    public function files(): array
+    {
+        if (!is_dir($this->path)) {
+            throw new FileNotFoundException("Directory does not exist: " . $this->path);
+        }
+
+        $files = [];
+
+        foreach (scandir($this->path) as $filename) {
+            if ('.' === $filename) continue;
+            if ('..' === $filename) continue;
+
+            if (is_file(self::join($this->path, $filename))) {
+                $files[] = $filename;
+            }
+        }
+
+        return $files;
+    }
+
+    public function fnmatch()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.fnmatch
     }
 
     /**
@@ -465,6 +647,11 @@ class Path
         return $text;
     }
 
+    public function getOwner()
+    {
+        // TODO:  implement https://path.readthedocs.io/en/latest/api.html#path.Path.get_owner
+    }
+
     /**
      * Writes contents to a file.
      *
@@ -477,6 +664,14 @@ class Path
         // TODO: complete the input types
         // TODO: add a condition on the creation of the file if not existing
         file_put_contents($this->path, $content);
+    }
+
+    public function putLines(array $lines): void
+    {
+        // TODO: review use-cases
+        // TODO: complete the input types
+        // TODO: add a condition on the creation of the file if not existing
+        file_put_contents($this->path, implode(PHP_EOL, $lines));
     }
 
     /**
@@ -545,6 +740,23 @@ class Path
             chgrp($this->path, $group);
     }
 
+    public function setATime()
+    {
+        // TODO: implement
+    }
+    public function setCTime()
+    {
+        // TODO: implement
+    }
+    public function setMTime()
+    {
+        // TODO: implement
+    }
+    public function setUTime()
+    {
+        // TODO: implement
+    }
+
     /**
      * Checks if a file exists.
      *
@@ -553,6 +765,26 @@ class Path
     public function exists(): bool
     {
         return file_exists($this->path);
+    }
+
+    public function samefile()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.samefile
+    }
+
+    public function expand()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.expand
+    }
+
+    public function expand_user()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.expanduser
+    }
+
+    public function expand_vars()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.expandvars
     }
 
     /**
@@ -566,6 +798,15 @@ class Path
         foreach (glob($pattern) as $filename) {
             yield new static($filename);
         }
+    }
+
+    public function remove()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.remove
+    }
+    public function remove_p()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.remove_p
     }
 
     /**
@@ -584,6 +825,46 @@ class Path
         } else {
             rmdir($this->path);
         }
+    }
+
+    public function rename()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.rename
+    }
+
+    public function renames()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.renames
+    }
+
+    public function read_hash()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.read_hash
+    }
+
+    public function read_hexhash()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.read_hexhash
+    }
+
+    public function read_md5()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.read_md5
+    }
+
+    public function read_text()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.read_text
+    }
+
+    public function readlink()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.readlink
+    }
+
+    public function readlinkabs()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.readlinkabs
     }
 
     /**
@@ -615,11 +896,32 @@ class Path
      * @param string $mode The mode in which to open the file. Defaults to 'r'.
      * @throws Throwable If an exception is thrown within the callback function.
      */
-    public function with(callable $callback, string $mode = 'r'): void
+    public function with(callable $callback, string $mode = 'r')
     {
         $handle = $this->open($mode);
         try {
-            $callback($handle);
+            return $callback($handle);
+        } finally {
+            fclose($handle);
+        }
+    }
+
+    /**
+     * Retrieves chunks of data from the file.
+     *
+     * @param callable $callback The callback function to process each chunk of data.
+     * @param int $chunk_size The size of each chunk in bytes. Defaults to 8192.
+     * @return Generator Returns a generator that yields each chunk of data read from the file.
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public function chunks(callable $callback, int $chunk_size = 8192): Generator
+    {
+        $handle = $this->open('rb');
+        try {
+            while (!feof($handle)) {
+                yield fread($handle, $chunk_size);
+            }
         } finally {
             fclose($handle);
         }
@@ -655,10 +957,21 @@ class Path
      * @param string $user The new owner username.
      * @param string $group The new owner group name.
      * @return bool
+     * @throws FileNotFoundException
      */
     public function chown(string $user, string $group): bool
     {
         return $this->setOwner($user, $group);
+    }
+
+    /**
+     * Changes the root directory of the current process to the specified directory.
+     *
+     * @return bool Returns true on success or false on failure.
+     */
+    public function chroot(): bool
+    {
+        return chroot($this->path);
     }
 
     /**
@@ -669,6 +982,11 @@ class Path
     public function isLink(): bool
     {
         return is_link($this->path);
+    }
+
+    public function isMount()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.ismount
     }
 
     /**
@@ -690,6 +1008,11 @@ class Path
             }
             yield $fileInfo->getFilename();
         }
+    }
+
+    public function lines()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.lines
     }
 
     /**
@@ -715,6 +1038,25 @@ class Path
     public function lstat(): bool|array
     {
         return lstat($this->path);
+    }
+
+    public function splitDrive()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.splitdrive
+    }
+
+    public function stat() {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.stat
+    }
+
+    public function symlink()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.symlink
+    }
+
+    public function unlink()
+    {
+        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.unlink
     }
 
     /**
