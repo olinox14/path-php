@@ -36,7 +36,13 @@ class Path
     protected string $path;
 
     protected mixed $handle;
+    protected BuiltinProxy $builtin;
 
+    /**
+     * Returns a new instance of the current class, initialized with the constant __DIR__ as the path.
+     *
+     * @return self A new instance of the current class.
+     */
     public static function here(): self
     {
         return new self(__DIR__);
@@ -169,6 +175,8 @@ class Path
 
     public function __construct(string $path)
     {
+        $this->builtin = new BuiltinProxy();
+        
         $this->path = $path;
         $this->handle = null;
         return $this;
@@ -221,7 +229,7 @@ class Path
      */
     public function abspath(): string
     {
-        return realpath($this->path);
+        return $this->builtin->realpath($this->path);
     }
 
     /**
@@ -239,10 +247,10 @@ class Path
     function access(int $mode): bool
     {
         return match ($mode) {
-            self::F_OK => file_exists($this->path),
-            self::R_OK => is_readable($this->path),
-            self::W_OK => is_writable($this->path),
-            self::X_OK => is_executable($this->path),
+            self::F_OK => $this->builtin->file_exists($this->path),
+            self::R_OK => $this->builtin->is_readable($this->path),
+            self::W_OK => $this->builtin->is_writable($this->path),
+            self::X_OK => $this->builtin->is_executable($this->path),
             default => throw new RuntimeException('Invalid mode'),
         };
     }
@@ -254,7 +262,7 @@ class Path
      */
     function atime(): ?string
     {
-        $time = fileatime($this->path);
+        $time = $this->builtin->fileatime($this->path);
         if ($time === false) {
             return null;
         }
@@ -268,7 +276,7 @@ class Path
      */
     function ctime(): ?string
     {
-        $time = filectime($this->path);
+        $time = $this->builtin->filectime($this->path);
         if ($time === false) {
             return null;
         }
@@ -282,7 +290,7 @@ class Path
      */
     function mtime(): ?string
     {
-        $time = filemtime($this->path);
+        $time = $this->builtin->filemtime($this->path);
         if ($time === false) {
             return null;
         }
@@ -296,7 +304,7 @@ class Path
      */
     public function isFile(): bool
     {
-        return is_file($this->path);
+        return $this->builtin->is_file($this->path);
     }
 
     /**
@@ -306,7 +314,7 @@ class Path
      */
     public function isDir(): bool
     {
-        return is_dir($this->path);
+        return $this->builtin->is_dir($this->path);
     }
 
     /**
@@ -316,7 +324,7 @@ class Path
      */
     public function ext(): string
     {
-        return pathinfo($this->path, PATHINFO_EXTENSION);
+        return $this->builtin->pathinfo($this->path, PATHINFO_EXTENSION);
     }
 
     /**
@@ -326,7 +334,7 @@ class Path
      */
     public function basename(): string
     {
-        return pathinfo($this->path, PATHINFO_BASENAME);
+        return $this->builtin->pathinfo($this->path, PATHINFO_BASENAME);
     }
 
     /**
@@ -338,7 +346,7 @@ class Path
      */
     public function cd(string|self $path): bool
     {
-        return chdir((string)$path);
+        return $this->builtin->chdir((string)$path);
     }
 
     /**
@@ -359,7 +367,7 @@ class Path
      */
     public function name(): string
     {
-        return pathinfo($this->path, PATHINFO_FILENAME);
+        return $this->builtin->pathinfo($this->path, PATHINFO_FILENAME);
     }
 
     public function normcase()
@@ -395,7 +403,7 @@ class Path
             throw new FileExistsException("A file with this name already exists : " . $this);
         }
 
-        mkdir($this->path, $mode, $recursive);
+        $this->builtin->mkdir($this->path, $mode, $recursive);
     }
 
     /**
@@ -407,9 +415,9 @@ class Path
     public function delete(): void
     {
         if ($this->isFile()) {
-            unlink($this->path);
+            $this->builtin->unlink($this->path);
         } else if ($this->isDir()) {
-            rmdir($this->path);
+            $this->builtin->rmdir($this->path);
         } else {
             throw new FileNotFoundException("File does not exist : " . $this);
         }
@@ -432,15 +440,15 @@ class Path
         }
 
         $destination = (string)$destination;
-        if (is_dir($destination)) {
+        if ($this->builtin->is_dir($destination)) {
             $destination = self::join($destination, $this->basename());
         }
 
-        if (file_exists($destination)) {
+        if ($this->builtin->file_exists($destination)) {
             throw new FileExistsException("File already exists : " . $destination);
         }
 
-        $success = copy($this->path, $destination);
+        $success = $this->builtin->copy($this->path, $destination);
         if (!$success) {
             throw new IOException("Error copying file {$this->path} to {$destination}");
         }
@@ -463,15 +471,15 @@ class Path
         // TODO: voir à faire la synthèse de copytree et https://path.readthedocs.io/en/latest/api.html#path.Path.merge_tree
         if ($this->isFile()) {
             $destination = (string)$destination;
-            if (is_dir($destination)) {
+            if ($this->builtin->is_dir($destination)) {
                 $destination = self::join($destination, $this->basename());
             }
 
-            if (file_exists($destination)) {
+            if ($this->builtin->file_exists($destination)) {
                 throw new FileExistsException("File or dir already exists : " . $destination);
             }
 
-            $success = copy($this->path, $destination);
+            $success = $this->builtin->copy($this->path, $destination);
             if (!$success) {
                 throw new IOException("Error copying file {$this->path} to {$destination}");
             }
@@ -496,13 +504,13 @@ class Path
     {
         // TODO: comparer à https://path.readthedocs.io/en/latest/api.html#path.Path.move
         $destination = (string)$destination;
-        if (is_dir($destination)) {
+        if ($this->builtin->is_dir($destination)) {
             $destination = self::join($destination, $this->basename());
         }
-        if (file_exists($destination)) {
+        if ($this->builtin->file_exists($destination)) {
             throw new FileExistsException("File or dir already exists : " . $destination);
         }
-        rename($this->path, $destination);
+        $this->builtin->rename($this->path, $destination);
     }
 
     /**
@@ -521,7 +529,7 @@ class Path
         if ($atime instanceof \DateTime) {
             $atime = $atime->getTimestamp();
         }
-        touch($this->path, $time, $atime);
+        $this->builtin->touch($this->path, $time, $atime);
     }
 
     /**
@@ -531,7 +539,7 @@ class Path
      */
     public function lastModified(): bool|int
     {
-        return filemtime($this->path);
+        return $this->builtin->filemtime($this->path);
     }
 
     /**
@@ -545,7 +553,7 @@ class Path
         if (!$this->isFile()) {
             throw new FileNotFoundException("File does not exist : " . $this->path);
         }
-        return filesize($this->path);
+        return $this->builtin->filesize($this->path);
     }
 
     /**
@@ -556,7 +564,7 @@ class Path
     public function parent(): self
     {
         // TODO: check on special cases
-        return new self(dirname($this->path));
+        return new self($this->builtin->dirname($this->path));
     }
 
     /**
@@ -581,17 +589,17 @@ class Path
      */
     public function dirs(): array
     {
-        if (!is_dir($this->path)) {
+        if (!$this->builtin->is_dir($this->path)) {
             throw new FileNotFoundException("Directory does not exist: " . $this->path);
         }
 
         $dirs = [];
 
-        foreach (scandir($this->path) as $filename) {
+        foreach ($this->builtin->scandir($this->path) as $filename) {
             if ('.' === $filename) continue;
             if ('..' === $filename) continue;
 
-            if (is_dir(self::join($this->path, $filename))) {
+            if ($this->builtin->is_dir(self::join($this->path, $filename))) {
                 $dirs[] = $filename;
             }
         }
@@ -607,17 +615,17 @@ class Path
      */
     public function files(): array
     {
-        if (!is_dir($this->path)) {
+        if (!$this->builtin->is_dir($this->path)) {
             throw new FileNotFoundException("Directory does not exist: " . $this->path);
         }
 
         $files = [];
 
-        foreach (scandir($this->path) as $filename) {
+        foreach ($this->builtin->scandir($this->path) as $filename) {
             if ('.' === $filename) continue;
             if ('..' === $filename) continue;
 
-            if (is_file(self::join($this->path, $filename))) {
+            if ($this->builtin->is_file(self::join($this->path, $filename))) {
                 $files[] = $filename;
             }
         }
@@ -641,7 +649,7 @@ class Path
         if (!$this->isFile()) {
             throw new FileNotFoundException("File does not exist : " . $this->path);
         }
-        $text = file_get_contents($this->path);
+        $text = $this->builtin->file_get_contents($this->path);
         if ($text === false) {
             throw new IOException("Error reading file {$this->path}");
         }
@@ -664,7 +672,7 @@ class Path
         // TODO: review use-cases
         // TODO: complete the input types
         // TODO: add a condition on the creation of the file if not existing
-        file_put_contents($this->path, $content);
+        $this->builtin->file_put_contents($this->path, $content);
     }
 
     public function putLines(array $lines): void
@@ -672,7 +680,7 @@ class Path
         // TODO: review use-cases
         // TODO: complete the input types
         // TODO: add a condition on the creation of the file if not existing
-        file_put_contents($this->path, implode(PHP_EOL, $lines));
+        $this->builtin->file_put_contents($this->path, implode(PHP_EOL, $lines));
     }
 
     /**
@@ -687,7 +695,7 @@ class Path
         // TODO: review use-cases
         // TODO: complete the input types
         // TODO: add a condition on the creation of the file if not existing
-        file_put_contents($this->path, $content, FILE_APPEND);
+        $this->builtin->file_put_contents($this->path, $content, FILE_APPEND);
     }
 
     /**
@@ -701,7 +709,7 @@ class Path
         if (!$this->isFile()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
-        return (int)substr(sprintf('%o', fileperms($this->path)), -4);
+        return (int)substr(sprintf('%o', $this->builtin->fileperms($this->path)), -4);
     }
 
     // TODO; add some more user-friendly methods to get permissions (read, write, exec...)
@@ -718,8 +726,8 @@ class Path
         if (!$this->isFile()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
-        clearstatcache(); // TODO: check for a better way of dealing with PHP cache
-        return chmod($this->path, $permissions);
+        $this->builtin->clearstatcache(); // TODO: check for a better way of dealing with PHP cache
+        return $this->builtin->chmod($this->path, $permissions);
     }
 
     /**
@@ -735,10 +743,10 @@ class Path
         if (!$this->isFile()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
-        clearstatcache(); // TODO: check for a better way of dealing with PHP cache
+        $this->builtin->clearstatcache(); // TODO: check for a better way of dealing with PHP cache
         return
-            chown($this->path, $user) &&
-            chgrp($this->path, $group);
+            $this->builtin->chown($this->path, $user) &&
+            $this->builtin->chgrp($this->path, $group);
     }
 
     public function setATime()
@@ -765,7 +773,7 @@ class Path
      */
     public function exists(): bool
     {
-        return file_exists($this->path);
+        return $this->builtin->file_exists($this->path);
     }
 
     public function samefile()
@@ -794,9 +802,10 @@ class Path
      * @param string $pattern The pattern to search for.
      * @return Generator An iterable list of objects representing files and directories that match the pattern.
      */
-    public static function glob(string $pattern): Generator
+    public function glob(string $pattern): Generator
     {
-        foreach (glob($pattern) as $filename) {
+        // TODO: concat $this->path and $pattern?
+        foreach ($this->builtin->glob($pattern) as $filename) {
             yield new static($filename);
         }
     }
@@ -817,14 +826,14 @@ class Path
      */
     public function rmdir(bool $recursive = false): void
     {
-        if (!is_dir($this->path)) {
+        if (!$this->builtin->is_dir($this->path)) {
             throw new FileNotFoundException("{$this->path} is not a directory");
         }
 
         if ($recursive) {
             self::_rrmdir($this->path);
         } else {
-            rmdir($this->path);
+            $this->builtin->rmdir($this->path);
         }
     }
 
@@ -882,7 +891,7 @@ class Path
             throw new FileNotFoundException("{$this->path} is not a file");
         }
 
-        $handle = fopen($this->path, $mode);
+        $handle = $this->builtin->fopen($this->path, $mode);
         if ($handle === false) {
             throw new IOException("Failed opening file {$this->path}");
         }
@@ -903,7 +912,7 @@ class Path
         try {
             return $callback($handle);
         } finally {
-            fclose($handle);
+            $this->builtin->fclose($handle);
         }
     }
 
@@ -920,11 +929,11 @@ class Path
     {
         $handle = $this->open('rb');
         try {
-            while (!feof($handle)) {
-                yield fread($handle, $chunk_size);
+            while (!$this->builtin->feof($handle)) {
+                yield $this->builtin->fread($handle, $chunk_size);
             }
         } finally {
-            fclose($handle);
+            $this->builtin->fclose($handle);
         }
     }
 
@@ -972,7 +981,7 @@ class Path
      */
     public function chroot(): bool
     {
-        return chroot($this->path);
+        return $this->builtin->chroot($this->path);
     }
 
     /**
@@ -982,7 +991,7 @@ class Path
      */
     public function isLink(): bool
     {
-        return is_link($this->path);
+        return $this->builtin->is_link($this->path);
     }
 
     public function isMount()
@@ -1034,7 +1043,7 @@ class Path
         if (!function_exists('link')) {
             return false;
         }
-        return link($this->path, $target);
+        return $this->builtin->link($this->path, $target);
     }
 
     /**
@@ -1044,7 +1053,7 @@ class Path
      */
     public function lstat(): bool|array
     {
-        return lstat($this->path);
+        return $this->builtin->lstat($this->path);
     }
 
     public function splitDrive()
@@ -1103,7 +1112,7 @@ class Path
         $path = $this->abspath();
         $basePath = (string)$basePath;
 
-        $realBasePath = realpath($basePath);
+        $realBasePath = $this->builtin->realpath($basePath);
         if ($realBasePath === false) {
             throw new FileNotFoundException("$basePath does not exist or unable to get a real path");
         }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Path\Tests;
+namespace Path\Tests\functionnal;
 
 use Path\Exception\FileExistsException;
 use Path\Exception\FileNotFoundException;

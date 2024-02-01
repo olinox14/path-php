@@ -33,12 +33,12 @@ class BuiltinProxy
         return pathinfo($path, $flags);
     }
 
-    public function opendir(string $directory, $context): false|resource
+    public function opendir(string $directory, $context = null)
     {
         return opendir($directory, $context);
     }
 
-    public function mkdir(string $directory, int $permissions = 0777, bool $recursive = false, $context): bool
+    public function mkdir(string $directory, int $permissions = 0777, bool $recursive = false, $context = null): bool
     {
         return mkdir($directory, $permissions, $recursive, $context);
     }
@@ -48,7 +48,7 @@ class BuiltinProxy
         return readdir($dir_handle);
     }
 
-    public function copy(string $from, string $to, $context ): bool
+    public function copy(string $from, string $to, $context = null): bool
     {
         return copy($from, $to, $context);
     }
@@ -58,17 +58,17 @@ class BuiltinProxy
         closedir($dir_handle);
     }
 
-    public function scandir(string $directory, int $sorting_order = 0, $context ): array|false
+    public function scandir(string $directory, int $sorting_order = 0, $context = null): array|false
     {
         return scandir($directory, $sorting_order, $context);
     }
 
-    public function unlink(string $filename, $context): bool
+    public function unlink(string $filename, $context = null): bool
     {
         return unlink($filename, $context);
     }
 
-    public function rmdir(string $directory, $context): bool
+    public function rmdir(string $directory, $context = null): bool
     {
         return rmdir($directory, $context);
     }
@@ -118,7 +118,7 @@ class BuiltinProxy
         return chdir($directory);
     }
 
-    public function rename(string $from, string $to, $context): bool
+    public function rename(string $from, string $to, $context = null): bool
     {
         return rename($from, $to, $context);
     }
@@ -138,12 +138,12 @@ class BuiltinProxy
         return dirname($path, $levels);
     }
 
-    public function file_get_contents(string $filename, bool $use_include_path = false, $context, int $offset = 0, ?int $length): false|string
+    public function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, ?int $length = null): false|string
     {
         return file_get_contents($filename, $use_include_path, $context, $offset, $length);
     }
 
-    public function file_put_contents(string $filename, mixed $data, int $flags = 0, $context ): false|int
+    public function file_put_contents(string $filename, mixed $data, int $flags = 0, $context = null): false|int
     {
         return file_put_contents($filename, $data, $flags, $context);
     }
@@ -183,7 +183,7 @@ class BuiltinProxy
         return glob($pattern, $flags);
     }
 
-    public function fopen(string $filename, string $mode, bool $use_include_path = false, $context ): false|resource
+    public function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null)
     {
         return fopen($filename, $mode, $use_include_path, $context);
     }
