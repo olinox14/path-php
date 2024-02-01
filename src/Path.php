@@ -84,6 +84,7 @@ class Path
      *
      * @throws FileNotFoundException
      * @throws FileExistsException
+     * @throws IOException
      */
     public static function copy_dir(string|self $src, string|self $dst): void
     {
@@ -987,6 +988,12 @@ class Path
     public function isMount()
     {
         // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.ismount
+    }
+
+    public function getDirectoryIterator()
+    {
+        // TODO: complete
+        return new \DirectoryIterator($this->path);
     }
 
     /**
