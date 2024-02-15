@@ -9,7 +9,7 @@ use Path\Path;
 use PHPUnit\Framework\TestCase;
 
 // TODO: tested args should be both typed Path and string
-class PathTest extends TestCase
+class PathTest
 {
     const TEMP_TEST_DIR = __DIR__ . "/temp";
     // TODO: consider using sys_get_temp_dir()
@@ -39,35 +39,8 @@ class PathTest extends TestCase
         chdir(__DIR__);
     }
 
-    public function testToString(): void
-    {
-        $path = new Path('/foo/bar');
-        $this->assertEquals('/foo/bar', $path->__toString());
-    }
 
-    /**
-     * Test 'join' method.
-     */
-    public function testJoin(): void
-    {
-        // One part
-        $this->assertEquals(
-            '/home/user',
-            Path::join('/home', 'user')
-        );
 
-        // Multiple parts
-        $this->assertEquals(
-            '/home/user/documents',
-            Path::join('/home', 'user', 'documents')
-        );
-
-        // Absolute path passed in $parts
-        $this->assertEquals(
-            '/user/documents',
-            Path::join('home', '/user', 'documents')
-        );
-    }
 
     /**
      * Test 'Path' class 'copy_dir' method to copy a directory

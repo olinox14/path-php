@@ -10,6 +10,11 @@ use JetBrains\PhpStorm\ExpectedValues;
  */
 class BuiltinProxy
 {
+    public function date(string $format, int $time): string
+    {
+        return date($format, $time);
+    }
+
     public function is_dir(string $filename): bool
     {
         return is_dir($filename);

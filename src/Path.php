@@ -39,16 +39,6 @@ class Path
     protected BuiltinProxy $builtin;
 
     /**
-     * Returns a new instance of the current class, initialized with the constant __DIR__ as the path.
-     *
-     * @return self A new instance of the current class.
-     */
-    public static function here(): self
-    {
-        return new self(__DIR__);
-    }
-
-    /**
      * Joins two or more parts of a path together, inserting '/' as needed.
      * If any component is an absolute path, all previous path components
      * will be discarded. An empty last part will result in a path that
@@ -87,6 +77,7 @@ class Path
      *
      * @return void
      * TODO: see https://stackoverflow.com/a/12763962/4279120
+     * TODO: en faire une méthode non statique et tester
      *
      * @throws FileNotFoundException
      * @throws FileExistsException
@@ -113,7 +104,7 @@ class Path
 
     /**
      * [internal] Recursively copies a directory from source to destination.
-     *
+     * TODO: en faire une méthode non statique et tester
      * @param string $src The path to the source directory.
      * @param string $dst The path to the destination directory.
      * @return void
@@ -151,7 +142,10 @@ class Path
         }
     }
 
-    /** @noinspection SpellCheckingInspection */
+    /**
+     * TODO: en faire une méthode non statique et tester
+     * @noinspection SpellCheckingInspection
+     */
     private static function _rrmdir(string $dir): void
     {
         if (!is_dir($dir)) {
@@ -173,17 +167,22 @@ class Path
         rmdir($dir);
     }
 
-    public function __construct(string $path)
+    public function __construct(string|self $path)
     {
         $this->builtin = new BuiltinProxy();
         
-        $this->path = $path;
+        $this->path = (string)$path;
         $this->handle = null;
         return $this;
     }
 
     public function __toString(): string {
         return $this->path;
+    }
+
+    protected function cast(string|self $path): self
+    {
+        return new self($path);
     }
 
     /**
@@ -204,7 +203,7 @@ class Path
      * @return bool Returns true if the given path is equal to the current path, false otherwise.
      */
     public function eq(string|self $path): bool {
-        return (string)$path === $this->path;
+        return $this->cast($path)->path() === $this->path();
     }
 
     /**
@@ -224,12 +223,26 @@ class Path
     /**
      * Returns an absolute version of the current path.
      *
-     * @return string
+     * @return self
      * TODO: make an alias `realpath`
+     * @throws IOException
      */
-    public function abspath(): string
+    public function absPath(): self
     {
-        return $this->builtin->realpath($this->path);
+        $absPath = $this->builtin->realpath($this->path);
+        if ($absPath === false) {
+            throw new IOException("Error while getting abspath of `" . $this->path . "`");
+        }
+        return $this->cast($absPath);
+    }
+
+    /**
+     * > Alias for absPath()
+     * @throws IOException
+     */
+    public function realpath(): self
+    {
+        return $this->absPath();
     }
 
     /**
@@ -242,7 +255,6 @@ class Path
      *        - W_OK: checks for write permission.
      *        - X_OK: checks for execute permission.
      * @return bool Returns true if the permission check is successful; otherwise, returns false.
-     * TODO: complete unit tests
      */
     function access(int $mode): bool
     {
@@ -258,7 +270,8 @@ class Path
     /**
      * Retrieves the last access time of a file or directory.
      *
-     * @return string|null The last access time of the file or directory in 'Y-m-d H:i:s' format. Returns null if the file or directory does not exist or on error.
+     * @return string|null The last access time of the file or directory in 'Y-m-d H:i:s' format.
+     * Returns null if the file or directory does not exist or on error.
      */
     function atime(): ?string
     {
@@ -266,13 +279,14 @@ class Path
         if ($time === false) {
             return null;
         }
-        return date('Y-m-d H:i:s', $time);
+        return $this->builtin->date('Y-m-d H:i:s', $time);
     }
 
     /**
      * Retrieves the creation time of a file or directory.
      *
-     * @return string|null The creation time of the file or directory in 'Y-m-d H:i:s' format, or null if the time could not be retrieved.
+     * @return string|null The creation time of the file or directory in 'Y-m-d H:i:s' format,
+     * or null if the time could not be retrieved.
      */
     function ctime(): ?string
     {
@@ -280,7 +294,7 @@ class Path
         if ($time === false) {
             return null;
         }
-        return date('Y-m-d H:i:s', $time);
+        return $this->builtin->date('Y-m-d H:i:s', $time);
     }
 
     /**
@@ -294,7 +308,7 @@ class Path
         if ($time === false) {
             return null;
         }
-        return date('Y-m-d H:i:s', $time);
+        return $this->builtin->date('Y-m-d H:i:s', $time);
     }
 
     /**
@@ -388,6 +402,7 @@ class Path
      *
      * @return void
      * @throws FileExistsException
+     * @throws IOException
      */
     public function mkdir(int $mode = 0777, bool $recursive = false): void
     {
@@ -403,7 +418,11 @@ class Path
             throw new FileExistsException("A file with this name already exists : " . $this);
         }
 
-        $this->builtin->mkdir($this->path, $mode, $recursive);
+        $result = $this->builtin->mkdir($this->path, $mode, $recursive);
+
+        if (!$result) {
+            throw new IOException("Error why creating the new directory : " . $this->path);
+        }
     }
 
     /**
@@ -411,13 +430,22 @@ class Path
      *
      * @return void
      * @throws FileNotFoundException
+     * @throws IOException
      */
     public function delete(): void
     {
         if ($this->isFile()) {
-            $this->builtin->unlink($this->path);
+            $result = $this->builtin->unlink($this->path);
+
+            if (!$result) {
+                throw new IOException("Error why deleting file : " . $this->path);
+            }
         } else if ($this->isDir()) {
-            $this->builtin->rmdir($this->path);
+            $result = $this->builtin->rmdir($this->path);
+
+            if (!$result) {
+                throw new IOException("Error why deleting directory : " . $this->path);
+            }
         } else {
             throw new FileNotFoundException("File does not exist : " . $this);
         }
@@ -427,6 +455,7 @@ class Path
      * Copy data and mode bits (“cp src dst”). Return the file’s destination.
      * The destination may be a directory.
      * If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’s “cp -P src dst”.
+     * TODO: implements the follow_symlinks functionality
      *
      * @param string|self $destination The destination path or object to copy the file to.
      * @throws FileNotFoundException If the source file does not exist or is not a file.
@@ -439,7 +468,7 @@ class Path
             throw new FileNotFoundException("File does not exist or is not a file : " . $this);
         }
 
-        $destination = (string)$destination;
+        $destination = (string)$destination; // TODO: add an absPath method to the dest?
         if ($this->builtin->is_dir($destination)) {
             $destination = self::join($destination, $this->basename());
         }
@@ -453,7 +482,7 @@ class Path
             throw new IOException("Error copying file {$this->path} to {$destination}");
         }
 
-        return new self($destination);
+        return $this->cast($destination);
     }
 
     /**
@@ -1109,7 +1138,7 @@ class Path
             throw new FileNotFoundException("{$this->path} is not a file or directory");
         }
 
-        $path = $this->abspath();
+        $path = $this->absPath();
         $basePath = (string)$basePath;
 
         $realBasePath = $this->builtin->realpath($basePath);
