@@ -523,23 +523,34 @@ class Path
 
     /**
      * Moves a file or directory to a new location.
+     * Returns the path of the newly created file or directory.
      *
      * @param string|Path $destination The new location where the file or directory should be moved to.
      *
-     * @return void
+     * @return Path
      * @throws FileExistsException
+     * @throws IOException
      */
-    public function move(string|self $destination): void
+    public function move(string|self $destination): self
     {
         // TODO: comparer à https://path.readthedocs.io/en/latest/api.html#path.Path.move
         $destination = (string)$destination;
+
         if ($this->builtin->is_dir($destination)) {
             $destination = self::join($destination, $this->basename());
         }
+
         if ($this->builtin->file_exists($destination)) {
             throw new FileExistsException("File or dir already exists : " . $destination);
         }
-        $this->builtin->rename($this->path, $destination);
+
+        $success = $this->builtin->rename($this->path, $destination);
+
+        if (!$success) {
+            throw new IOException("Error while moving " . $this->path . " to " . $destination);
+        }
+
+        return $this->cast($destination);
     }
 
     /**
@@ -549,6 +560,7 @@ class Path
      * @param int|\DateTime|null $atime (optional) The access time to set. Default is the value of $time.
      *
      * @return void
+     * @throws IOException
      */
     public function touch(int|\DateTime $time = null, int|\DateTime $atime = null): void
     {
@@ -558,17 +570,12 @@ class Path
         if ($atime instanceof \DateTime) {
             $atime = $atime->getTimestamp();
         }
-        $this->builtin->touch($this->path, $time, $atime);
-    }
 
-    /**
-     * Returns the last modified timestamp of a file or directory.
-     *
-     * @return int|bool The last modified timestamp, or false if an error occurred.
-     */
-    public function lastModified(): bool|int
-    {
-        return $this->builtin->filemtime($this->path);
+        $success = $this->builtin->touch($this->path, $time, $atime);
+
+        if (!$success) {
+            throw new IOException("Error while touching " . $this->path);
+        }
     }
 
     /**
@@ -576,13 +583,21 @@ class Path
      *
      * @return int The size of the file in bytes.
      * @throws FileNotFoundException
+     * @throws IOException
      */
     public function size(): int
     {
         if (!$this->isFile()) {
             throw new FileNotFoundException("File does not exist : " . $this->path);
         }
-        return $this->builtin->filesize($this->path);
+
+        $result = $this->builtin->filesize($this->path);
+
+        if ($result === false) {
+            throw new IOException("Error while getting the size of " . $this->path);
+        }
+
+        return $result;
     }
 
     /**
@@ -593,7 +608,10 @@ class Path
     public function parent(): self
     {
         // TODO: check on special cases
-        return new self($this->builtin->dirname($this->path));
+        // TODO: add the levels argument?
+        return $this->cast(
+            $this->builtin->dirname($this->path)
+        );
     }
 
     /**
@@ -603,13 +621,15 @@ class Path
      */
     public function dirname(): self
     {
+        // TODO: add the levels argument?
         return $this->parent();
     }
 
     /**
      * List of this directory’s subdirectories.
      *
-     * The elements of the list are Path objects. This does not walk recursively into subdirectories (but see walkdirs()).
+     * The elements of the list are Path objects.
+     * This does not walk recursively into subdirectories (but see walkdirs()).
      *
      * Accepts parameters to iterdir().
      *
@@ -675,56 +695,55 @@ class Path
      */
     public function getContent(): bool|string
     {
-        if (!$this->isFile()) {
+        if (!$this->builtin->is_file($this->path)) {
             throw new FileNotFoundException("File does not exist : " . $this->path);
         }
+
         $text = $this->builtin->file_get_contents($this->path);
+
         if ($text === false) {
             throw new IOException("Error reading file {$this->path}");
         }
         return $text;
     }
 
-    public function getOwner()
-    {
-        // TODO:  implement https://path.readthedocs.io/en/latest/api.html#path.Path.get_owner
-    }
-
     /**
      * Writes contents to a file.
      *
      * @param string $content The contents to be written to the file.
-     * @return void
+     * @return int
+     * @throws FileNotFoundException
+     * @throws IOException
      */
-    public function putContent(string $content): void
+    public function putContent(string $content, bool $append = false): int
     {
-        // TODO: review use-cases
-        // TODO: complete the input types
-        // TODO: add a condition on the creation of the file if not existing
-        $this->builtin->file_put_contents($this->path, $content);
-    }
+        if (!$this->builtin->is_file($this->path)) {
+            throw new FileNotFoundException("File does not exist : " . $this->path);
+        }
 
-    public function putLines(array $lines): void
-    {
         // TODO: review use-cases
         // TODO: complete the input types
         // TODO: add a condition on the creation of the file if not existing
-        $this->builtin->file_put_contents($this->path, implode(PHP_EOL, $lines));
+        $result = $this->builtin->file_put_contents(
+            $this->path,
+            $content,
+            $append ? FILE_APPEND : 0
+        );
+
+        if ($result === False) {
+            throw new IOException("Error while putting content into $this->path");
+        }
+
+        return $result;
     }
 
     /**
-     * Appends contents to a file.
-     *
-     * @param string $content The contents to append to the file.
-     *
-     * @return void
+     * @throws IOException
+     * @throws FileNotFoundException
      */
-    public function appendContent(string $content): void
+    public function putLines(array $lines): int
     {
-        // TODO: review use-cases
-        // TODO: complete the input types
-        // TODO: add a condition on the creation of the file if not existing
-        $this->builtin->file_put_contents($this->path, $content, FILE_APPEND);
+        return $this->putContent(implode(PHP_EOL, $lines));
     }
 
     /**
@@ -732,13 +751,21 @@ class Path
      *
      * @return int The permissions of the file or directory in octal notation.
      * @throws FileNotFoundException
+     * @throws IOException
      */
     public function getPermissions(): int
     {
         if (!$this->isFile()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
-        return (int)substr(sprintf('%o', $this->builtin->fileperms($this->path)), -4);
+
+        $perms = $this->builtin->fileperms($this->path);
+
+        if ($perms === false) {
+            throw new IOException("Error while getting permissions on " . $this->path);
+        }
+
+        return (int)substr(sprintf('%o', $perms), -4);
     }
 
     // TODO; add some more user-friendly methods to get permissions (read, write, exec...)

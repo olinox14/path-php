@@ -976,4 +976,731 @@ class PathTest extends TestCase
 
         $path->copy($destination);
     }
+
+//    public function testCopyTree(): void {
+//         TODO: implement
+//    }
+
+    /**
+     * @throws IOException
+     * @throws FileExistsException
+     */
+    public function testMove()
+    {
+        $path = $this->getMock('foo.ext', 'move');
+
+        $destination = "/bar/foo2.ext";
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('is_dir')
+            ->with($destination)
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('file_exists')
+            ->with($destination)
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('rename')
+            ->with('foo.ext', $destination)
+            ->willReturn(True);
+
+        $destinationPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $destinationPath->method('eq')->with($destination)->willReturn(True);
+
+        $path->method('cast')->with($destination)->willReturn($destinationPath);
+
+        $result = $path->move($destination);
+
+        $this->assertTrue(
+            $result->eq($destination)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileExistsException
+     */
+    public function testMoveWithPath()
+    {
+        $path = $this->getMock('foo.ext', 'move');
+
+        $destination = new Path("/bar/foo2.ext");
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('is_dir')
+            ->with($destination)
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('file_exists')
+            ->with($destination)
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('rename')
+            ->with('foo.ext', $destination)
+            ->willReturn(True);
+
+        $destinationPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $destinationPath->method('eq')->with($destination)->willReturn(True);
+
+        $path->method('cast')->with($destination)->willReturn($destinationPath);
+
+        $result = $path->move($destination);
+
+        $this->assertTrue(
+            $result->eq($destination)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileExistsException
+     */
+    public function testMoveDestIsDir()
+    {
+        $path = $this->getMock('foo.ext', 'move');
+        $path->method('basename')->willReturn('foo.ext');
+
+        $destination = "/bar";
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('is_dir')
+            ->with($destination)
+            ->willReturn(True);
+
+        $newDestination = $destination . "/foo.ext";
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('file_exists')
+            ->with($newDestination)
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('rename')
+            ->with('foo.ext', $newDestination)
+            ->willReturn(True);
+
+        $destinationPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $destinationPath->method('eq')->with($newDestination)->willReturn(True);
+
+        $path->method('cast')->with($newDestination)->willReturn($destinationPath);
+
+        $result = $path->move($destination);
+
+        $this->assertTrue(
+            $result->eq($newDestination)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileExistsException
+     */
+    public function testMoveFileExist()
+    {
+        $path = $this->getMock('foo.ext', 'move');
+        $path->method('basename')->willReturn('foo.ext');
+
+        $destination = "/bar/foo2.ext";
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('is_dir')
+            ->with($destination)
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('file_exists')
+            ->with($destination)
+            ->willReturn(True);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('rename');
+
+        $this->expectException(FileExistsException::class);
+
+        $path->move($destination);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileExistsException
+     */
+    public function testMoveWithError()
+    {
+        $path = $this->getMock('foo.ext', 'move');
+        $path->method('basename')->willReturn('foo.ext');
+
+        $destination = "/bar/foo2.ext";
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('is_dir')
+            ->with($destination)
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('file_exists')
+            ->with($destination)
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('rename')
+            ->with('foo.ext', $destination)
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->move($destination);
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testTouchWithNoTimestamps()
+    {
+        $path = $this->getMock('foo.ext', 'touch');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('touch')
+            ->with('foo.ext', null, null)
+            ->willReturn(True);
+
+        $path->touch();
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testTouchWithTimestamps()
+    {
+        $path = $this->getMock('foo.ext', 'touch');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('touch')
+            ->with('foo.ext', 123, 456)
+            ->willReturn(True);
+
+        $path->touch(123, 456);
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testTouchWithDatetimes()
+    {
+        $path = $this->getMock('foo.ext', 'touch');
+
+        $datetime1 = $this->getMockBuilder(\DateTime::class)->getMock();
+        $datetime1->method('getTimestamp')->willReturn(123);
+
+        $datetime2 = $this->getMockBuilder(\DateTime::class)->getMock();
+        $datetime2->method('getTimestamp')->willReturn(456);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('touch')
+            ->with('foo.ext', 123, 456)
+            ->willReturn(True);
+
+        $path->touch($datetime1, $datetime2);
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testTouchWithError()
+    {
+        $path = $this->getMock('foo.ext', 'touch');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('touch')
+            ->with('foo.ext')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->touch();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testSize()
+    {
+        $path = $this->getMock('foo.ext', 'size');
+        $path->method('isFile')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('filesize')
+            ->with('foo.ext')
+            ->willReturn(123456);
+
+        $this->assertEquals(
+            123456,
+            $path->size()
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testSizeFileNotExist()
+    {
+        $path = $this->getMock('foo.ext', 'size');
+        $path->method('isFile')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('filesize');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->size();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testSizeFileWithError()
+    {
+        $path = $this->getMock('foo.ext', 'size');
+        $path->method('isFile')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('filesize')
+            ->with('foo.ext')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->size();
+    }
+
+    public function testParent(): void
+    {
+        $path = $this->getMock('/foo/foo.ext', 'parent');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('dirname')
+            ->with('/foo/foo.ext')
+            ->willReturn('/foo');
+
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('cast')->with('/foo')->willReturn($newPath);
+
+        $newPath->method('eq')->with('/foo')->willReturn(True);
+
+        $this->assertTrue(
+            $path->parent()->eq('/foo')
+        );
+    }
+
+    public function testDirName(): void
+    {
+        $path = $this->getMock('/foo/foo.ext', 'dirname');
+
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newPath->method('eq')->with('/foo')->willReturn(True);
+
+        $path
+            ->expects(self::once())
+            ->method('parent')
+            ->willReturn($newPath);
+
+        $this->assertTrue(
+            $path->dirname()->eq('/foo')
+        );
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testDirs()
+    {
+        $path = $this->getMock('/foo', 'dirs');
+
+        $this->builtin
+            ->method('is_dir')
+            ->willReturnMap(
+                [
+                    ['/foo', True],
+                    ['/foo/file.ext', False],
+                    ['/foo/dir1', True],
+                    ['/foo/dir2', True],
+                ]
+            );
+
+        $results = [
+            '..',
+            '.',
+            'file.ext',
+            'dir1',
+            'dir2'
+        ];
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('scandir')
+            ->with('/foo')
+            ->willReturn($results);
+
+        $this->assertEquals(
+            ['dir1', 'dir2'],
+            $path->dirs()
+        );
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testDirsIsNotDir()
+    {
+        $path = $this->getMock('/foo', 'dirs');
+
+        $this->builtin
+            ->method('is_dir')
+            ->with('/foo')
+            ->willReturn(False);
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->dirs();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testFiles()
+    {
+        $path = $this->getMock('/foo', 'files');
+
+        $this->builtin
+            ->method('is_dir')
+            ->with('/foo')
+            ->willReturn(True);
+
+        $this->builtin
+            ->method('is_file')
+            ->willReturnMap(
+                [
+                    ['/foo/file1.ext', True],
+                    ['/foo/file2.ext', True],
+                    ['/foo/dir1', False],
+                ]
+            );
+
+        $results = [
+            '..',
+            '.',
+            'file1.ext',
+            'file2.ext',
+            'dir1'
+        ];
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('scandir')
+            ->with('/foo')
+            ->willReturn($results);
+
+        $this->assertEquals(
+            ['file1.ext', 'file2.ext'],
+            $path->files()
+        );
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testFilesIsNotDir()
+    {
+        $path = $this->getMock('/foo', 'files');
+
+        $this->builtin
+            ->method('is_dir')
+            ->with('/foo')
+            ->willReturn(False);
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->files();
+    }
+
+//    public function testFnMatch(): void
+//    {
+//        //TODO: implements
+//    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGetContent(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'getContent');
+
+        $this->builtin
+            ->method('is_file')
+            ->with('/foo/file.ext')
+            ->willReturn(True);
+
+        $this->builtin
+            ->method('file_get_contents')
+            ->with('/foo/file.ext')
+            ->willReturn('azerty');
+
+        $this->assertEquals(
+            'azerty',
+            $path->getContent()
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGetContentFileDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'getContent');
+
+        $this->builtin
+            ->method('is_file')
+            ->with('/foo/file.ext')
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('file_get_contents');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->getContent();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGetContentErrorWhileReading(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'getContent');
+
+        $this->builtin
+            ->method('is_file')
+            ->with('/foo/file.ext')
+            ->willReturn(True);
+
+        $this->builtin
+            ->method('file_get_contents')
+            ->with('/foo/file.ext')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->getContent();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testPutContent(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'putContent');
+
+        $this->builtin
+            ->method('is_file')
+            ->with('/foo/file.ext')
+            ->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('file_put_contents')
+            ->with('/foo/file.ext', 'azerty')
+            ->willReturn(6);
+
+        $this->assertEquals(
+            6,
+            $path->putContent('azerty')
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testPutContentAndAppend(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'putContent');
+
+        $this->builtin
+            ->method('is_file')
+            ->with('/foo/file.ext')
+            ->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('file_put_contents')
+            ->with('/foo/file.ext', 'azerty', FILE_APPEND)
+            ->willReturn(6);
+
+        $this->assertEquals(
+            6,
+            $path->putContent('azerty', True)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testPutContentFileDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'putContent');
+
+        $this->builtin
+            ->method('is_file')
+            ->with('/foo/file.ext')
+            ->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('file_put_contents');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->putContent('azerty');
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testPutContentErrorWhileWriting(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'putContent');
+
+        $this->builtin
+            ->method('is_file')
+            ->with('/foo/file.ext')
+            ->willReturn(True);
+
+        $this->builtin
+            ->method('file_put_contents')
+            ->with('/foo/file.ext')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->putContent('azerty');
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testPutLines(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'putLines');
+
+        $lines = [
+            'once upon a time',
+            'a man and a spoon',
+            'had a great time drinking coffee'
+        ];
+
+        $path
+            ->expects(self::once())
+            ->method('putContent')
+            ->with(implode(PHP_EOL, $lines))
+            ->willReturn(123);
+
+        $this->assertEquals(
+            123,
+            $path->putLines($lines)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGetPermissions(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'getPermissions');
+        $path->method('isFile')->willReturn(True);
+
+        $this->builtin
+            ->method('fileperms')
+            ->with('/foo/file.ext')
+            ->willReturn(16895);
+
+        $this->assertEquals(
+            777,
+            $path->getPermissions()
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGetPermissionsFileDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'getPermissions');
+        $path->method('isFile')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('fileperms');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->getPermissions();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGetPermissionsWithError(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'getPermissions');
+        $path->method('isFile')->willReturn(True);
+
+        $this->builtin
+            ->method('fileperms')
+            ->with('/foo/file.ext')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->getPermissions();
+    }
 }
