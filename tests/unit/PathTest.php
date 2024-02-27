@@ -20,6 +20,10 @@ class TestablePath extends Path {
     {
         return parent::cast($path);
     }
+
+    public function rrmdir(): bool {
+        return $this->rrmdir();
+    }
 }
 
 class PathTest extends TestCase
@@ -1702,5 +1706,292 @@ class PathTest extends TestCase
         $this->expectException(IOException::class);
 
         $path->getPermissions();
+    }
+
+    /**
+     * @throws FileNotFoundException|IOException
+     */
+    public function testSetPermissions(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setPermissions');
+
+        $path->method('isFile')->willReturn(True);
+
+        $this->builtin
+            ->method('chmod')
+            ->with('/foo/file.ext', 0777)
+            ->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('clearstatcache');
+
+        $this->assertTrue(
+            $path->setPermissions(0777)
+        );
+    }
+
+    /**
+     * @throws FileNotFoundException|IOException
+     */
+    public function testSetPermissionsFileDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setPermissions');
+
+        $path->method('isFile')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('clearstatcache');
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('chmod');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->setPermissions(0777);
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testSetPermissionsWithError(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setPermissions');
+
+        $path->method('isFile')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('clearstatcache');
+
+        $this->builtin
+            ->method('chmod')
+            ->with('/foo/file.ext', 0777)
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->setPermissions(0777);
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testSetOwner(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setOwner');
+
+        $path->method('isFile')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('clearstatcache');
+
+        $this->builtin
+            ->method('chown')
+            ->with('/foo/file.ext', 'user')
+            ->willReturn(True);
+
+        $this->builtin
+            ->method('chgrp')
+            ->with('/foo/file.ext', 'group')
+            ->willReturn(True);
+
+        $path->setOwner('user', 'group');
+    }
+
+    /**
+     * @throws FileNotFoundException|IOException
+     */
+    public function testSetOwnerFileDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setOwner');
+
+        $path->method('isFile')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('clearstatcache');
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('chown');
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('chgrp');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->setOwner('user', 'group');
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testSetPermissionsWithChownError(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setOwner');
+
+        $path->method('isFile')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('clearstatcache');
+
+        $this->builtin
+            ->method('chown')
+            ->with('/foo/file.ext', 'user')
+            ->willReturn(False);
+
+        $this->builtin
+            ->method('chgrp')
+            ->with('/foo/file.ext', 'group')
+            ->willReturn(True);
+
+        $this->expectException(IOException::class);
+
+        $path->setOwner('user', 'group');
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testSetPermissionsWithChGroupError(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setOwner');
+
+        $path->method('isFile')->willReturn(True);
+
+        $this->builtin
+            ->method('chown')
+            ->with('/foo/file.ext', 'user')
+            ->willReturn(True);
+
+        $this->builtin
+            ->method('chgrp')
+            ->with('/foo/file.ext', 'group')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->setOwner('user', 'group');
+    }
+
+    public function testExists(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'exists');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('file_exists')
+            ->with('/foo/file.ext')
+            ->willReturn(True);
+
+        $this->assertTrue(
+            $path->exists()
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGlob(): void {
+        $path = $this->getMock('/foo', 'glob');
+        $path->method('isDir')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('glob')
+            ->with('/foo/*')
+            ->willReturn(['a', 'b', 'c']);
+
+        $this->assertEquals(
+            ['a', 'b', 'c'],
+            array_map(
+                function (Path $p) { return (string)$p; },
+                $path->glob('*')
+            )
+        );
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testGlobDirDoesNotExist(): void {
+        $path = $this->getMock('/foo', 'glob');
+        $path->method('isDir')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('glob');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->glob('*');
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testGlobWithError(): void {
+        $path = $this->getMock('/foo', 'glob');
+        $path->method('isDir')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('glob')
+            ->with('/foo/*')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->glob('*');
+    }
+
+    /**
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public function testRmDirNonRecursive(): void
+    {
+        $path = $this->getMock('/foo', 'rmdir');
+
+        $path->method('isDir')->willReturn(True);
+
+        $this->builtin
+            ->method('rmdir')
+            ->with('/foo')
+            ->willReturn(True);
+
+        $path
+            ->expects(self::never())
+            ->method('rrmdir');
+
+        $path->rmdir();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public function testRmDirRecursive(): void
+    {
+        $path = $this->getMock('/foo', 'rmdir');
+
+        $path->method('isDir')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('rmdir');
+
+        $path
+            ->method('rrmdir')
+            ->willReturn(True);
+
+        $path->rmdir(True);
     }
 }

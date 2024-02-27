@@ -1,0 +1,9 @@
+- Finir les tests unitaires
+- ajouter une couverture de test
+- Faire un test en live sur linux
+- Déployer sur github
+- Mettre en place la CI avec travis
+- Maj le readme avec les badges tests et couverture
+- Créer la doc en ligne
+- Faire le guide des contribs
+- Rendre compatible avec windows / mac

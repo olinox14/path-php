@@ -142,29 +142,25 @@ class Path
         }
     }
 
-    /**
-     * TODO: en faire une méthode non statique et tester
-     * @noinspection SpellCheckingInspection
-     */
-    private static function _rrmdir(string $dir): void
+    protected function rrmdir(): bool
     {
-        if (!is_dir($dir)) {
-            return;
+        if (!is_dir($this->path)) {
+            return false;
         }
 
-        foreach (scandir($dir) as $object) {
+        foreach (scandir($this->path) as $object) {
             if ($object == "." || $object == "..") {
                 continue;
             }
 
-            if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir."/".$object)) {
-                self::_rrmdir($dir . DIRECTORY_SEPARATOR . $object);
+            if (is_dir($this->path. DIRECTORY_SEPARATOR .$object) && !is_link($this->path ."/".$object)) {
+                $this->rrmdir();
             }
             else {
-                unlink($dir . DIRECTORY_SEPARATOR . $object);
+                unlink($this->path . DIRECTORY_SEPARATOR . $object);
             }
         }
-        rmdir($dir);
+        return rmdir($this->path);
     }
 
     public function __construct(string|self $path)
@@ -768,7 +764,7 @@ class Path
         return (int)substr(sprintf('%o', $perms), -4);
     }
 
-    // TODO; add some more user-friendly methods to get permissions (read, write, exec...)
+    // TODO: add some more user-friendly methods to get permissions (read, write, exec...)
 
     /**
      * Changes the permissions of a file or directory.
@@ -776,6 +772,7 @@ class Path
      * @param int $permissions The new permissions to set. The value should be an octal number.
      * @return bool Returns true on success, false on failure.
      * @throws FileNotFoundException
+     * @throws IOException
      */
     public function setPermissions(int $permissions): bool
     {
@@ -783,7 +780,14 @@ class Path
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
         $this->builtin->clearstatcache(); // TODO: check for a better way of dealing with PHP cache
-        return $this->builtin->chmod($this->path, $permissions);
+
+        $success = $this->builtin->chmod($this->path, $permissions);
+
+        if ($success === false) {
+            throw new IOException("Error while setting permissions on " . $this->path);
+        }
+
+        return true;
     }
 
     /**
@@ -793,16 +797,23 @@ class Path
      * @param string $group The new owner group name.
      * @return bool
      * @throws FileNotFoundException
+     * @throws IOException
      */
-    public function setOwner(string $user, string $group): bool
+    public function setOwner(string $user, string $group): void
     {
         if (!$this->isFile()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
+
         $this->builtin->clearstatcache(); // TODO: check for a better way of dealing with PHP cache
-        return
+
+        $success =
             $this->builtin->chown($this->path, $user) &&
             $this->builtin->chgrp($this->path, $group);
+
+        if ($success === false) {
+            throw new IOException("Error while setting owner of " . $this->path);
+        }
     }
 
     public function setATime()
@@ -856,14 +867,28 @@ class Path
      * Retrieves a list of files and directories that match a specified pattern.
      *
      * @param string $pattern The pattern to search for.
-     * @return Generator An iterable list of objects representing files and directories that match the pattern.
+     * @return array A list of files and directories that match the pattern.
+     * @throws FileNotFoundException
+     * @throws IOException
      */
-    public function glob(string $pattern): Generator
+    public function glob(string $pattern): array
     {
-        // TODO: concat $this->path and $pattern?
-        foreach ($this->builtin->glob($pattern) as $filename) {
-            yield new static($filename);
+        if (!$this->isDir()) {
+            throw new FileNotFoundException("Dir does not exist : " . $this->path);
         }
+
+        $pattern = self::join($this->path, $pattern);
+
+        $result = $this->builtin->glob($pattern);
+
+        if ($result === false) {
+            throw new IOException("Error while getting blob on " . $this->path);
+        }
+
+        return array_map(
+            function (string $s) { return new static($s); },
+            $result
+        );
     }
 
     public function remove()
@@ -879,17 +904,19 @@ class Path
      * Removes a directory and its contents recursively.
      *
      * @throws FileNotFoundException
+     * @throws IOException
      */
     public function rmdir(bool $recursive = false): void
     {
-        if (!$this->builtin->is_dir($this->path)) {
+        if (!$this->isDir()) {
             throw new FileNotFoundException("{$this->path} is not a directory");
         }
 
-        if ($recursive) {
-            self::_rrmdir($this->path);
-        } else {
-            $this->builtin->rmdir($this->path);
+        // TODO: maybe we could only rely on the recursive method?
+        $result = $recursive ? $this->rrmdir() : $this->builtin->rmdir($this->path);
+
+        if ($result === false) {
+            throw new IOException("Error while removing directory : " . $this->path);
         }
     }
 
