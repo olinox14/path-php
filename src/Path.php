@@ -770,11 +770,10 @@ class Path
      * Changes the permissions of a file or directory.
      *
      * @param int $permissions The new permissions to set. The value should be an octal number.
-     * @return bool Returns true on success, false on failure.
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public function setPermissions(int $permissions): bool
+    public function setPermissions(int $permissions): void
     {
         if (!$this->isFile()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
@@ -786,8 +785,6 @@ class Path
         if ($success === false) {
             throw new IOException("Error while setting permissions on " . $this->path);
         }
-
-        return true;
     }
 
     /**
@@ -795,7 +792,6 @@ class Path
      *
      * @param string $user The new owner username.
      * @param string $group The new owner group name.
-     * @return bool
      * @throws FileNotFoundException
      * @throws IOException
      */
@@ -989,26 +985,29 @@ class Path
      * @param string $mode The mode in which to open the file. Defaults to 'r'.
      * @throws Throwable If an exception is thrown within the callback function.
      */
-    public function with(callable $callback, string $mode = 'r')
+    public function with(callable $callback, string $mode = 'r'): mixed
     {
         $handle = $this->open($mode);
         try {
             return $callback($handle);
         } finally {
-            $this->builtin->fclose($handle);
+            $closed = $this->builtin->fclose($handle);
+            if (!$closed) {
+                throw new IOException("Could not close the file stream : " .$this->path);
+            }
         }
     }
 
     /**
      * Retrieves chunks of data from the file.
      *
-     * @param callable $callback The callback function to process each chunk of data.
      * @param int $chunk_size The size of each chunk in bytes. Defaults to 8192.
      * @return Generator Returns a generator that yields each chunk of data read from the file.
      * @throws FileNotFoundException
      * @throws IOException
+     * @throws Throwable
      */
-    public function chunks(callable $callback, int $chunk_size = 8192): Generator
+    public function chunks(int $chunk_size = 8192): Generator
     {
         $handle = $this->open('rb');
         try {
@@ -1016,7 +1015,10 @@ class Path
                 yield $this->builtin->fread($handle, $chunk_size);
             }
         } finally {
-            $this->builtin->fclose($handle);
+            $closed = $this->builtin->fclose($handle);
+            if (!$closed) {
+                throw new IOException("Could not close the file stream : " .$this->path);
+            }
         }
     }
 
@@ -1035,12 +1037,11 @@ class Path
      * Changes permissions of the file.
      *
      * @param int $mode The new permissions (octal).
-     * @return bool
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException|IOException
      */
-    public function chmod(int $mode): bool
+    public function chmod(int $mode): void
     {
-        return $this->setPermissions($mode);
+        $this->setPermissions($mode);
     }
 
     /**
@@ -1049,22 +1050,24 @@ class Path
      *
      * @param string $user The new owner username.
      * @param string $group The new owner group name.
-     * @return bool
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException|IOException
      */
-    public function chown(string $user, string $group): bool
+    public function chown(string $user, string $group): void
     {
-        return $this->setOwner($user, $group);
+        $this->setOwner($user, $group);
     }
 
     /**
      * Changes the root directory of the current process to the specified directory.
      *
-     * @return bool Returns true on success or false on failure.
+     * @throws IOException
      */
-    public function chroot(): bool
+    public function chroot(): void
     {
-        return $this->builtin->chroot($this->path);
+        $success = $this->builtin->chroot($this->path);
+        if (!$success) {
+            throw new IOException("Error changing root directory to " . $this->path);
+        }
     }
 
     /**
@@ -1082,10 +1085,10 @@ class Path
         // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.ismount
     }
 
-    public function getDirectoryIterator()
+    protected function getDirectoryIterator(): \DirectoryIterator
     {
-        // TODO: complete
-        return new \DirectoryIterator($this->path);
+        // TODO: make it public?
+         return new \DirectoryIterator($this->path);
     }
 
     /**
@@ -1100,7 +1103,7 @@ class Path
             throw new FileNotFoundException("{$this->path} is not a directory");
         }
 
-        foreach (new \DirectoryIterator($this->path) as $fileInfo) {
+        foreach ($this->getDirectoryIterator() as $fileInfo) {
             // TODO: use the DirectoryIterator everywhere else?
             if ($fileInfo->isDot()) {
                 continue;
@@ -1118,15 +1121,28 @@ class Path
      * Create a hard link pointing to a path.
      *
      * @param string|Path $target
-     * @return bool
+     * @throws FileExistsException
+     * @throws FileNotFoundException
+     * @throws IOException
      */
-    public function link(string|self $target): bool
+    public function link(string|self $target): void
     {
-        $target = (string)$target;
-        if (!function_exists('link')) {
-            return false;
+        // TODO: manage dirs and files here
+        if (!$this->isFile()) {
+            throw new FileNotFoundException("{$this->path} is not a file");
         }
-        return $this->builtin->link($this->path, $target);
+
+        $target = $this->cast($target);
+
+        if ($target->isFile()) {
+            throw new FileExistsException($target . " already exist");
+        }
+
+        $success = $this->builtin->link($this->path, (string)$target);
+
+        if ($success === false) {
+            throw new IOException("Error while creating the link from " . $this->path . " to " . $target);
+        }
     }
 
     /**

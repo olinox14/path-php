@@ -7,3 +7,5 @@
 - Créer la doc en ligne
 - Faire le guide des contribs
 - Rendre compatible avec windows / mac
+- faire des constantes des modes de fopen?
+- revoir la gestion des erreurs et les traceback
