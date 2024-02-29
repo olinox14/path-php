@@ -1148,11 +1148,16 @@ class Path
     /**
      * Like stat(), but do not follow symbolic links.
      *
-     * @return array|false
+     * @return array
+     * @throws IOException
      */
-    public function lstat(): bool|array
+    public function lstat(): array
     {
-        return $this->builtin->lstat($this->path);
+        $result = $this->builtin->lstat($this->path);
+        if ($result === false) {
+            throw new IOException("Error while getting lstat of " . $this->path);
+        }
+        return $result;
     }
 
     public function splitDrive()
@@ -1201,6 +1206,7 @@ class Path
      * @param string|Path $basePath
      * @return string
      * @throws FileNotFoundException
+     * @throws IOException
      */
     public function getRelativePath(string|self $basePath): string
     {
@@ -1208,7 +1214,7 @@ class Path
             throw new FileNotFoundException("{$this->path} is not a file or directory");
         }
 
-        $path = $this->absPath();
+        $path = (string)$this->absPath();
         $basePath = (string)$basePath;
 
         $realBasePath = $this->builtin->realpath($basePath);
