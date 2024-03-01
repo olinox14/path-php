@@ -79,7 +79,11 @@ class PathTest extends TestCase
     public function testToString(): void
     {
         $path = new Path('/foo/bar');
-        $this->assertEquals('/foo/bar', $path->__toString());
+
+        $this->assertEquals(
+            '/foo/bar',
+            $path->__toString()
+        );
     }
 
     public function testPath()
@@ -129,23 +133,24 @@ class PathTest extends TestCase
      * @throws IOException
      */
     public function testAbsPath(): void {
-        $path = $this->getMock('bar', 'absPath');
+        $path = $this->getMock('./file.ext', 'absPath');
+        $path->method('path')->willReturn('./file.ext');
 
         $this->builtin
             ->expects(self::once())
             ->method('realpath')
-            ->with('bar')
-            ->willReturn('/foo/bar');
+            ->with('./file.ext')
+            ->willReturn('/foo/file.ext');
 
         $newPath = $this->getMockBuilder(TestablePath::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $newPath->method('path')->willReturn('/foo/bar');
+        $newPath->method('path')->willReturn('/foo/file.ext');
 
-        $path->method('cast')->with('/foo/bar')->willReturn($newPath);
+        $path->method('cast')->with('/foo/file.ext')->willReturn($newPath);
 
         $this->assertEquals(
-            '/foo/bar',
+            '/foo/file.ext',
             $path->absPath()->path()
         );
     }
@@ -338,33 +343,54 @@ class PathTest extends TestCase
         $path->access(-1);
     }
 
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
     public function testATime(): void
     {
         $path = $this->getMock('bar', 'atime');
+        $path->method('exists')->willReturn(True);
+
+        $ts = 1000;
 
         $this->builtin
             ->expects(self::once())
             ->method('fileatime')
             ->with('bar')
-            ->willReturn(1000);
-
-        $date = '2000-01-01';
-
-        $this->builtin
-            ->expects(self::once())
-            ->method('date')
-            ->with('Y-m-d H:i:s', 1000)
-            ->willReturn($date);
+            ->willReturn($ts);
 
         $this->assertEquals(
-            $date,
+            $ts,
             $path->atime()
         );
     }
 
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testATimeFileDoesNotExist(): void
+    {
+        $path = $this->getMock('bar', 'atime');
+        $path->method('exists')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('fileatime');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->atime();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
     public function testATimeError(): void
     {
         $path = $this->getMock('bar', 'atime');
+        $path->method('exists')->willReturn(True);
 
         $this->builtin
             ->expects(self::once())
@@ -372,10 +398,9 @@ class PathTest extends TestCase
             ->with('bar')
             ->willReturn(false);
 
-        $this->assertEquals(
-            null,
-            $path->atime()
-        );
+        $this->expectException(IOException::class);
+
+        $path->atime();
     }
 
     public function testCTime(): void
@@ -402,9 +427,31 @@ class PathTest extends TestCase
         );
     }
 
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testCTimeFileDoesNotExist(): void
+    {
+        $path = $this->getMock('bar', 'ctime');
+        $path->method('exists')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('filectime');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->ctime();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
     public function testCTimeError(): void
     {
         $path = $this->getMock('bar', 'ctime');
+        $path->method('exists')->willReturn(True);
 
         $this->builtin
             ->expects(self::once())
@@ -412,10 +459,9 @@ class PathTest extends TestCase
             ->with('bar')
             ->willReturn(false);
 
-        $this->assertEquals(
-            null,
-            $path->ctime()
-        );
+        $this->expectException(IOException::class);
+
+        $path->ctime();
     }
 
     public function testMTime(): void
@@ -442,9 +488,31 @@ class PathTest extends TestCase
         );
     }
 
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testMTimeFileDoesNotExist(): void
+    {
+        $path = $this->getMock('bar', 'mtime');
+        $path->method('exists')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('filemtime');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->mtime();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
     public function testMTimeError(): void
     {
         $path = $this->getMock('bar', 'mtime');
+        $path->method('exists')->willReturn(True);
 
         $this->builtin
             ->expects(self::once())
@@ -452,10 +520,9 @@ class PathTest extends TestCase
             ->with('bar')
             ->willReturn(false);
 
-        $this->assertEquals(
-            null,
-            $path->mtime()
-        );
+        $this->expectException(IOException::class);
+
+        $path->mtime();
     }
 
     public function testIsFile(): void
@@ -504,6 +571,22 @@ class PathTest extends TestCase
         );
     }
 
+    public function testExtNoExt(): void
+    {
+        $path = $this->getMock('bar', 'ext');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('pathinfo')
+            ->with('bar', PATHINFO_EXTENSION)
+            ->willReturn('');
+
+        $this->assertEquals(
+            '',
+            $path->ext()
+        );
+    }
+
     public function testBaseName(): void
     {
         $path = $this->getMock('bar.ext', 'basename');
@@ -520,19 +603,60 @@ class PathTest extends TestCase
         );
     }
 
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
     public function testCD(): void
     {
         $path = $this->getMock('bar', 'cd');
+        $path->method('exists')->willReturn(True);
 
         $this->builtin
             ->expects(self::once())
             ->method('chdir')
-            ->with('foo')
-            ->willReturn(true);
+            ->with('bar')
+            ->willReturn(True);
 
-        $this->assertTrue(
-            $path->cd('foo')
-        );
+        $path->cd();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testCDDirDoesNotExist(): void
+    {
+        $path = $this->getMock('bar', 'cd');
+        $path->method('exists')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('chdir');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->cd();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testCDWithError(): void
+    {
+        $path = $this->getMock('bar', 'cd');
+        $path->method('exists')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chdir')
+            ->with('bar')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->cd();
     }
 
     public function testChDir(): void

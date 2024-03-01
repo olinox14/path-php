@@ -59,7 +59,7 @@ class PathTest
         touch($srcContent);
         mkdir($dst);
 
-        Path::copy_dir($src, $dst);
+        Path::copytree($src, $dst);
 
         $this->assertTrue(
             file_exists($dst . DIRECTORY_SEPARATOR . "foo.txt")
@@ -82,7 +82,7 @@ class PathTest
         $this->expectException(FileNotFoundException::class);
         $this->expectExceptionMessage("Directory does not exist : " . $dst);
 
-        Path::copy_dir($src, $dst);
+        Path::copytree($src, $dst);
     }
 
     /**
@@ -104,7 +104,7 @@ class PathTest
         $this->expectException(FileExistsException::class);
         $this->expectExceptionMessage("Directory already exists : " . $dst);
 
-        Path::copy_dir($src, $dst);
+        Path::copytree($src, $dst);
     }
 
     /**
