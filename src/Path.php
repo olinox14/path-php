@@ -329,65 +329,57 @@ class Path
      * > Thanks to https://stackoverflow.com/users/216254/troex
      * @return self A new instance of the class with the normalized path.
      */
-    //TODO: review
+    //TODO: review 2
     public function normPath(): self
     {
-        if (empty($this->path)) {
+        if (empty($path)) {
             return $this->cast('.');
         }
 
-        $initial_slashes =
-            str_starts_with($this->path, '//') ?
-                2 :
-                (int)str_starts_with($this->path, '/');
+        $initialSlashes = str_starts_with($path, '//')
+            ? 2
+            : (str_starts_with($path, '/') ? 1 : 0);
 
-        $comps = explode('/', $this->path);
-        $new_comps = [];
+        $parts = explode('/', $path);
+        $newParts = [];
 
-        foreach ($comps as $comp)
+        foreach ($parts as $part)
         {
-            if (in_array($comp, array('', '.'))) {
+            if (!$part || $part === '.') {
                 continue;
             }
 
             if (
-                $comp != '..' ||
-                !$initial_slashes &&
-                !$new_comps ||
-                $new_comps &&
-                (end($new_comps) == '..')
+                ($part != '..') ||
+                (!$initialSlashes && !$newParts) ||
+                ($newParts && (end($newParts) == '..'))
             ) {
-                $new_comps[] = $comp;
+                $newParts[] = $part;
             }
-            elseif ($new_comps) {
+            elseif ($newParts) {
                 array_pop($new_comps);
             }
         }
 
-        $comps = $new_comps;
-        $path = implode('/', $comps);
+        $path = implode('/', $newParts);
+        if ($initialSlashes)
+            $path = str_repeat('/', $initialSlashes) . $path;
 
-        if ($initial_slashes) {
-            $path = str_repeat('/', $initial_slashes) . $path;
-        }
-
-        return $this->cast($path || '.');
+        return $this->cast($path);
     }
 
     /**
      * Creates a new directory.
      *
-     * @param int $mode (optional) The permissions for the new directory. Default is 0777.
-     * @param bool $recursive (optional) Indicates whether to create parent directories if they do not exist. Default is false.
+     * @param int $mode The permissions for the new directory. Default is 0777.
+     * @param bool $recursive Indicates whether to create parent directories if they do not exist. Default is false.
      *
      * @return void
      * @throws FileExistsException
      * @throws IOException
      */
-    //TODO: review
     public function mkdir(int $mode = 0777, bool $recursive = false): void
     {
-        // TODO: may we make $mode the second arg, and mimic the mode of the parent if not provided?
         if ($this->isDir()) {
             if (!$recursive) {
                 throw new FileExistsException("Directory already exists : " . $this);
@@ -395,6 +387,7 @@ class Path
                 return;
             }
         }
+
         if ($this->isFile()) {
             throw new FileExistsException("A file with this name already exists : " . $this);
         }
@@ -413,7 +406,6 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
     public function delete(): void
     {
         if ($this->isFile()) {
@@ -429,7 +421,7 @@ class Path
                 throw new IOException("Error why deleting directory : " . $this->path);
             }
         } else {
-            throw new FileNotFoundException("File does not exist : " . $this);
+            throw new FileNotFoundException("File or directory does not exist : " . $this);
         }
     }
 
@@ -444,7 +436,7 @@ class Path
      * @throws FileExistsException
      * @throws IOException
      */
-    //TODO: review
+    //TODO: review2
     public function copy(string|self $destination, bool $follow_symlinks = false): self
     {
         if (!$this->isFile()) {
@@ -478,7 +470,7 @@ class Path
      * @throws FileNotFoundException If the source file or directory does not exist.
      * @throws IOException
      */
-    //TODO: review
+    //TODO: review2
     public function copyTree(string|self $destination, bool $follow_symlinks = false): self
     {
         // TODO: voir à faire la synthèse de copytree et https://path.readthedocs.io/en/latest/api.html#path.Path.merge_tree
@@ -515,7 +507,7 @@ class Path
      * @throws FileExistsException
      * @throws IOException
      */
-    //TODO: review
+    //TODO: review2
     public function move(string|self $destination): self
     {
         // TODO: comparer à https://path.readthedocs.io/en/latest/api.html#path.Path.move
@@ -547,7 +539,6 @@ class Path
      * @return void
      * @throws IOException
      */
-    //TODO: review
     public function touch(int|\DateTime $time = null, int|\DateTime $atime = null): void
     {
         if ($time instanceof \DateTime) {
@@ -571,7 +562,6 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
     public function size(): int
     {
         if (!$this->isFile()) {
@@ -592,40 +582,33 @@ class Path
      *
      * @return self The parent directory of the specified path.
      */
-    //TODO: review
-    public function parent(): self
+    public function parent(int $levels = 1): self
     {
-        // TODO: check on special cases
-        // TODO: add the levels argument?
         return $this->cast(
-            $this->builtin->dirname($this->path)
+            $this->builtin->dirname($this->path ?? ".", $levels)
         );
     }
 
     /**
      * Alias for Path->parent() method
      *
+     * @param int $levels
      * @return self
      */
-    //TODO: review
-    public function dirname(): self
+    public function dirname(int $levels = 1): self
     {
-        // TODO: add the levels argument?
-        return $this->parent();
+        return $this->parent($levels);
     }
 
     /**
-     * List of this directory’s subdirectories.
+     * Retrieves an array of this directory’s subdirectories.
      *
      * The elements of the list are Path objects.
-     * This does not walk recursively into subdirectories (but see walkdirs()).
-     *
-     * Accepts parameters to iterdir().
+     * This does not walk recursively into subdirectories (but see walkdirs() //TODO: implement).
      *
      * @return array
      * @throws FileNotFoundException
      */
-    //TODO: review
     public function dirs(): array
     {
         if (!$this->builtin->is_dir($this->path)) {
@@ -635,8 +618,9 @@ class Path
         $dirs = [];
 
         foreach ($this->builtin->scandir($this->path) as $filename) {
-            if ('.' === $filename) continue;
-            if ('..' === $filename) continue;
+            if ($filename === '.' || $filename === '..') {
+                continue;
+            }
 
             if ($this->builtin->is_dir(self::join($this->path, $filename))) {
                 $dirs[] = $filename;
@@ -652,7 +636,6 @@ class Path
      * @return array An array of files present in the directory.
      * @throws FileNotFoundException If the directory specified in the path does not exist.
      */
-    //TODO: review
     public function files(): array
     {
         if (!$this->builtin->is_dir($this->path)) {
@@ -662,8 +645,9 @@ class Path
         $files = [];
 
         foreach ($this->builtin->scandir($this->path) as $filename) {
-            if ('.' === $filename) continue;
-            if ('..' === $filename) continue;
+            if ($filename === '.' || $filename === '..') {
+                continue;
+            }
 
             if ($this->builtin->is_file(self::join($this->path, $filename))) {
                 $files[] = $filename;
@@ -673,19 +657,24 @@ class Path
         return $files;
     }
 
-    public function fnmatch()
+    /**
+     * Performs a pattern matching using the `fnmatch()` function.
+     *
+     * @param string $pattern The pattern to match against.
+     * @return bool True if the path matches the pattern, false otherwise.
+     */
+    public function fnmatch(string $pattern): bool
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.fnmatch
+        return $this->builtin->fnmatch($pattern, $this->path);
     }
 
     /**
      * Retrieves the content of a file.
      *
-     * @return bool|string The content of the file as a string.
+     * @return string The content of the file as a string.
      * @throws FileNotFoundException|IOException
      */
-    //TODO: review
-    public function getContent(): bool|string
+    public function getContent(): string
     {
         if (!$this->builtin->is_file($this->path)) {
             throw new FileNotFoundException("File does not exist : " . $this->path);
@@ -694,7 +683,7 @@ class Path
         $text = $this->builtin->file_get_contents($this->path);
 
         if ($text === false) {
-            throw new IOException("Error reading file {$this->path}");
+            throw new IOException("An error occurred while reading file {$this->path}");
         }
         return $text;
     }
@@ -704,11 +693,11 @@ class Path
      *
      * @param string $content The contents to be written to the file.
      * @param bool $append
-     * @return int
+     * @return int The number of bytes that were written to the file
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
+    //TODO: review2
     public function putContent(string $content, bool $append = false): int
     {
         if (!$this->builtin->is_file($this->path)) {
@@ -732,13 +721,18 @@ class Path
     }
 
     /**
-     * @throws IOException
+     * Writes an array of lines to a file.
+     *
+     * @param array<string> $lines An array of lines to be written to the file.
+     * @return int The number of bytes written to the file.
      * @throws FileNotFoundException
+     * @throws IOException
      */
-    //TODO: review
     public function putLines(array $lines): int
     {
-        return $this->putContent(implode(PHP_EOL, $lines));
+        return $this->putContent(
+            implode(PHP_EOL, $lines)
+        );
     }
 
     /**
@@ -748,10 +742,9 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
     public function getPermissions(): int
     {
-        if (!$this->isFile()) {
+        if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
 
@@ -773,10 +766,9 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
     public function setPermissions(int $permissions): void
     {
-        if (!$this->isFile()) {
+        if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
         $this->builtin->clearstatcache(); // TODO: check for a better way of dealing with PHP cache
@@ -796,10 +788,9 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
     public function setOwner(string $user, string $group): void
     {
-        if (!$this->isFile()) {
+        if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
 
@@ -836,7 +827,6 @@ class Path
      *
      * @return bool Returns true if the file exists, false otherwise.
      */
-    //TODO: review
     public function exists(): bool
     {
         return $this->builtin->file_exists($this->path);
@@ -870,7 +860,6 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
     public function glob(string $pattern): array
     {
         if (!$this->isDir()) {
@@ -882,11 +871,11 @@ class Path
         $result = $this->builtin->glob($pattern);
 
         if ($result === false) {
-            throw new IOException("Error while getting blob on " . $this->path);
+            throw new IOException("Error while getting glob on " . $this->path);
         }
 
         return array_map(
-            function (string $s) { return new static($s); },
+            function (string $s) { return new static(self::join($this->path, $s)); },
             $result
         );
     }
@@ -905,7 +894,7 @@ class Path
      *
      * @return bool True if the directory was successfully removed, false otherwise.
      */
-    //TODO: review
+    //TODO: review2
     protected function rrmdir(): bool
     {
         if (!is_dir($this->path)) {
@@ -928,12 +917,12 @@ class Path
     }
 
     /**
-     * Removes a directory and its contents recursively.
+     * Removes a directory and its contents.
      *
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
+    //TODO: review2
     public function rmdir(bool $recursive = false): void
     {
         if (!$this->isDir()) {
@@ -996,16 +985,15 @@ class Path
      * @throws FileNotFoundException If the path does not refer to a file.
      * @throws IOException If the file fails to open.
      */
-    //TODO: review
     public function open(string $mode = 'r'): mixed
     {
         if (!$this->isFile()) {
-            throw new FileNotFoundException("{$this->path} is not a file");
+            throw new FileNotFoundException($this->path . " is not a file");
         }
 
         $handle = $this->builtin->fopen($this->path, $mode);
         if ($handle === false) {
-            throw new IOException("Failed opening file {$this->path}");
+            throw new IOException("Failed opening file " . $this->path);
         }
 
         return $handle;
@@ -1018,7 +1006,6 @@ class Path
      * @param string $mode The mode in which to open the file. Defaults to 'r'.
      * @throws Throwable If an exception is thrown within the callback function.
      */
-    //TODO: review
     public function with(callable $callback, string $mode = 'r'): mixed
     {
         $handle = $this->open($mode);
@@ -1027,7 +1014,7 @@ class Path
         } finally {
             $closed = $this->builtin->fclose($handle);
             if (!$closed) {
-                throw new IOException("Could not close the file stream : " .$this->path);
+                throw new IOException("Could not close the file stream : " . $this->path);
             }
         }
     }
@@ -1041,7 +1028,6 @@ class Path
      * @throws IOException
      * @throws Throwable
      */
-    //TODO: review
     public function chunks(int $chunk_size = 8192): Generator
     {
         $handle = $this->open('rb');
@@ -1052,7 +1038,7 @@ class Path
         } finally {
             $closed = $this->builtin->fclose($handle);
             if (!$closed) {
-                throw new IOException("Could not close the file stream : " .$this->path);
+                throw new IOException("Could not close the file stream : " . $this->path);
             }
         }
     }
@@ -1062,7 +1048,6 @@ class Path
      *
      * @return bool
      */
-    //TODO: review
     public function isAbs(): bool
     {
         return str_starts_with($this->path, '/');
@@ -1075,7 +1060,6 @@ class Path
      * @param int $mode The new permissions (octal).
      * @throws FileNotFoundException|IOException
      */
-    //TODO: review
     public function chmod(int $mode): void
     {
         $this->setPermissions($mode);
@@ -1089,7 +1073,6 @@ class Path
      * @param string $group The new owner group name.
      * @throws FileNotFoundException|IOException
      */
-    //TODO: review
     public function chown(string $user, string $group): void
     {
         $this->setOwner($user, $group);
@@ -1099,10 +1082,14 @@ class Path
      * Changes the root directory of the current process to the specified directory.
      *
      * @throws IOException
+     * @throws FileNotFoundException
      */
-    //TODO: review
     public function chroot(): void
     {
+        if (!$this->isDir()) {
+            throw new FileNotFoundException("Dir does not exist : " . $this->path);
+        }
+
         $success = $this->builtin->chroot($this->path);
         if (!$success) {
             throw new IOException("Error changing root directory to " . $this->path);
@@ -1114,7 +1101,6 @@ class Path
      *
      * @return bool
      */
-    //TODO: review
     public function isLink(): bool
     {
         return $this->builtin->is_link($this->path);
@@ -1125,6 +1111,10 @@ class Path
         // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.ismount
     }
 
+    /**
+     * TODO: review2
+     * @return \DirectoryIterator
+     */
     protected function getDirectoryIterator(): \DirectoryIterator
     {
         // TODO: make it public?
@@ -1135,13 +1125,13 @@ class Path
      * Iterate over the files in this directory.
      *
      * @return Generator
-     * @throws FileNotFoundException if the path is not a directory.
+     * @throws FileNotFoundException If the path is not a directory.
      */
-    //TODO: review
+    //TODO: review2
     public function iterDir(): Generator
     {
         if (!$this->isDir()) {
-            throw new FileNotFoundException("{$this->path} is not a directory");
+            throw new FileNotFoundException($this->path . " is not a directory");
         }
 
         foreach ($this->getDirectoryIterator() as $fileInfo) {
@@ -1159,24 +1149,22 @@ class Path
     }
 
     /**
-     * Create a hard link pointing to a path.
+     * Create a hard link pointing to this path.
      *
      * @param string|Path $target
      * @throws FileExistsException
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
     public function link(string|self $target): void
     {
-        // TODO: manage dirs and files here
-        if (!$this->isFile()) {
-            throw new FileNotFoundException("{$this->path} is not a file");
+        if (!$this->exists()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this);
         }
 
         $target = $this->cast($target);
 
-        if ($target->isFile()) {
+        if ($target->exists()) {
             throw new FileExistsException($target . " already exist");
         }
 
@@ -1193,7 +1181,6 @@ class Path
      * @return array
      * @throws IOException
      */
-    //TODO: review
     public function lstat(): array
     {
         $result = $this->builtin->lstat($this->path);
@@ -1233,7 +1220,6 @@ class Path
      *
      * @return array
      */
-    //TODO: review
     public function parts(): array
     {
         $parts = [];
@@ -1252,7 +1238,7 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review
+    //TODO: review2
     public function getRelativePath(string|self $basePath): string
     {
         if (!$this->exists()) {

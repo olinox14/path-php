@@ -143,6 +143,11 @@ class BuiltinProxy
         return dirname($path, $levels);
     }
 
+    public function fnmatch(string $pattern, string $filename): bool
+    {
+        return fnmatch($pattern, $filename);
+    }
+
     public function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, ?int $length = null): false|string
     {
         return file_get_contents($filename, $use_include_path, $context, $offset, $length);
