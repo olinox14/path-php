@@ -507,7 +507,7 @@ class Path
      * @throws FileExistsException
      * @throws IOException
      */
-    //TODO: review2
+    //TODO: review2 - compare to rename
     public function move(string|self $destination): self
     {
         // TODO: comparer à https://path.readthedocs.io/en/latest/api.html#path.Path.move
@@ -689,6 +689,26 @@ class Path
     }
 
     /**
+     * > Alias for getContent()
+     * @return string
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public function readText(): string
+    {
+        return $this->getContent();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function lines(): array
+    {
+        return explode(PHP_EOL, $this->getContent());
+    }
+
+    /**
      * Writes contents to a file.
      *
      * @param string $content The contents to be written to the file.
@@ -757,8 +777,6 @@ class Path
         return (int)substr(sprintf('%o', $perms), -4);
     }
 
-    // TODO: add some more user-friendly methods to get permissions (read, write, exec...)
-
     /**
      * Changes the permissions of a file or directory.
      *
@@ -805,23 +823,6 @@ class Path
         }
     }
 
-    public function setATime()
-    {
-        // TODO: implement
-    }
-    public function setCTime()
-    {
-        // TODO: implement
-    }
-    public function setMTime()
-    {
-        // TODO: implement
-    }
-    public function setUTime()
-    {
-        // TODO: implement
-    }
-
     /**
      * Checks if a file exists.
      *
@@ -832,24 +833,61 @@ class Path
         return $this->builtin->file_exists($this->path);
     }
 
-    public function samefile()
+    /**
+     * Return True if both pathname arguments refer to the same file or directory.
+     *
+     * @throws IOException
+     */
+    public function sameFile(string | self $other): bool
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.samefile
+        return $this->absPath() === $this->cast($other)->absPath();
     }
 
-    public function expand()
+    /**
+     * Expands the path by performing three operations: expanding user, expanding variables, and normalizing the path.
+     *
+     * @return Path The expanded path.
+     */
+    public function expand(): Path
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.expand
+        return $this->expandUser()->expandVars()->normPath();
     }
 
-    public function expand_user()
+    /**
+     * Expands the user directory in the file path.
+     *
+     * @return self The modified instance with the expanded user path.
+     * TODO: review2
+     */
+    public function expandUser(): self
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.expanduser
+        $path = $this->path;
+        if (str_starts_with($path, '~')) {
+            $home = $_SERVER['HOME'];
+            $path = self::join($home, substr($path, 1));
+        }
+        return $this->cast($path);
     }
 
-    public function expand_vars()
+    /**
+     * Expands variables in the path.
+     *
+     * Searches for variable placeholders in the path and replaces them with their corresponding values from the environment variables.
+     *
+     * @return Path The path with expanded variables.
+     * TODO: review2
+     */
+    public function expandVars(): Path
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.expandvars
+        $path = preg_replace_callback(
+            '/\$\{([^}]+)}|\$(\w+)/',
+            function($matches) {
+                return getenv($matches[1] ?: $matches[2]);
+            },
+            $this->path
+        );
+
+        return $this->cast($path);
     }
 
     /**
@@ -880,13 +918,46 @@ class Path
         );
     }
 
-    public function remove()
+    /**
+     * Removes the file.
+     *
+     * @return void
+     * @throws IOException if there was an error while removing the file.
+     *
+     * @throws IOException if the file does not exist or is not a file.
+     */
+    public function remove(): void
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.remove
+        if (!$this->isFile()) {
+            throw new IOException( $this->path . " is not a file");
+        }
+        $result = unlink($this->path);
+        if (!$result) {
+            throw new IOException( "Error while removing the file " . $this->path);
+        }
     }
-    public function remove_p()
+
+    /**
+     * > Alias for Path->remove()
+     * @return void
+     */
+    public function unlink(): void
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.remove_p
+        $this->remove();
+    }
+
+    /**
+     * Like remove(), but do not throw an exception if the file does not exist
+     *
+     * @return void
+     * @throws IOException
+     */
+    public function remove_p(): void
+    {
+        if (!$this->exists()) {
+            return;
+        }
+        $this->remove();
     }
 
     /**
@@ -937,44 +1008,68 @@ class Path
         }
     }
 
-    public function rename()
+    /**
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     * @throws IOException
+     */
+    public function rename(string|self $newPath): Path
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.rename
+        if (!$this->exists()) {
+            throw new FileNotFoundException($this->path . " does not exist");
+        }
+        $newPath = $this->cast($newPath);
+        if ($newPath->exists()) {
+            throw new FileExistsException($newPath . " already exist");
+        }
+        if (!$newPath->parent()->exists()) {
+            throw new FileNotFoundException($newPath->parent() . " does not exist");
+        }
+
+        $success = $this->builtin->rename($this->path, $newPath);
+
+        if (!$success) {
+            throw new IOException("Error while renaming " . $this->path . " into " . $newPath);
+        }
+
+        return $newPath;
     }
 
     public function renames()
     {
+        // TODO: review2
         // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.renames
     }
 
-    public function read_hash()
+    /**
+     * @throws IOException
+     */
+    public function readHash(string $algo, bool $binary = false): string
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.read_hash
+        $result = $this->builtin->hash_file($algo, $this->path, $binary);
+        if (!$result) {
+            throw new IOException("Error while computing the hash of " . $this->path);
+        }
+        return $result;
     }
 
-    public function read_hexhash()
+    /**
+     * Reads the target of a symbolic link and returns a new instance of the current class.
+     *
+     * @return self The target of the symbolic link as a new instance of the current class.
+     * @throws FileNotFoundException If the path does not exist or is not a symbolic link.
+     * @throws IOException If there is an error while getting the target of the symbolic link.
+     */
+    public function readLink(): self
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.read_hexhash
-    }
-
-    public function read_md5()
-    {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.read_md5
-    }
-
-    public function read_text()
-    {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.read_text
-    }
-
-    public function readlink()
-    {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.readlink
-    }
-
-    public function readlinkabs()
-    {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.readlinkabs
+        if (!$this->isLink()) {
+            throw new FileNotFoundException($this->path() . " does not exist or is not a symbolic link");
+        }
+        $result = $this->builtin->readLink($this->path);
+        if ($result === false) {
+            throw new IOException("Error while getting the target of the symbolic link " . $this->path);
+        }
+        return $this->cast($result);
     }
 
     /**
@@ -1106,9 +1201,15 @@ class Path
         return $this->builtin->is_link($this->path);
     }
 
-    public function isMount()
+    /**
+     * Checks if the path is a mount point.
+     *
+     * @return bool True if the path is a mount point, false otherwise.
+     * TODO: review2
+     */
+    public function isMount(): bool
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.ismount
+        return disk_free_space($this->path) !== false;
     }
 
     /**
@@ -1143,36 +1244,34 @@ class Path
         }
     }
 
-    public function lines()
-    {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.lines
-    }
-
     /**
      * Create a hard link pointing to this path.
      *
-     * @param string|Path $target
+     * @param string|Path $newLink
+     * @return Path
      * @throws FileExistsException
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public function link(string|self $target): void
+    public function link(string|self $newLink): self
     {
         if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this);
         }
 
-        $target = $this->cast($target);
+        $newLink = $this->cast($newLink);
 
-        if ($target->exists()) {
-            throw new FileExistsException($target . " already exist");
+        if ($newLink->exists()) {
+            throw new FileExistsException($newLink . " already exist");
         }
 
-        $success = $this->builtin->link($this->path, (string)$target);
+        $success = $this->builtin->link($this->path, (string)$newLink);
 
         if ($success === false) {
-            throw new IOException("Error while creating the link from " . $this->path . " to " . $target);
+            throw new IOException("Error while creating the link from " . $this->path . " to " . $newLink);
         }
+
+        return $newLink;
     }
 
     /**
@@ -1192,21 +1291,34 @@ class Path
 
     public function splitDrive()
     {
+        // TODO: review2
         // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.splitdrive
     }
 
-    public function stat() {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.stat
-    }
-
-    public function symlink()
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function symlink(string | self $newLink): self
     {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.symlink
-    }
+        if (!$this->exists()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this);
+        }
 
-    public function unlink()
-    {
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.unlink
+        $newLink = $this->cast($newLink);
+
+        if ($newLink->exists()) {
+            throw new FileExistsException($newLink . " already exist");
+        }
+
+        $success = $this->builtin->symlink($this->path, (string)$newLink);
+
+        if ($success === false) {
+            throw new IOException("Error while creating the symbolic link from " . $this->path . " to " . $newLink);
+        }
+
+        return $newLink;
     }
 
     /**

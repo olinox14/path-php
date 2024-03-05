@@ -53,6 +53,11 @@ class BuiltinProxy
         return readdir($dir_handle);
     }
 
+    public function readlink(string $path): false|string
+    {
+        return readlink($path);
+    }
+
     public function copy(string $from, string $to, $context = null): bool
     {
         return copy($from, $to, $context);
@@ -193,6 +198,11 @@ class BuiltinProxy
         return glob($pattern, $flags);
     }
 
+    public function hash_file(string $algo, string $filename, bool $binary): false|string
+    {
+        return hash_file($algo, $filename, $binary);
+    }
+
     public function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null)
     {
         return fopen($filename, $mode, $use_include_path, $context);
@@ -216,6 +226,11 @@ class BuiltinProxy
     public function link(string $target, string $link): bool
     {
         return link($target, $link);
+    }
+
+    public function symlink(string $target, string $link): bool
+    {
+        return symlink($target, $link);
     }
 
     public function lstat(string $filename): array|false
