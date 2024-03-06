@@ -1,4 +1,5 @@
 - revoir les conditions isFile et isDir (il se peut qu'il faille remplacer par exists de ci de là)
+- tester toutes les fonctions
 - ajouter une couverture de test
 - Faire un test en live sur linux
 - Déployer sur github

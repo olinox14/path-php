@@ -329,43 +329,68 @@ class Path
      * > Thanks to https://stackoverflow.com/users/216254/troex
      * @return self A new instance of the class with the normalized path.
      */
-    //TODO: review 2
     public function normPath(): self
     {
+        $path = $this->path;
+
+        // Handle windows gracefully
+        if (DIRECTORY_SEPARATOR !== '/') {
+            $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+        }
+
+        // Also tests some special cases we can't really do anything with
+        if (!str_contains($path, '/') || $path === '/' || '.' === $path || '..' === $path) {
+            return $this->cast($path);
+        }
+
+        $path = rtrim($path, '/');
+
         if (empty($path)) {
             return $this->cast('.');
         }
 
-        $initialSlashes = str_starts_with($path, '//')
-            ? 2
-            : (str_starts_with($path, '/') ? 1 : 0);
+        // Extract the scheme if any
+        $scheme = null;
+        if (strpos($path, '://')) {
+            list($scheme, $path) = explode('://', $path, 2);
+        }
 
         $parts = explode('/', $path);
         $newParts = [];
 
-        foreach ($parts as $part)
-        {
-            if (!$part || $part === '.') {
+        foreach ($parts as $part) {
+
+            if ($part === '' || $part === '.') {
+                if (empty($newParts)) {
+                    // First part is empty or '.' : path is absolute, keep an empty first part. Else, discard.
+                    $newParts[] = '';
+                }
                 continue;
             }
 
-            if (
-                ($part != '..') ||
-                (!$initialSlashes && !$newParts) ||
-                ($newParts && (end($newParts) == '..'))
-            ) {
-                $newParts[] = $part;
+            if ($part === '..') {
+                if (empty($newParts)) {
+                    // Path start with '..', we can't do anything with it so keep it
+                    $newParts[] = $part;
+                } else {
+                    // Remove the last part
+                    array_pop($newParts);
+                }
+                continue;
             }
-            elseif ($newParts) {
-                array_pop($new_comps);
-            }
+
+            $newParts[] = $part;
         }
 
-        $path = implode('/', $newParts);
-        if ($initialSlashes)
-            $path = str_repeat('/', $initialSlashes) . $path;
+        // Rebuild path
+        $newPath = implode('/', $newParts);
 
-        return $this->cast($path);
+        // Add scheme if any
+        if ($scheme !== null) {
+            $newPath = $scheme . '://' . $newPath;
+        }
+
+        return $this->cast($newPath);
     }
 
     /**
@@ -400,7 +425,7 @@ class Path
     }
 
     /**
-     * Deletes a file or a directory.
+     * Deletes a file or a directory (non-recursively).
      *
      * @return void
      * @throws FileNotFoundException
@@ -426,38 +451,40 @@ class Path
     }
 
     /**
-     * Copy data and mode bits (“cp src dst”). Return the file’s destination.
-     * The destination may be a directory.
+     * Copy data and mode bits (“cp src dst”). The destination may be a directory.
+     * Return the file’s destination as a Path.
      * If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’s “cp -P src dst”.
-     * TODO: implements the follow_symlinks functionality
      *
      * @param string|self $destination The destination path or object to copy the file to.
      * @throws FileNotFoundException If the source file does not exist or is not a file.
      * @throws FileExistsException
      * @throws IOException
      */
-    //TODO: review2
     public function copy(string|self $destination, bool $follow_symlinks = false): self
     {
         if (!$this->isFile()) {
             throw new FileNotFoundException("File does not exist or is not a file : " . $this);
         }
 
-        $destination = (string)$destination; // TODO: add an absPath method to the dest?
-        if ($this->builtin->is_dir($destination)) {
-            $destination = self::join($destination, $this->basename());
+        $destination = $this->cast($destination);
+        if ($destination->isDir()) {
+            $destination = $destination->append($this->basename());
         }
 
-        if ($this->builtin->file_exists($destination)) {
-            throw new FileExistsException("File already exists : " . $destination);
+        if ($destination->isFile()) {
+            throw new FileExistsException("File already exists : " . $destination->path());
         }
 
-        $success = $this->builtin->copy($this->path, $destination);
+        if (!$follow_symlinks && $this->isLink()) {
+            return $this->symlink($destination);
+        }
+
+        $success = $this->builtin->copy($this->path, $destination->path());
         if (!$success) {
-            throw new IOException("Error copying file {$this->path} to {$destination}");
+            throw new IOException("Error copying file {$this->path} to {$destination->path()}");
         }
 
-        return $this->cast($destination);
+        return $destination;
     }
 
     /**
@@ -470,31 +497,28 @@ class Path
      * @throws FileNotFoundException If the source file or directory does not exist.
      * @throws IOException
      */
-    //TODO: review2
     public function copyTree(string|self $destination, bool $follow_symlinks = false): self
     {
-        // TODO: voir à faire la synthèse de copytree et https://path.readthedocs.io/en/latest/api.html#path.Path.merge_tree
-        if ($this->isFile()) {
-            $destination = (string)$destination;
-            if ($this->builtin->is_dir($destination)) {
-                $destination = self::join($destination, $this->basename());
-            }
-
-            if ($this->builtin->file_exists($destination)) {
-                throw new FileExistsException("File or dir already exists : " . $destination);
-            }
-
-            $success = $this->builtin->copy($this->path, $destination);
-            if (!$success) {
-                throw new IOException("Error copying file {$this->path} to {$destination}");
-            }
-        } else if ($this->isDir()) {
-            self::copyTree($this, $destination);
-        } else {
+        if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this);
         }
 
-        return new self($destination);
+        if ($this->isFile()) {
+            return $this->copy($destination, $follow_symlinks);
+        }
+
+        $destination = $this->cast($destination);
+
+        foreach ($this->files() as $file) {
+            $file->copy($destination, $follow_symlinks);
+        }
+
+        foreach ($this->dirs() as $dir) {
+            $dir->mkdir();
+            $dir->copyTree($destination, $follow_symlinks);
+        }
+
+        return $destination;
     }
 
     /**
@@ -611,7 +635,7 @@ class Path
      */
     public function dirs(): array
     {
-        if (!$this->builtin->is_dir($this->path)) {
+        if (!$this->isDir()) {
             throw new FileNotFoundException("Directory does not exist: " . $this->path);
         }
 
@@ -622,8 +646,10 @@ class Path
                 continue;
             }
 
-            if ($this->builtin->is_dir(self::join($this->path, $filename))) {
-                $dirs[] = $filename;
+            $child = $this->cast(self::join($this->path, $filename));
+
+            if ($child->isDir()) {
+                $dirs[] = $child;
             }
         }
 
@@ -638,7 +664,7 @@ class Path
      */
     public function files(): array
     {
-        if (!$this->builtin->is_dir($this->path)) {
+        if (!$this->isDir()) {
             throw new FileNotFoundException("Directory does not exist: " . $this->path);
         }
 
@@ -649,8 +675,10 @@ class Path
                 continue;
             }
 
-            if ($this->builtin->is_file(self::join($this->path, $filename))) {
-                $files[] = $filename;
+            $child = $this->cast(self::join($this->path, $filename));
+
+            if ($child->isFile()) {
+                $files[] = $child;
             }
         }
 
@@ -1296,9 +1324,13 @@ class Path
     }
 
     /**
-     * @throws IOException
-     * @throws FileNotFoundException
-     * @throws FileExistsException
+     * Creates a symbolic link to the specified destination.
+     *
+     * @param string|self $newLink The path or the instance of the symbolic link to create.
+     * @return self The instance of the symbolic link that was created.
+     * @throws FileNotFoundException If the file or directory does not exist.
+     * @throws FileExistsException If the symbolic link already exists.
+     * @throws IOException If there was an error while creating the symbolic link.
      */
     public function symlink(string | self $newLink): self
     {
