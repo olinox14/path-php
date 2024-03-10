@@ -6,6 +6,8 @@ use Generator;
 use Path\Exception\FileExistsException;
 use Path\Exception\FileNotFoundException;
 use Path\Exception\IOException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use RuntimeException;
 use Throwable;
 
@@ -522,36 +524,34 @@ class Path
     }
 
     /**
-     * Moves a file or directory to a new location.
+     * Moves a file or directory to a new location. Existing files or dirs will be overwritten.
      * Returns the path of the newly created file or directory.
      *
      * @param string|Path $destination The new location where the file or directory should be moved to.
      *
      * @return Path
-     * @throws FileExistsException
      * @throws IOException
+     * @throws FileNotFoundException
      */
-    //TODO: review2 - compare to rename
     public function move(string|self $destination): self
     {
-        // TODO: comparer à https://path.readthedocs.io/en/latest/api.html#path.Path.move
-        $destination = (string)$destination;
-
-        if ($this->builtin->is_dir($destination)) {
-            $destination = self::join($destination, $this->basename());
+        if (!$this->exists()) {
+            throw new FileNotFoundException($this->path . " does not exist");
         }
 
-        if ($this->builtin->file_exists($destination)) {
-            throw new FileExistsException("File or dir already exists : " . $destination);
+        $destination = $this->cast($destination);
+
+        if ($destination->isDir()) {
+            $destination = self::join($destination, $this->basename());
         }
 
         $success = $this->builtin->rename($this->path, $destination);
 
         if (!$success) {
-            throw new IOException("Error while moving " . $this->path . " to " . $destination);
+            throw new IOException("Error while moving " . $this->path . " to " . $destination->path());
         }
 
-        return $this->cast($destination);
+        return $destination;
     }
 
     /**
@@ -628,7 +628,7 @@ class Path
      * Retrieves an array of this directory’s subdirectories.
      *
      * The elements of the list are Path objects.
-     * This does not walk recursively into subdirectories (but see walkdirs() //TODO: implement).
+     * This does not walk recursively into subdirectories (but see walkdirs())
      *
      * @return array
      * @throws FileNotFoundException
@@ -740,21 +740,18 @@ class Path
      * Writes contents to a file.
      *
      * @param string $content The contents to be written to the file.
-     * @param bool $append
+     * @param bool $append Append the content to the file's content instead of replacing it
+     * @param bool $create Creates the file if it does not already exist
      * @return int The number of bytes that were written to the file
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review2
-    public function putContent(string $content, bool $append = false): int
+    public function putContent(string $content, bool $append = false, bool $create = true): int
     {
-        if (!$this->builtin->is_file($this->path)) {
+        if (!$this->isFile() && !$create) {
             throw new FileNotFoundException("File does not exist : " . $this->path);
         }
 
-        // TODO: review use-cases
-        // TODO: complete the input types
-        // TODO: add a condition on the creation of the file if not existing
         $result = $this->builtin->file_put_contents(
             $this->path,
             $content,
@@ -809,15 +806,19 @@ class Path
      * Changes the permissions of a file or directory.
      *
      * @param int $permissions The new permissions to set. The value should be an octal number.
+     * @param bool $clearStatCache
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public function setPermissions(int $permissions): void
+    public function setPermissions(int $permissions, bool $clearStatCache = false): void
     {
         if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
-        $this->builtin->clearstatcache(); // TODO: check for a better way of dealing with PHP cache
+
+        if ($clearStatCache) {
+            $this->builtin->clearstatcache();
+        }
 
         $success = $this->builtin->chmod($this->path, $permissions);
 
@@ -834,13 +835,15 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public function setOwner(string $user, string $group): void
+    public function setOwner(string $user, string $group, bool $clearStatCache = false): void
     {
         if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
 
-        $this->builtin->clearstatcache(); // TODO: check for a better way of dealing with PHP cache
+        if ($clearStatCache) {
+            $this->builtin->clearstatcache();
+        }
 
         $success =
             $this->builtin->chown($this->path, $user) &&
@@ -885,7 +888,6 @@ class Path
      * Expands the user directory in the file path.
      *
      * @return self The modified instance with the expanded user path.
-     * TODO: review2
      */
     public function expandUser(): self
     {
@@ -903,7 +905,6 @@ class Path
      * Searches for variable placeholders in the path and replaces them with their corresponding values from the environment variables.
      *
      * @return Path The path with expanded variables.
-     * TODO: review2
      */
     public function expandVars(): Path
     {
@@ -968,6 +969,7 @@ class Path
     /**
      * > Alias for Path->remove()
      * @return void
+     * @throws IOException
      */
     public function unlink(): void
     {
@@ -989,47 +991,36 @@ class Path
     }
 
     /**
-     * Recursively removes a directory and all its contents.
-     *
-     * @return bool True if the directory was successfully removed, false otherwise.
-     */
-    //TODO: review2
-    protected function rrmdir(): bool
-    {
-        if (!is_dir($this->path)) {
-            return false;
-        }
-
-        foreach (scandir($this->path) as $object) {
-            if ($object == "." || $object == "..") {
-                continue;
-            }
-
-            if (is_dir($this->path. DIRECTORY_SEPARATOR .$object) && !is_link($this->path ."/".$object)) {
-                $this->rrmdir();
-            }
-            else {
-                unlink($this->path . DIRECTORY_SEPARATOR . $object);
-            }
-        }
-        return rmdir($this->path);
-    }
-
-    /**
      * Removes a directory and its contents.
      *
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review2
-    public function rmdir(bool $recursive = false): void
+    public function rmdir(bool $recursive = false, bool $permissive = false): void
     {
         if (!$this->isDir()) {
+            if ($permissive) {
+                return;
+            }
             throw new FileNotFoundException("{$this->path} is not a directory");
         }
 
-        // TODO: maybe we could only rely on the recursive method?
-        $result = $recursive ? $this->rrmdir() : $this->builtin->rmdir($this->path);
+        $subDirs = $this->dirs();
+        $files = $this->files();
+
+        if ((!empty($subdirs) || !empty($files)) && !$recursive) {
+            throw new IOException("Directory is not empty : " . $this->path);
+        }
+
+        foreach ($subDirs as $dir) {
+            $dir->rmdir(true, false);
+        }
+
+        foreach ($files as $file) {
+            $file->remove();
+        }
+
+        $result = $this->builtin->rmdir($this->path);
 
         if ($result === false) {
             throw new IOException("Error while removing directory : " . $this->path);
@@ -1038,35 +1029,11 @@ class Path
 
     /**
      * @throws FileNotFoundException
-     * @throws FileExistsException
      * @throws IOException
      */
     public function rename(string|self $newPath): Path
     {
-        if (!$this->exists()) {
-            throw new FileNotFoundException($this->path . " does not exist");
-        }
-        $newPath = $this->cast($newPath);
-        if ($newPath->exists()) {
-            throw new FileExistsException($newPath . " already exist");
-        }
-        if (!$newPath->parent()->exists()) {
-            throw new FileNotFoundException($newPath->parent() . " does not exist");
-        }
-
-        $success = $this->builtin->rename($this->path, $newPath);
-
-        if (!$success) {
-            throw new IOException("Error while renaming " . $this->path . " into " . $newPath);
-        }
-
-        return $newPath;
-    }
-
-    public function renames()
-    {
-        // TODO: review2
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.renames
+        return $this->move($newPath);
     }
 
     /**
@@ -1120,6 +1087,28 @@ class Path
         }
 
         return $handle;
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function walkDirs(): array
+    {
+        if (!$this->isDir()) {
+            throw new FileNotFoundException("Directory does not exist: " . $this->path);
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->path)
+        );
+
+        $result = [];
+
+        foreach ($iterator as $file) {
+            $result[] = $this->cast($file->getPathname());
+        }
+
+        return $result;
     }
 
     /**
@@ -1233,43 +1222,10 @@ class Path
      * Checks if the path is a mount point.
      *
      * @return bool True if the path is a mount point, false otherwise.
-     * TODO: review2
      */
     public function isMount(): bool
     {
         return disk_free_space($this->path) !== false;
-    }
-
-    /**
-     * TODO: review2
-     * @return \DirectoryIterator
-     */
-    protected function getDirectoryIterator(): \DirectoryIterator
-    {
-        // TODO: make it public?
-         return new \DirectoryIterator($this->path);
-    }
-
-    /**
-     * Iterate over the files in this directory.
-     *
-     * @return Generator
-     * @throws FileNotFoundException If the path is not a directory.
-     */
-    //TODO: review2
-    public function iterDir(): Generator
-    {
-        if (!$this->isDir()) {
-            throw new FileNotFoundException($this->path . " is not a directory");
-        }
-
-        foreach ($this->getDirectoryIterator() as $fileInfo) {
-            // TODO: use the DirectoryIterator everywhere else?
-            if ($fileInfo->isDot()) {
-                continue;
-            }
-            yield $fileInfo->getFilename();
-        }
     }
 
     /**
@@ -1315,12 +1271,6 @@ class Path
             throw new IOException("Error while getting lstat of " . $this->path);
         }
         return $result;
-    }
-
-    public function splitDrive()
-    {
-        // TODO: review2
-        // TODO: implement https://path.readthedocs.io/en/latest/api.html#path.Path.splitdrive
     }
 
     /**
@@ -1382,7 +1332,6 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    //TODO: review2
     public function getRelativePath(string|self $basePath): string
     {
         if (!$this->exists()) {
