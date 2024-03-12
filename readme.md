@@ -19,4 +19,4 @@ Se placer dans le docker, puis :
 
     docker start path
     docker exec -it path bash
-    vendor/bin/phpunit .
+    XDEBUG_MODE=coverage vendor/bin/phpunit -c phpunit.xml
