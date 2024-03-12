@@ -48,12 +48,12 @@ class Path
      *
      * @param string|Path $path The base path
      * @param string ...$parts The parts of the path to be joined.
-     * @return string The resulting path after joining the parts using the directory separator.
+     * @return self The resulting path after joining the parts using the directory separator.
      */
-    public static function join(string|self $path, string|self ...$parts): string
+    public static function join(string|self $path, string|self ...$parts): self
     {
         $path = (string)$path;
-        $parts = array_map(fn($x) => (string)$x, $parts);
+        $parts = array_map(fn($p) => (string)$p, $parts);
 
         foreach ($parts as $part) {
             if (str_starts_with($part, DIRECTORY_SEPARATOR)) {
@@ -64,7 +64,7 @@ class Path
                 $path .= DIRECTORY_SEPARATOR . $part;
             }
         }
-        return $path;
+        return new self($path);
     }
 
     public function __construct(string|self $path)
@@ -120,7 +120,7 @@ class Path
      * @param string ...$parts The parts to be appended to the current path.
      * @return self Returns an instance of the class with the appended path.
      */
-    public function append(string ...$parts): self
+    public function append(string|self ...$parts): self
     {
         $this->path = self::join($this->path, ...$parts);
         return $this;
@@ -704,7 +704,7 @@ class Path
      */
     public function getContent(): string
     {
-        if (!$this->builtin->is_file($this->path)) {
+        if (!$this->isFile()) {
             throw new FileNotFoundException("File does not exist : " . $this->path);
         }
 
