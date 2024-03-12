@@ -542,10 +542,10 @@ class Path
         $destination = $this->cast($destination);
 
         if ($destination->isDir()) {
-            $destination = self::join($destination, $this->basename());
+            $destination = $destination->append($this->basename());
         }
 
-        $success = $this->builtin->rename($this->path, $destination);
+        $success = $this->builtin->rename($this->path, $destination->path());
 
         if (!$success) {
             throw new IOException("Error while moving " . $this->path . " to " . $destination->path());
@@ -646,7 +646,7 @@ class Path
                 continue;
             }
 
-            $child = $this->cast(self::join($this->path, $filename));
+            $child = $this->append($filename);
 
             if ($child->isDir()) {
                 $dirs[] = $child;
@@ -675,7 +675,7 @@ class Path
                 continue;
             }
 
-            $child = $this->cast(self::join($this->path, $filename));
+            $child = $this->append($filename);
 
             if ($child->isFile()) {
                 $files[] = $child;
@@ -933,7 +933,7 @@ class Path
             throw new FileNotFoundException("Dir does not exist : " . $this->path);
         }
 
-        $pattern = self::join($this->path, $pattern);
+        $pattern = $this->append($pattern);
 
         $result = $this->builtin->glob($pattern);
 
@@ -942,7 +942,7 @@ class Path
         }
 
         return array_map(
-            function (string $s) { return new static(self::join($this->path, $s)); },
+            function (string $s) { return $this->append($s); },
             $result
         );
     }
