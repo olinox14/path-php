@@ -320,7 +320,7 @@ class Path
     {
         return $this->cast(
             strtolower(
-                str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->path)
+                str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->path())
             )
         );
     }
@@ -333,11 +333,11 @@ class Path
      */
     public function normPath(): self
     {
-        $path = $this->path;
+        $path = $this->normCase()->path();
 
-        // Handle windows gracefully
-        if (DIRECTORY_SEPARATOR !== '/') {
-            $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+        // TODO: handle case where path start with //
+        if (empty($path)) {
+            return $this->cast('.');
         }
 
         // Also tests some special cases we can't really do anything with
@@ -346,10 +346,6 @@ class Path
         }
 
         $path = rtrim($path, '/');
-
-        if (empty($path)) {
-            return $this->cast('.');
-        }
 
         // Extract the scheme if any
         $scheme = null;

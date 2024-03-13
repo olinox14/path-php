@@ -34,14 +34,14 @@ class TestablePath extends Path {
 
 class PathTest extends TestCase
 {
-    private BuiltinProxy | MockObject $builtin;
+    private BuiltinProxy|MockObject $builtin;
 
     public function setUp(): void
     {
         $this->builtin = $this->getMockBuilder(BuiltinProxy::class)->getMock();
     }
 
-    public function getMock(string $path, string $methodName): TestablePath | MockObject
+    public function getMock(string $path, string $methodName): TestablePath|MockObject
     {
         $mock = $this
             ->getMockBuilder(TestablePath::class)
@@ -66,13 +66,41 @@ class PathTest extends TestCase
         // Multiple parts
         $this->assertEquals(
             '/home/user/documents',
-            Path::join('/home', 'user', 'documents')
+            Path::join('/home', 'user', '', 'documents')
         );
 
         // Absolute path passed in $parts
         $this->assertEquals(
             '/user/documents',
-            Path::join('home', '/user', 'documents')
+            Path::join('home/', '/user', 'documents')
+        );
+    }
+
+    public function testCastWithString(): void
+    {
+        $path = $this->getMock('bar', 'cast');
+
+        $strPath = "/foo/file.ext";
+
+        $newPath = $path->cast($strPath);
+
+        $this->assertEquals(
+            '/foo/file.ext',
+            $newPath->path()
+        );
+    }
+
+    public function testCastWithPath(): void
+    {
+        $path = $this->getMock('bar', 'cast');
+
+        $otherPath = new Path("/foo/file.ext");
+
+        $newPath = $path->cast($otherPath);
+
+        $this->assertEquals(
+            '/foo/file.ext',
+            $newPath->path()
         );
     }
 
@@ -129,6 +157,34 @@ class PathTest extends TestCase
         $this->assertFalse($path->eq('/foo/bar'));
     }
 
+    public function testAppendOnePart(): void
+    {
+        $path = new Path('/home');
+
+        $this->assertEquals(
+            Path::join('/home', 'user')->path(),
+            $path->append('user')->path()
+        );
+    }
+
+    public function testAppendMultiplePart(): void {
+        $path = new Path('/home');
+
+        $this->assertEquals(
+            Path::join('/home', 'user', '', 'documents')->path(),
+            $path->append('user', '', 'documents')->path()
+        );
+    }
+
+    public function testAppendAbsoluteInParts(): void {
+        $path = new Path('home');
+
+        $this->assertEquals(
+            Path::join('home', '/user', 'documents')->path(),
+            $path->append('/user', 'documents')->path()
+        );
+    }
+
     /**
      * @throws IOException
      */
@@ -153,6 +209,24 @@ class PathTest extends TestCase
             '/foo/file.ext',
             $path->absPath()->path()
         );
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testAbsPathWithError(): void {
+        $path = $this->getMock('./file.ext', 'absPath');
+        $path->method('path')->willReturn('./file.ext');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('realpath')
+            ->with('./file.ext')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->absPath()->path();
     }
 
     /**
@@ -676,6 +750,157 @@ class PathTest extends TestCase
         );
     }
 
+    public function testNormCase(): void
+    {
+        $path = $this->getMock('', 'normCase');
+        $path->method('path')->willReturn('/Foo\\bar');
+
+        $normed = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->expects(self::once())->method('cast')->with('/foo/bar')->willReturn($normed);
+
+        $this->assertEquals(
+            $normed,
+            $path->normCase()
+        );
+
+    }
+
+    public function testNormPath(): void {
+        $path = $this->getMock('', 'normPath');
+
+        $normed = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed->method('path')->willReturn('/foo/bar');
+        $path->expects(self::once())->method('normCase')->willReturn($normed);
+
+        $normed2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed2->method('path')->willReturn('/foo/bar');
+        $path->expects(self::once())->method('cast')->with('/foo/bar')->willReturn($normed2);
+
+        $this->assertEquals(
+            '/foo/bar',
+            $path->normPath()->path()
+        );
+    }
+
+    public function testNormPathNoSep(): void {
+        $path = $this->getMock('', 'normPath');
+
+        $normed = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed->method('path')->willReturn('foo');
+        $path->expects(self::once())->method('normCase')->willReturn($normed);
+
+        $normed2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed2->method('path')->willReturn('foo');
+        $path->expects(self::once())->method('cast')->with('foo')->willReturn($normed2);
+
+        $this->assertEquals(
+            'foo',
+            $path->normPath()->path()
+        );
+    }
+
+    public function testNormPathIsRoot(): void {
+        $path = $this->getMock('', 'normPath');
+
+        $normed = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed->method('path')->willReturn('/');
+        $path->expects(self::once())->method('normCase')->willReturn($normed);
+
+        $normed2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed2->method('path')->willReturn('/');
+        $path->expects(self::once())->method('cast')->with('/')->willReturn($normed2);
+
+        $this->assertEquals(
+            '/',
+            $path->normPath()->path()
+        );
+    }
+
+    public function testNormPathIsCurrent(): void {
+        $path = $this->getMock('', 'normPath');
+
+        $normed = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed->method('path')->willReturn('..');
+        $path->expects(self::once())->method('normCase')->willReturn($normed);
+
+        $normed2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed2->method('path')->willReturn('..');
+        $path->expects(self::once())->method('cast')->with('..')->willReturn($normed2);
+
+        $this->assertEquals(
+            '..',
+            $path->normPath()->path()
+        );
+    }
+
+    public function testNormPathIsParent(): void {
+        $path = $this->getMock('', 'normPath');
+
+        $normed = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed->method('path')->willReturn('.');
+        $path->expects(self::once())->method('normCase')->willReturn($normed);
+
+        $normed2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed2->method('path')->willReturn('.');
+        $path->expects(self::once())->method('cast')->with('.')->willReturn($normed2);
+
+        $this->assertEquals(
+            '.',
+            $path->normPath()->path()
+        );
+    }
+
+    public function testNormPathIsEmpty(): void {
+        $path = $this->getMock('', 'normPath');
+
+        $normed = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed->method('path')->willReturn('');
+        $path->expects(self::once())->method('normCase')->willReturn($normed);
+
+        $normed2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed2->method('path')->willReturn('.');
+        $path->expects(self::once())->method('cast')->with('.')->willReturn($normed2);
+
+        $this->assertEquals(
+            '.',
+            $path->normPath()->path()
+        );
+    }
+
+    public function testNormPathWithParentPart(): void {
+        $path = $this->getMock('', 'normPath');
+
+        $normed = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed->method('path')->willReturn('/foo/../bar');
+        $path->expects(self::once())->method('normCase')->willReturn($normed);
+
+        $normed2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed2->method('path')->willReturn('/bar');
+        $path->expects(self::once())->method('cast')->with('/bar')->willReturn($normed2);
+
+        $this->assertEquals(
+            '/bar',
+            $path->normPath()->path()
+        );
+    }
+
+    public function testNormPathWithLeadingParentPart(): void {
+        $path = $this->getMock('', 'normPath');
+
+        $normed = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed->method('path')->willReturn('../foo/../bar');
+        $path->expects(self::once())->method('normCase')->willReturn($normed);
+
+        $normed2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $normed2->method('path')->willReturn('../bar');
+        $path->expects(self::once())->method('cast')->with('../bar')->willReturn($normed2);
+
+        $this->assertEquals(
+            '../bar',
+            $path->normPath()->path()
+        );
+    }
+
     /**
      * @throws IOException
      * @throws FileExistsException
@@ -1070,6 +1295,69 @@ class PathTest extends TestCase
         $this->expectException(IOException::class);
 
         $path->copy($destination);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testCopyIsLinkWithFollow()
+    {
+        $path = $this->getMock('foo.ext', 'copy');
+        $path->method('isFile')->willReturn(True);
+        $path->method('isLink')->willReturn(True);
+
+        $destination = "/bar/foo2.ext";
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newPath->method('eq')->with($destination)->willReturn(True);
+        $newPath->method('isDir')->willReturn(False);
+        $newPath->method('isFile')->willReturn(False);
+        $newPath->method('path')->willReturn($destination);
+
+        $path->method('cast')->with($destination)->willReturn($newPath);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('copy')
+            ->with('foo.ext', $destination)
+            ->willReturn(True);
+
+        $result = $path->copy($destination, True);
+
+        $this->assertTrue(
+            $result->eq($destination)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testCopyIsLinkNoFollow()
+    {
+        $path = $this->getMock('foo.ext', 'copy');
+        $path->method('isFile')->willReturn(True);
+        $path->method('isLink')->willReturn(True);
+
+        $destination = "/bar/foo2.ext";
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newPath->method('isDir')->willReturn(False);
+        $newPath->method('isFile')->willReturn(False);
+
+        $path->method('cast')->with($destination)->willReturn($newPath);
+
+        $path
+            ->expects(self::once())
+            ->method('symlink')
+            ->with($newPath);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('copy');
+
+        $path->copy($destination, False);
     }
 
     /**
