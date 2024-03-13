@@ -935,7 +935,7 @@ class Path
 
         $pattern = $this->append($pattern);
 
-        $result = $this->builtin->glob($pattern);
+        $result = $this->builtin->glob($pattern->path());
 
         if ($result === false) {
             throw new IOException("Error while getting glob on " . $this->path);
