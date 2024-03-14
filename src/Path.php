@@ -50,7 +50,7 @@ class Path
      * @param string ...$parts The parts of the path to be joined.
      * @return self The resulting path after joining the parts using the directory separator.
      */
-    public static function join(string|self $path, string|self ...$parts): self
+    public static function join(string|self $path, string|self ...$parts): string
     {
         $path = (string)$path;
         $parts = array_map(fn($p) => (string)$p, $parts);
@@ -512,7 +512,7 @@ class Path
         }
 
         foreach ($this->dirs() as $dir) {
-            $dir->mkdir();
+            $dir->mkdir(); // TODO: mimic the source permissions into the new dir?
             $dir->copyTree($destination, $follow_symlinks);
         }
 
@@ -867,7 +867,7 @@ class Path
      */
     public function sameFile(string | self $other): bool
     {
-        return $this->absPath() === $this->cast($other)->absPath();
+        return $this->absPath()->path() === $this->cast($other)->absPath()->path();
     }
 
     /**
@@ -887,7 +887,7 @@ class Path
      */
     public function expandUser(): self
     {
-        $path = $this->path;
+        $path = $this->path();
         if (str_starts_with($path, '~')) {
             $home = $_SERVER['HOME'];
             $path = self::join($home, substr($path, 1));
@@ -907,9 +907,9 @@ class Path
         $path = preg_replace_callback(
             '/\$\{([^}]+)}|\$(\w+)/',
             function($matches) {
-                return getenv($matches[1] ?: $matches[2]);
+                return $this->builtin->getenv($matches[1] ?: $matches[2]);
             },
-            $this->path
+            $this->path()
         );
 
         return $this->cast($path);
@@ -949,14 +949,14 @@ class Path
      * @return void
      * @throws IOException if there was an error while removing the file.
      *
-     * @throws IOException if the file does not exist or is not a file.
+     * @throws IOException|FileNotFoundException if the file does not exist or is not a file.
      */
     public function remove(): void
     {
         if (!$this->isFile()) {
-            throw new IOException( $this->path . " is not a file");
+            throw new FileNotFoundException( $this->path . " is not a file");
         }
-        $result = unlink($this->path);
+        $result = $this->builtin->unlink($this->path);
         if (!$result) {
             throw new IOException( "Error while removing the file " . $this->path);
         }
@@ -965,7 +965,7 @@ class Path
     /**
      * > Alias for Path->remove()
      * @return void
-     * @throws IOException
+     * @throws IOException|FileNotFoundException
      */
     public function unlink(): void
     {
@@ -977,6 +977,7 @@ class Path
      *
      * @return void
      * @throws IOException
+     * @throws FileNotFoundException
      */
     public function remove_p(): void
     {

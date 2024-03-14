@@ -237,4 +237,9 @@ class BuiltinProxy
     {
         return lstat($filename);
     }
+
+    public function getenv(?string $name = null, bool $local_only = false): array|false|string
+    {
+        return getenv($name, $local_only);
+    }
 }

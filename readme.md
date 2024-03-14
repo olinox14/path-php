@@ -1,6 +1,9 @@
-# Path.php
 
-### Lancer le docker 
+An intuitive and object-oriented file and path operations, inspired by the path.py python library.
+
+### Contribute 
+
+#### Build docker
 
     docker build -t path .
 
@@ -13,9 +16,7 @@
     docker exec -it path bash
     composer install
 
-### Executer les tests
-
-Se placer dans le docker, puis : 
+#### Run tests
 
     docker start path
     docker exec -it path bash
