@@ -3,6 +3,8 @@
 namespace Path;
 
 use JetBrains\PhpStorm\ExpectedValues;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
  * A proxy for PHP builtin file methods
@@ -241,5 +243,21 @@ class BuiltinProxy
     public function getenv(?string $name = null, bool $local_only = false): array|false|string
     {
         return getenv($name, $local_only);
+    }
+
+    public function getRecursiveIterator(string $directory): \Iterator
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory)
+        );
+
+        foreach ($iterator as $file) {
+            yield $file;
+        }
+    }
+
+    public function disk_free_space(string $directory): float|false
+    {
+        return disk_free_space($directory);
     }
 }

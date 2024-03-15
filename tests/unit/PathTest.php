@@ -10,6 +10,8 @@ use Path\Exception\IOException;
 use Path\Path;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class TestablePath extends Path {
     public function setBuiltin(BuiltinProxy $builtinProxy): void
@@ -2693,8 +2695,8 @@ class PathTest extends TestCase
     public function testRmDirNonRecursive(): void
     {
         $path = $this->getMock('/foo', 'rmdir');
-
         $path->method('isDir')->willReturn(True);
+        $path->method('path')->willReturn('/foo');
 
         $this->builtin
             ->expects(self::once())
@@ -2709,10 +2711,37 @@ class PathTest extends TestCase
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public function testRmDirRecursive(): void
+    public function testRmDirNonEmptyAndRecursive(): void
     {
         $path = $this->getMock('/foo', 'rmdir');
         $path->method('isDir')->willReturn(True);
+        $path->method('path')->willReturn('/foo');
+
+        $file1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $file2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $dir1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $dir2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $path->method('files')->willReturn([$file1, $file2]);
+        $path->method('dirs')->willReturn([$dir1, $dir2]);
+
+        $file1
+            ->expects(self::once())
+            ->method('remove');
+
+        $file2
+            ->expects(self::once())
+            ->method('remove');
+
+        $dir1
+            ->expects(self::once())
+            ->method('rmdir')
+            ->with(True, False);
+
+        $dir2
+            ->expects(self::once())
+            ->method('rmdir')
+            ->with(True, False);
 
         $this->builtin
             ->expects(self::once())
@@ -2721,6 +2750,263 @@ class PathTest extends TestCase
             ->willReturn(True);
 
         $path->rmdir(True);
+    }
+
+    /**
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public function testRmDirNonEmptyAndNotRecursive(): void
+    {
+        $path = $this->getMock('/foo', 'rmdir');
+        $path->method('isDir')->willReturn(True);
+        $path->method('path')->willReturn('/foo');
+
+        $file1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $file2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $dir1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $dir2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $path->method('files')->willReturn([$file1, $file2]);
+        $path->method('dirs')->willReturn([$dir1, $dir2]);
+
+        $file1
+            ->expects(self::never())
+            ->method('remove');
+
+        $file2
+            ->expects(self::never())
+            ->method('remove');
+
+        $dir1
+            ->expects(self::never())
+            ->method('rmdir')
+            ->with(True, False);
+
+        $dir2
+            ->expects(self::never())
+            ->method('rmdir');
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('rmdir');
+
+        $this->expectException(IOException::class);
+
+        $path->rmdir(False);
+    }
+
+    /**
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public function testRmDirDirDoesNotExistButPermissive(): void
+    {
+        $path = $this->getMock('/foo', 'rmdir');
+        $path->method('isDir')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('rmdir');
+
+        $path->rmdir(False, True);
+    }
+
+    /**
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public function testRmDirDirDoesNotExistAndNotPermissive(): void
+    {
+        $path = $this->getMock('/foo', 'rmdir');
+        $path->method('isDir')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('rmdir');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->rmdir();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public function testRmDirDirWithError(): void
+    {
+        $path = $this->getMock('/foo', 'rmdir');
+        $path->method('isDir')->willReturn(true);
+        $path->method('path')->willReturn('/foo');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('rmdir')
+            ->with('/foo')
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->rmdir();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testRename(): void
+    {
+        $path = $this->getMock('/foo', 'rename');
+
+        $destination = "/bar";
+
+        $path
+            ->expects(self::once())
+            ->method('move')
+            ->with($destination)
+            ->willReturn($path);
+
+        $this->assertEquals(
+            $path,
+            $path->rename($destination)
+        );
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testReadHash(): void
+    {
+        $path = $this->getMock('/foo', 'readHash');
+
+        $hash = "9f487a5b26dc5d66fb8d60e002355ebfa6a978fa9e2b63bbfdae609c8d2e65c9";
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('hash_file')
+            ->with('sha256', '/foo', false)
+            ->willReturn($hash);
+
+        $this->assertEquals(
+            $hash,
+            $path->readHash('sha256')
+        );
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testReadHashAndIsBinary(): void
+    {
+        $path = $this->getMock('/foo', 'readHash');
+
+        $hash = "9f487a5b26dc5d66fb8d60e002355ebfa6a978fa9e2b63bbfdae609c8d2e65c9";
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('hash_file')
+            ->with('sha256', '/foo', true)
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->readHash('sha256', true);
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testReadHashWithError(): void
+    {
+        $path = $this->getMock('/foo', 'readHash');
+
+        $hash = "9f487a5b26dc5d66fb8d60e002355ebfa6a978fa9e2b63bbfdae609c8d2e65c9";
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('hash_file')
+            ->with('sha256', '/foo', false)
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->readHash('sha256');
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testReadLink(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'readLink');
+        $path->method('isLink')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('readLink')
+            ->with('/foo/file.ext')
+            ->willReturn('/bar/file.ext');
+
+        $linkPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $path
+            ->expects(self::once())
+            ->method('cast')
+            ->with('/bar/file.ext')
+            ->willReturn($linkPath);
+
+        $this->assertEquals(
+            $linkPath,
+            $path->readLink()
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testReadLinkIsNotALink(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'readLink');
+        $path->method('isLink')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('readLink');
+
+        $path
+            ->expects(self::never())
+            ->method('cast');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->readLink();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testReadLinkWithError(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'readLink');
+        $path->method('isLink')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('readLink')
+            ->with('/foo/file.ext')
+            ->willReturn(False);
+
+        $path
+            ->expects(self::never())
+            ->method('cast');
+
+        $this->expectException(IOException::class);
+
+        $path->readLink();
     }
 
     /**
@@ -2901,6 +3187,72 @@ class PathTest extends TestCase
         $this->expectException(IOException::class);
 
         $path->open();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testWalkDirs(): void
+    {
+        $path = $this->getMock('/foo', 'walkDirs');
+        $path->method('isDir')->willReturn(True);
+
+        $iterator = $this
+            ->getMockBuilder(\Iterator::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('getRecursiveIterator')
+            ->with('/foo')
+            ->willReturn($iterator);
+
+        $file1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $file2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $dir1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $path
+            ->method('cast')
+            ->willReturnMap([
+                ['/foo/file1.ext', $file1],
+                ['/foo/file2.ext', $file2],
+                ['/foo/dir1.ext', $dir1]
+            ]);
+
+        $iterator
+            ->method('valid')
+            ->will($this->onConsecutiveCalls(true, true, true, false));
+
+        $iterator
+            ->method('current')
+            ->will($this->onConsecutiveCalls('/foo/file1.ext', '/foo/file2.ext', '/foo/dir1.ext'));
+
+        $iterator
+            ->method('key')
+            ->will($this->onConsecutiveCalls(0, 1, 2));
+
+        $this->assertEquals(
+            [$file1, $file2, $dir1],
+            iterator_to_array($path->walkDirs())
+        );
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testWalkDirsDirDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo', 'walkDirs');
+        $path->method('isDir')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('getRecursiveIterator');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->walkDirs();
     }
 
     /**
@@ -3192,6 +3544,23 @@ class PathTest extends TestCase
     /**
      * @throws IOException
      */
+    public function testChRootDirDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo', 'chroot');
+        $path->method('isDir')->willReturn(False);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('chroot');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->chroot();
+    }
+
+    /**
+     * @throws IOException
+     */
     public function testChRootWithError(): void
     {
         $path = $this->getMock('/foo', 'chroot');
@@ -3235,6 +3604,36 @@ class PathTest extends TestCase
 
         $this->assertFalse(
             $path->isLink()
+        );
+    }
+
+    public function testIsMountIsTrue(): void
+    {
+        $path = $this->getMock('/foo', 'isMount');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('disk_free_space')
+            ->with('/foo')
+            ->willReturn(123.0);
+
+        $this->assertTrue(
+            $path->isMount()
+        );
+    }
+
+    public function testIsMountIsFalse(): void
+    {
+        $path = $this->getMock('/foo', 'isMount');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('disk_free_space')
+            ->with('/foo')
+            ->willReturn(False);
+
+        $this->assertFalse(
+            $path->isMount()
         );
     }
 
@@ -3404,6 +3803,121 @@ class PathTest extends TestCase
         $this->expectException(IOException::class);
 
         $path->lstat();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testSymLink(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'symlink');
+        $path->method('exists')->willReturn(True);
+
+        $newLink = 'bar/file.ext';
+
+        $newLinkPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newLinkPath->method('exists')->willReturn(False);
+        $newLinkPath->method('__toString')->willReturn($newLink);
+
+        $path
+            ->expects(self::once())
+            ->method('cast')
+            ->with($newLink)
+            ->willReturn($newLinkPath);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('symlink')
+            ->with('foo/file.ext', $newLink)
+            ->willReturn(True);
+
+        $path->symlink($newLink);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testSymLinkFileDoesNotExist(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'symlink');
+        $path->method('exists')->willReturn(False);
+
+        $newLink = 'bar/file.ext';
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('symlink');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->symlink($newLink);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testSymLinkTargetExists(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'symlink');
+        $path->method('exists')->willReturn(True);
+
+        $newLink = 'bar/file.ext';
+
+        $newLinkPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newLinkPath->method('exists')->willReturn(True);
+
+        $path
+            ->expects(self::once())
+            ->method('cast')
+            ->with($newLink)
+            ->willReturn($newLinkPath);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('symlink');
+
+        $this->expectException(FileExistsException::class);
+
+        $path->symlink($newLink);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testSymLinkWithError(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'symlink');
+        $path->method('exists')->willReturn(True);
+
+        $newLink = 'bar/file.ext';
+
+        $newLinkPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newLinkPath->method('exists')->willReturn(False);
+        $newLinkPath->method('__toString')->willReturn($newLink);
+
+        $path
+            ->expects(self::once())
+            ->method('cast')
+            ->with($newLink)
+            ->willReturn($newLinkPath);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('symlink')
+            ->with('foo/file.ext', $newLink)
+            ->willReturn(False);
+
+        $this->expectException(IOException::class);
+
+        $path->symlink($newLink);
     }
 
     public function testParts(): void

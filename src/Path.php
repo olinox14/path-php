@@ -1017,7 +1017,7 @@ class Path
             $file->remove();
         }
 
-        $result = $this->builtin->rmdir($this->path);
+        $result = $this->builtin->rmdir($this->path());
 
         if ($result === false) {
             throw new IOException("Error while removing directory : " . $this->path);
@@ -1039,7 +1039,7 @@ class Path
     public function readHash(string $algo, bool $binary = false): string
     {
         $result = $this->builtin->hash_file($algo, $this->path, $binary);
-        if (!$result) {
+        if ($result === false) {
             throw new IOException("Error while computing the hash of " . $this->path);
         }
         return $result;
@@ -1095,14 +1095,12 @@ class Path
             throw new FileNotFoundException("Directory does not exist: " . $this->path);
         }
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->path)
-        );
+        $iterator = $this->builtin->getRecursiveIterator($this->path);
 
         $result = [];
 
         foreach ($iterator as $file) {
-            $result[] = $this->cast($file->getPathname());
+            $result[] = $this->cast($file);
         }
 
         return $result;
@@ -1222,7 +1220,7 @@ class Path
      */
     public function isMount(): bool
     {
-        return disk_free_space($this->path) !== false;
+        return $this->builtin->disk_free_space($this->path) !== false;
     }
 
     /**
