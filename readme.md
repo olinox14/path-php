@@ -1,5 +1,12 @@
+[![CI](https://github.com/olinox14/path-php/actions/workflows/php.yml/badge.svg)](https://github.com/olinox14/path-php/actions/workflows/php.yml)
+
+# Path-php
 
 An intuitive and object-oriented file and path operations, inspired by the path.py python library.
+
+### Examples
+
+
 
 ### Contribute 
 
