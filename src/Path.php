@@ -1089,7 +1089,7 @@ class Path
     /**
      * @throws FileNotFoundException
      */
-    public function walkDirs(): array
+    public function walkDirs(): \Iterator
     {
         if (!$this->isDir()) {
             throw new FileNotFoundException("Directory does not exist: " . $this->path);
@@ -1097,13 +1097,9 @@ class Path
 
         $iterator = $this->builtin->getRecursiveIterator($this->path);
 
-        $result = [];
-
         foreach ($iterator as $file) {
-            $result[] = $this->cast($file);
+            yield $this->cast($file);
         }
-
-        return $result;
     }
 
     /**

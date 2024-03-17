@@ -3252,7 +3252,7 @@ class PathTest extends TestCase
 
         $this->expectException(FileNotFoundException::class);
 
-        $path->walkDirs();
+        iterator_to_array($path->walkDirs());
     }
 
     /**
