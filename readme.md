@@ -5,9 +5,23 @@
 
 An intuitive and object-oriented file and path operations, inspired by the path.py python library.
 
-### Examples
+    <?php
 
+    use Path\Path;
+  
+    $path = new Path(__file__).parent();
 
+    echo($path->dirs());
+
+    $path = new Path('/home');
+
+    foreach($path->files() as $file) {
+        $file->chmod(0555);
+    }
+
+    $newPath = $path->append('bar')
+
+    echo($newPath->absPath()); // => '/foo/bar'
 
 ### Contribute 
 

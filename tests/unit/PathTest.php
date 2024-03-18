@@ -2,7 +2,6 @@
 
 namespace Path\Tests\unit;
 
-use http\Params;
 use Path\BuiltinProxy;
 use Path\Exception\FileExistsException;
 use Path\Exception\FileNotFoundException;
@@ -10,8 +9,6 @@ use Path\Exception\IOException;
 use Path\Path;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 
 class TestablePath extends Path {
     public function setBuiltin(BuiltinProxy $builtinProxy): void
