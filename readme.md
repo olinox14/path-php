@@ -19,7 +19,7 @@ An intuitive and object-oriented file and path operations, inspired by the path.
         $file->chmod(0555);
     }
 
-    $newPath = $path->append('bar')
+    $newPath = $path->append('bar');
 
     echo($newPath->absPath()); // => '/foo/bar'
 
