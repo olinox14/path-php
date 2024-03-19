@@ -47,7 +47,6 @@ class Path
      * @param string|Path $path The base path
      * @param string ...$parts The parts of the path to be joined.
      * @return self The resulting path after joining the parts using the directory separator.
-     *  TODO: manual test
      */
     public static function join(string|self $path, string|self ...$parts): string
     {
@@ -77,7 +76,6 @@ class Path
 
     /**
      * @return string
-     *  TODO: manual test
      */
     public function __toString(): string {
         return $this->path;
@@ -88,7 +86,6 @@ class Path
      *
      * @param string|self $path The input path to be cast.
      * @return self An instance of the current class.
-     *  TODO: manual test
      */
     protected function cast(string|self $path): self
     {
@@ -99,7 +96,6 @@ class Path
      * Retrieves the current path of the file or directory
      *
      * @return string The path of the file or directory
-     *  TODO: manual test
      */
     public function path(): string
     {
@@ -112,7 +108,6 @@ class Path
      * @param string|Path $path The path to compare against.
      *
      * @return bool Returns true if the given path is equal to the current path, false otherwise.
-     *  TODO: manual test
      */
     public function eq(string|self $path): bool {
         return $this->cast($path)->path() === $this->path();
@@ -121,7 +116,6 @@ class Path
     /**
      * Appends parts to the current path.
      *
-     *  TODO: manual test
      * @param string ...$parts The parts to be appended to the current path.
      * @return self Returns an instance of the class with the appended path.
      *@see Path::join()
@@ -138,7 +132,6 @@ class Path
      *
      * @return self
      * @throws IOException
-     * TODO: manual test
      */
     public function absPath(): self
     {
@@ -152,7 +145,6 @@ class Path
     /**
      * > Alias for absPath()
      * @throws IOException
-     *  TODO: manual test
      */
     public function realpath(): self
     {
@@ -169,7 +161,6 @@ class Path
      *        - W_OK: checks for write permission.
      *        - X_OK: checks for execute permission.
      * @return bool Returns true if the permission check is successful; otherwise, returns false.
-     *  TODO: manual test
      */
     function access(int $mode): bool
     {
@@ -188,7 +179,6 @@ class Path
      * @return int The last access time of the file or directory as a timestamp.
      * @throws IOException
      * @throws FileNotFoundException
-     *  TODO: manual test
      */
     function atime(): int
     {
@@ -208,7 +198,6 @@ class Path
      * @return int The creation time of the file or directory as a timestamp.
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     function ctime(): int
     {
@@ -228,7 +217,6 @@ class Path
      * @return int The last modified time of the file or directory as a timestamp.
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     function mtime(): int
     {
@@ -246,7 +234,6 @@ class Path
      * Check if the path refers to a regular file.
      *
      * @return bool Returns true if the path refers to a regular file, otherwise returns false.
-     *  TODO: manual test
      */
     public function isFile(): bool
     {
@@ -257,7 +244,6 @@ class Path
      * Check if the given path is a directory.
      *
      * @return bool Returns true if the path is a directory, false otherwise.
-     *  TODO: manual test
      */
     public function isDir(): bool
     {
@@ -268,7 +254,6 @@ class Path
      * Get the extension of the given path.
      *
      * @return string Returns the extension of the path as a string if it exists, or an empty string otherwise.
-     *  TODO: manual test
      */
     public function ext(): string
     {
@@ -281,7 +266,6 @@ class Path
      * Ex: Path('path/to/file.ext').basename() => 'file.ext'
      *
      * @return string The base name of the path.
-     *  TODO: manual test
      */
     public function basename(): string
     {
@@ -293,7 +277,6 @@ class Path
      *
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function cd(): void
     {
@@ -311,7 +294,6 @@ class Path
      *
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function chdir(): void
     {
@@ -324,7 +306,6 @@ class Path
      * Ex: Path('path/to/file.ext').name() => 'file'
      *
      * @return string Returns the name of the file without its extension.
-     *  TODO: manual test
      */
     public function name(): string
     {
@@ -335,7 +316,6 @@ class Path
      * Converts the path to the normalized form.
      *
      * @return self The instance of the current object.
-     *  TODO: manual test
      */
     public function normCase(): self
     {
@@ -351,7 +331,6 @@ class Path
      *
      * > Thanks to https://stackoverflow.com/users/216254/troex
      * @return self A new instance of the class with the normalized path.
-     *  TODO: manual test
      */
     public function normPath(): self
     {
@@ -422,7 +401,6 @@ class Path
      * @return void
      * @throws FileExistsException
      * @throws IOException
-     *  TODO: manual test
      */
     public function mkdir(int $mode = 0777, bool $recursive = false): void
     {
@@ -451,7 +429,6 @@ class Path
      * @return void
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function delete(): void
     {
@@ -481,7 +458,6 @@ class Path
      * @throws FileNotFoundException If the source file does not exist or is not a file.
      * @throws FileExistsException
      * @throws IOException
-     *  TODO: manual test
      */
     public function copy(string|self $destination, bool $follow_symlinks = false): self
     {
