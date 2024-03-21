@@ -3,6 +3,8 @@
 
 # Path-php
 
+> This library is still under development, DO NOT USE IN PRODUCTION. Contributions, however, are welcome.
+
 An intuitive and object-oriented file and path operations, inspired by the path.py python library.
 
     <?php
