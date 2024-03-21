@@ -80,6 +80,11 @@ class BuiltinProxy
         return unlink($filename, $context);
     }
 
+    public function umask(?int $mode): int
+    {
+        return umask($mode);
+    }
+
     public function rmdir(string $directory, $context = null): bool
     {
         return rmdir($directory, $context);
