@@ -645,7 +645,7 @@ class Path
      * The elements of the list are Path objects.
      * This does not walk recursively into subdirectories (but see walkdirs())
      *
-     * @return array
+     * @return array<self>
      * @throws FileNotFoundException
      */
     public function dirs(): array
@@ -674,7 +674,7 @@ class Path
     /**
      * Retrieves an array of files present in the directory.
      *
-     * @return array An array of files present in the directory.
+     * @return array<self> An array of files present in the directory.
      * @throws FileNotFoundException If the directory specified in the path does not exist.
      */
     public function files(): array
@@ -802,7 +802,8 @@ class Path
     /**
      * Retrieves the permissions of a file or directory as an octal.
      *
-     * @return int The permissions of the file or directory in octal notation.
+     * @param bool $asOctal
+     * @return int The permissions of the file or directory
      * @throws FileNotFoundException
      * @throws IOException
      */
@@ -818,7 +819,11 @@ class Path
             throw new IOException("Error while getting permissions on " . $this->path);
         }
 
-        return $asOctal ? $perms : (int)substr(sprintf('%o', $perms), -4);
+        if (!$asOctal) {
+            $perms = (int)substr(sprintf('%o', $perms), -4);
+        }
+
+        return $perms;
     }
 
     /**
@@ -904,9 +909,9 @@ class Path
     /**
      * Expands the path by performing three operations: expanding user, expanding variables, and normalizing the path.
      *
-     * @return Path The expanded path.
+     * @return self The expanded path.
      */
-    public function expand(): Path
+    public function expand(): self
     {
         return $this->expandUser()->expandVars()->normPath();
     }
@@ -931,9 +936,9 @@ class Path
      *
      * Searches for variable placeholders in the path and replaces them with their corresponding values from the environment variables.
      *
-     * @return Path The path with expanded variables.
+     * @return self The path with expanded variables.
      */
-    public function expandVars(): Path
+    public function expandVars(): self
     {
         $path = preg_replace_callback(
             '/\$\{([^}]+)}|\$(\w+)/',
@@ -950,7 +955,7 @@ class Path
      * Retrieves a list of files and directories that match a specified pattern.
      *
      * @param string $pattern The pattern to search for.
-     * @return array A list of files and directories that match the pattern.
+     * @return array<self> A list of files and directories that match the pattern.
      * @throws FileNotFoundException
      * @throws IOException
      */
@@ -1065,7 +1070,7 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public function rename(string|self $newPath): Path
+    public function rename(string|self $newPath): self
     {
         return $this->move($newPath);
     }
@@ -1357,7 +1362,7 @@ class Path
      * Compute a version of this path that is relative to another path.
      *
      * @param string|Path $basePath
-     * @return string
+     * @return self
      * @throws FileNotFoundException
      * @throws IOException
      */
