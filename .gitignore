@@ -6,3 +6,5 @@ vendor/
 /.phpunit.result.cache
 
 composer.lock
+
+build/logs/clover.xml

@@ -499,11 +499,11 @@ class Path
      */
     public function copyTree(string|self $destination, bool $follow_symlinks = false): self
     {
-        $destination = $this->cast($destination);
-
         if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this);
         }
+
+        $destination = $this->cast($destination);
 
         if ($destination->isFile()) {
             $destination->remove();
@@ -824,7 +824,8 @@ class Path
     /**
      * Changes the permissions of a file or directory.
      *
-     * @param int $permissions The new permissions to set. The value should be an octal number.
+     * @param int $permissions The new permissions to set.
+     * @param bool $asOctal
      * @param bool $clearStatCache
      * @throws FileNotFoundException
      * @throws IOException
@@ -835,8 +836,8 @@ class Path
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
 
-        if (!$asOctal) {
-            $permissions = octdec($permissions);
+        if ($asOctal) {
+            $permissions = decoct($permissions);
         }
 
         if ($clearStatCache) {
@@ -1360,7 +1361,7 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public function getRelativePath(string|self $basePath): string
+    public function getRelativePath(string|self $basePath): self
     {
         if (!$this->exists()) {
             throw new FileNotFoundException("{$this->path} is not a file or directory");
@@ -1382,6 +1383,10 @@ class Path
             array_shift($baseParts);
         }
 
-        return str_repeat('..' . DIRECTORY_SEPARATOR, count($baseParts)) . implode(DIRECTORY_SEPARATOR, $pathParts);
+        return $this->cast(
+            str_repeat(
+            '..' . DIRECTORY_SEPARATOR, count($baseParts)) . implode(DIRECTORY_SEPARATOR, $pathParts
+            )
+        );
     }
 }
