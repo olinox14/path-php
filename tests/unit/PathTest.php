@@ -1393,6 +1393,38 @@ class PathTest extends TestCase
      * @throws FileNotFoundException
      * @throws FileExistsException
      */
+    public function testCopyTreeDestinationIsFile(): void
+    {
+        $path = $this->getMock('foo.ext', 'copyTree');
+        $path->method('exists')->willReturn(True);
+        $path->method('isFile')->willReturn(True);
+
+        $destination = "/bar/foo2.ext";
+        $destinationPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('cast')->with($destination)->willReturn($destinationPath);
+
+        $destinationPath->method('isFile')->willReturn(True);
+
+        $destinationPath->expects(self::once())->method('remove');
+
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $path
+            ->method('copy')
+            ->with($destinationPath, False)
+            ->willReturn($newPath);
+
+        $this->assertEquals(
+            $newPath,
+            $path->copyTree($destination)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
     public function testCopyTreeDoesNotExist(): void
     {
         $path = $this->getMock('foo.ext', 'copyTree');
@@ -2237,6 +2269,26 @@ class PathTest extends TestCase
      * @throws IOException
      * @throws FileNotFoundException
      */
+    public function testGetPermissionsAsDecimal(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'getPermissions');
+        $path->method('exists')->willReturn(True);
+
+        $this->builtin
+            ->method('fileperms')
+            ->with('/foo/file.ext')
+            ->willReturn(16895);
+
+        $this->assertEquals(
+            777,
+            $path->getPermissions(false)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
     public function testGetPermissionsFileDoesNotExist(): void
     {
         $path = $this->getMock('/foo/file.ext', 'getPermissions');
@@ -2279,8 +2331,26 @@ class PathTest extends TestCase
         $path->method('exists')->willReturn(True);
 
         $this->builtin
+            ->expects(self::once())
             ->method('chmod')
-            ->with('/foo/file.ext', 777)
+            ->with('/foo/file.ext', 1411)
+            ->willReturn(True);
+
+        $path->setPermissions(777);
+    }
+
+    /**
+     * @throws FileNotFoundException|IOException
+     */
+    public function testSetPermissionsWithCacheClearing(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setPermissions');
+        $path->method('exists')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chmod')
+            ->with('/foo/file.ext', 1411)
             ->willReturn(True);
 
         $this->builtin
@@ -2288,6 +2358,23 @@ class PathTest extends TestCase
             ->method('clearstatcache');
 
         $path->setPermissions(777, false, true);
+    }
+
+    /**
+     * @throws FileNotFoundException|IOException
+     */
+    public function testSetPermissionsWithDecimal(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setPermissions');
+        $path->method('exists')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chmod')
+            ->with('/foo/file.ext', 16895)
+            ->willReturn(True);
+
+        $path->setPermissions(16895, true);
     }
 
     /**
@@ -2320,17 +2407,13 @@ class PathTest extends TestCase
         $path->method('exists')->willReturn(True);
 
         $this->builtin
-            ->expects(self::once())
-            ->method('clearstatcache');
-
-        $this->builtin
             ->method('chmod')
-            ->with('/foo/file.ext', 0777)
+            ->with('/foo/file.ext', 1411)
             ->willReturn(False);
 
         $this->expectException(IOException::class);
 
-        $path->setPermissions(0777, false, true);
+        $path->setPermissions(777);
     }
 
     /**
@@ -2558,6 +2641,17 @@ class PathTest extends TestCase
 
         $this->assertEquals(
             $expandedPath,
+            $path->expandUser()
+        );
+    }
+
+    public function testExpandUserNothingToExpand(): void
+    {
+        $path = $this->getMock('file.ext', 'expandUser');
+        $path->method('path')->willReturn('file.ext');
+
+        $this->assertEquals(
+            $path,
             $path->expandUser()
         );
     }
@@ -3107,6 +3201,7 @@ class PathTest extends TestCase
     {
         $path = $this->getMock('/foo', 'remove_p');
         $path->method('isFile')->willReturn(True);
+        $path->method('isDir')->willReturn(False);
 
         $path
             ->expects(self::once())
@@ -3118,14 +3213,34 @@ class PathTest extends TestCase
     /**
      * @throws IOException
      */
-    public function testRemovePTargetDoesNotExists(): void
+    public function testRemovePFileDoesNotExists(): void
     {
         $path = $this->getMock('/foo', 'remove_p');
-        $path->method('exists')->willReturn(False);
+        $path->method('isFile')->willReturn(False);
+        $path->method('isDir')->willReturn(False);
 
         $path
             ->expects(self::never())
             ->method('remove');
+
+        $path->remove_p();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testRemovePTargetIsDir(): void
+    {
+        $path = $this->getMock('/foo', 'remove_p');
+        $path->method('isFile')->willReturn(False);
+        $path->method('isDir')->willReturn(True);
+
+        $path
+            ->expects(self::never())
+            ->method('remove');
+
+        $this->expectException(FileExistsException::class);
 
         $path->remove_p();
     }

@@ -835,13 +835,13 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public function setPermissions(int $permissions, bool $asOctal = true, bool $clearStatCache = false): void
+    public function setPermissions(int $permissions, bool $asOctal = false, bool $clearStatCache = false): void
     {
         if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
         }
 
-        if ($asOctal) {
+        if (!$asOctal) {
             $permissions = decoct($permissions);
         }
 
