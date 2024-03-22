@@ -10,20 +10,23 @@ An intuitive and object-oriented file and path operations, inspired by the path.
     <?php
 
     use Path\Path;
-  
-    $path = new Path(__file__).parent();
 
-    echo($path->dirs());
-
-    $path = new Path('/home');
-
+    $dir = (new Path(__file__))->parent();
+    
+    var_dump(
+        $dir->dirs()
+    );
+    
+    $path = new Path('.');
+    
     foreach($path->files() as $file) {
-        $file->chmod(0555);
+        $file->chmod(755);
     }
+    
+    $newPath = $path->append('readme.md');
+    
+    var_dump($newPath->absPath());
 
-    $newPath = $path->append('bar');
-
-    echo($newPath->absPath()); // => '/foo/bar'
 
 ### Contribute 
 
@@ -31,16 +34,16 @@ An intuitive and object-oriented file and path operations, inspired by the path.
 
     docker build -t path .
 
-    # Sur Linux
+    # Linux
     docker run -v "$(pwd)":/path --name path path
 
-    # Sous Windows
+    # Windows
     docker run -d -v "%cd%:/path" --name path path
 
     docker exec -it path bash
     composer install
 
-#### Run tests
+#### To run tests
 
     docker start path
     docker exec -it path bash
