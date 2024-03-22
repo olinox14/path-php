@@ -47,7 +47,6 @@ class Path
      * @param string|Path $path The base path
      * @param string ...$parts The parts of the path to be joined.
      * @return self The resulting path after joining the parts using the directory separator.
-     *  TODO: manual test
      */
     public static function join(string|self $path, string|self ...$parts): string
     {
@@ -77,7 +76,6 @@ class Path
 
     /**
      * @return string
-     *  TODO: manual test
      */
     public function __toString(): string {
         return $this->path;
@@ -88,7 +86,6 @@ class Path
      *
      * @param string|self $path The input path to be cast.
      * @return self An instance of the current class.
-     *  TODO: manual test
      */
     protected function cast(string|self $path): self
     {
@@ -99,7 +96,6 @@ class Path
      * Retrieves the current path of the file or directory
      *
      * @return string The path of the file or directory
-     *  TODO: manual test
      */
     public function path(): string
     {
@@ -112,7 +108,6 @@ class Path
      * @param string|Path $path The path to compare against.
      *
      * @return bool Returns true if the given path is equal to the current path, false otherwise.
-     *  TODO: manual test
      */
     public function eq(string|self $path): bool {
         return $this->cast($path)->path() === $this->path();
@@ -121,7 +116,6 @@ class Path
     /**
      * Appends parts to the current path.
      *
-     *  TODO: manual test
      * @param string ...$parts The parts to be appended to the current path.
      * @return self Returns an instance of the class with the appended path.
      *@see Path::join()
@@ -129,8 +123,7 @@ class Path
      */
     public function append(string|self ...$parts): self
     {
-        $this->path = self::join($this->path, ...$parts);
-        return $this;
+        return $this->cast(self::join($this->path, ...$parts));
     }
 
     /**
@@ -138,7 +131,6 @@ class Path
      *
      * @return self
      * @throws IOException
-     * TODO: manual test
      */
     public function absPath(): self
     {
@@ -152,7 +144,6 @@ class Path
     /**
      * > Alias for absPath()
      * @throws IOException
-     *  TODO: manual test
      */
     public function realpath(): self
     {
@@ -169,7 +160,6 @@ class Path
      *        - W_OK: checks for write permission.
      *        - X_OK: checks for execute permission.
      * @return bool Returns true if the permission check is successful; otherwise, returns false.
-     *  TODO: manual test
      */
     function access(int $mode): bool
     {
@@ -188,7 +178,6 @@ class Path
      * @return int The last access time of the file or directory as a timestamp.
      * @throws IOException
      * @throws FileNotFoundException
-     *  TODO: manual test
      */
     function atime(): int
     {
@@ -208,7 +197,6 @@ class Path
      * @return int The creation time of the file or directory as a timestamp.
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     function ctime(): int
     {
@@ -228,7 +216,6 @@ class Path
      * @return int The last modified time of the file or directory as a timestamp.
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     function mtime(): int
     {
@@ -246,7 +233,6 @@ class Path
      * Check if the path refers to a regular file.
      *
      * @return bool Returns true if the path refers to a regular file, otherwise returns false.
-     *  TODO: manual test
      */
     public function isFile(): bool
     {
@@ -257,7 +243,6 @@ class Path
      * Check if the given path is a directory.
      *
      * @return bool Returns true if the path is a directory, false otherwise.
-     *  TODO: manual test
      */
     public function isDir(): bool
     {
@@ -268,7 +253,6 @@ class Path
      * Get the extension of the given path.
      *
      * @return string Returns the extension of the path as a string if it exists, or an empty string otherwise.
-     *  TODO: manual test
      */
     public function ext(): string
     {
@@ -281,7 +265,6 @@ class Path
      * Ex: Path('path/to/file.ext').basename() => 'file.ext'
      *
      * @return string The base name of the path.
-     *  TODO: manual test
      */
     public function basename(): string
     {
@@ -293,7 +276,6 @@ class Path
      *
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function cd(): void
     {
@@ -311,7 +293,6 @@ class Path
      *
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function chdir(): void
     {
@@ -324,7 +305,6 @@ class Path
      * Ex: Path('path/to/file.ext').name() => 'file'
      *
      * @return string Returns the name of the file without its extension.
-     *  TODO: manual test
      */
     public function name(): string
     {
@@ -335,7 +315,6 @@ class Path
      * Converts the path to the normalized form.
      *
      * @return self The instance of the current object.
-     *  TODO: manual test
      */
     public function normCase(): self
     {
@@ -351,7 +330,6 @@ class Path
      *
      * > Thanks to https://stackoverflow.com/users/216254/troex
      * @return self A new instance of the class with the normalized path.
-     *  TODO: manual test
      */
     public function normPath(): self
     {
@@ -422,7 +400,6 @@ class Path
      * @return void
      * @throws FileExistsException
      * @throws IOException
-     *  TODO: manual test
      */
     public function mkdir(int $mode = 0777, bool $recursive = false): void
     {
@@ -451,7 +428,6 @@ class Path
      * @return void
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function delete(): void
     {
@@ -481,7 +457,6 @@ class Path
      * @throws FileNotFoundException If the source file does not exist or is not a file.
      * @throws FileExistsException
      * @throws IOException
-     *  TODO: manual test
      */
     public function copy(string|self $destination, bool $follow_symlinks = false): self
     {
@@ -519,7 +494,8 @@ class Path
      * @throws FileExistsException If the destination path or directory already exists.
      * @throws FileNotFoundException If the source file or directory does not exist.
      * @throws IOException
-     *  TODO: manual test
+     *  TODO: implement an 'ignore' callback property or an 'ignorePattern' property
+     *  TODO: implement a 'errorOnExistingDestination' property (default: True)
      */
     public function copyTree(string|self $destination, bool $follow_symlinks = false): self
     {
@@ -527,19 +503,36 @@ class Path
             throw new FileNotFoundException("File or dir does not exist : " . $this);
         }
 
+        $destination = $this->cast($destination);
+
+        if ($destination->isFile()) {
+            $destination->remove();
+        }
+
         if ($this->isFile()) {
             return $this->copy($destination, $follow_symlinks);
         }
 
-        $destination = $this->cast($destination);
-
-        foreach ($this->files() as $file) {
-            $file->copy($destination, $follow_symlinks);
+        if (!$destination->isDir()) {
+            $mode = $this->getPermissions();
+            $destination->mkdir($mode, true);
         }
 
         foreach ($this->dirs() as $dir) {
-            $dir->mkdir(); // TODO: mimic the source permissions into the new dir?
-            $dir->copyTree($destination, $follow_symlinks);
+            $newDir = $destination->append(
+                $dir->getRelativePath($this->path())
+            );
+
+            $dir->copyTree($newDir, $follow_symlinks);
+        }
+
+        foreach ($this->files() as $file) {
+            $newFile = $destination->append(
+                $file->getRelativePath($this->path())
+            );
+
+            $newFile->remove_p();
+            $file->copy($newFile, $follow_symlinks);
         }
 
         return $destination;
@@ -554,7 +547,6 @@ class Path
      * @return Path
      * @throws IOException
      * @throws FileNotFoundException
-     *  TODO: manual test
      */
     public function move(string|self $destination): self
     {
@@ -585,7 +577,6 @@ class Path
      *
      * @return void
      * @throws IOException
-     *  TODO: manual test
      */
     public function touch(int|\DateTime $time = null, int|\DateTime $atime = null): void
     {
@@ -609,7 +600,6 @@ class Path
      * @return int The size of the file in bytes.
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function size(): int
     {
@@ -630,7 +620,6 @@ class Path
      * Retrieves the parent directory of a file or directory path.
      *
      * @return self The parent directory of the specified path.
-     *  TODO: manual test
      */
     public function parent(int $levels = 1): self
     {
@@ -644,7 +633,6 @@ class Path
      *
      * @param int $levels
      * @return self
-     *  TODO: manual test
      */
     public function dirname(int $levels = 1): self
     {
@@ -657,9 +645,8 @@ class Path
      * The elements of the list are Path objects.
      * This does not walk recursively into subdirectories (but see walkdirs())
      *
-     * @return array
+     * @return array<self>
      * @throws FileNotFoundException
-     *  TODO: manual test
      */
     public function dirs(): array
     {
@@ -687,9 +674,8 @@ class Path
     /**
      * Retrieves an array of files present in the directory.
      *
-     * @return array An array of files present in the directory.
+     * @return array<self> An array of files present in the directory.
      * @throws FileNotFoundException If the directory specified in the path does not exist.
-     *  TODO: manual test
      */
     public function files(): array
     {
@@ -719,7 +705,6 @@ class Path
      *
      * @param string $pattern The pattern to match against.
      * @return bool True if the path matches the pattern, false otherwise.
-     *  TODO: manual test
      */
     public function fnmatch(string $pattern): bool
     {
@@ -731,7 +716,6 @@ class Path
      *
      * @return string The content of the file as a string.
      * @throws FileNotFoundException|IOException
-     *  TODO: manual test
      */
     public function getContent(): string
     {
@@ -752,7 +736,6 @@ class Path
      * @return string
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function readText(): string
     {
@@ -762,7 +745,6 @@ class Path
     /**
      * @throws IOException
      * @throws FileNotFoundException
-     *  TODO: manual test
      */
     public function lines(): array
     {
@@ -778,7 +760,6 @@ class Path
      * @return int The number of bytes that were written to the file
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function putContent(string $content, bool $append = false, bool $create = true): int
     {
@@ -803,27 +784,30 @@ class Path
      * Writes an array of lines to a file.
      *
      * @param array<string> $lines An array of lines to be written to the file.
+     * @param bool $append Append the content to the file's content instead of replacing it
+     * @param bool $create Creates the file if it does not already exist
      * @return int The number of bytes written to the file.
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
-    public function putLines(array $lines): int
+    public function putLines(array $lines, bool $append = false, bool $create = true): int
     {
         return $this->putContent(
-            implode(PHP_EOL, $lines)
+            implode(PHP_EOL, $lines),
+            $append,
+            $create
         );
     }
 
     /**
-     * Retrieves the permissions of a file or directory.
+     * Retrieves the permissions of a file or directory as an octal.
      *
-     * @return int The permissions of the file or directory in octal notation.
+     * @param bool $asOctal
+     * @return int The permissions of the file or directory
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
-    public function getPermissions(): int
+    public function getPermissions(bool $asOctal = true): int
     {
         if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
@@ -835,22 +819,30 @@ class Path
             throw new IOException("Error while getting permissions on " . $this->path);
         }
 
-        return (int)substr(sprintf('%o', $perms), -4);
+        if (!$asOctal) {
+            $perms = (int)substr(sprintf('%o', $perms), -4);
+        }
+
+        return $perms;
     }
 
     /**
      * Changes the permissions of a file or directory.
      *
-     * @param int $permissions The new permissions to set. The value should be an octal number.
+     * @param int $permissions The new permissions to set.
+     * @param bool $asOctal
      * @param bool $clearStatCache
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
-    public function setPermissions(int $permissions, bool $clearStatCache = false): void
+    public function setPermissions(int $permissions, bool $asOctal = false, bool $clearStatCache = false): void
     {
         if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this->path);
+        }
+
+        if (!$asOctal) {
+            $permissions = decoct($permissions);
         }
 
         if ($clearStatCache) {
@@ -864,6 +856,8 @@ class Path
         }
     }
 
+    // TODO: implement getOwner()
+
     /**
      * Changes ownership of the file.
      *
@@ -871,7 +865,6 @@ class Path
      * @param string $group The new owner group name.
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function setOwner(string $user, string $group, bool $clearStatCache = false): void
     {
@@ -896,7 +889,6 @@ class Path
      * Checks if a file exists.
      *
      * @return bool Returns true if the file exists, false otherwise.
-     *  TODO: manual test
      */
     public function exists(): bool
     {
@@ -905,9 +897,9 @@ class Path
 
     /**
      * Return True if both pathname arguments refer to the same file or directory.
+     * // TODO: make explicit that the two files/dirs have to exist
      *
      * @throws IOException
-     *  TODO: manual test
      */
     public function sameFile(string | self $other): bool
     {
@@ -917,10 +909,9 @@ class Path
     /**
      * Expands the path by performing three operations: expanding user, expanding variables, and normalizing the path.
      *
-     * @return Path The expanded path.
-     *  TODO: manual test
+     * @return self The expanded path.
      */
-    public function expand(): Path
+    public function expand(): self
     {
         return $this->expandUser()->expandVars()->normPath();
     }
@@ -929,16 +920,15 @@ class Path
      * Expands the user directory in the file path.
      *
      * @return self The modified instance with the expanded user path.
-     *  TODO: manual test
      */
     public function expandUser(): self
     {
-        $path = $this->path();
-        if (str_starts_with($path, '~')) {
-            $home = $_SERVER['HOME'];
-            $path = self::join($home, substr($path, 1));
+        if (!str_starts_with($this->path(), '~/')) {
+            return $this;
         }
-        return $this->cast($path);
+
+        $home = $this->cast($_SERVER['HOME']);
+        return $home->append(substr($this->path(), 2));
     }
 
     /**
@@ -946,10 +936,9 @@ class Path
      *
      * Searches for variable placeholders in the path and replaces them with their corresponding values from the environment variables.
      *
-     * @return Path The path with expanded variables.
-     *  TODO: manual test
+     * @return self The path with expanded variables.
      */
-    public function expandVars(): Path
+    public function expandVars(): self
     {
         $path = preg_replace_callback(
             '/\$\{([^}]+)}|\$(\w+)/',
@@ -966,10 +955,9 @@ class Path
      * Retrieves a list of files and directories that match a specified pattern.
      *
      * @param string $pattern The pattern to search for.
-     * @return array A list of files and directories that match the pattern.
+     * @return array<self> A list of files and directories that match the pattern.
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function glob(string $pattern): array
     {
@@ -998,7 +986,6 @@ class Path
      * @throws IOException if there was an error while removing the file.
      *
      * @throws IOException|FileNotFoundException if the file does not exist or is not a file.
-     *  TODO: manual test
      */
     public function remove(): void
     {
@@ -1015,7 +1002,6 @@ class Path
      * > Alias for Path->remove()
      * @return void
      * @throws IOException|FileNotFoundException
-     *  TODO: manual test
      */
     public function unlink(): void
     {
@@ -1023,16 +1009,20 @@ class Path
     }
 
     /**
-     * Like remove(), but do not throw an exception if the file does not exist
+     * Like remove(), but does not throw an exception if the file does not exist
+     * It will still raise a FileExistsException if the target is an existing directory.
      *
      * @return void
      * @throws IOException
      * @throws FileNotFoundException
-     *  TODO: manual test
+     * @throws FileExistsException
      */
     public function remove_p(): void
     {
-        if (!$this->exists()) {
+        if ($this->isDir()) {
+            throw new FileExistsException( $this->path . " is a directory");
+        }
+        if (!$this->isFile()) {
             return;
         }
         $this->remove();
@@ -1043,12 +1033,12 @@ class Path
      *
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function rmdir(bool $recursive = false, bool $permissive = false): void
     {
         if (!$this->isDir()) {
             if ($permissive) {
+                // TODO: should we throw an error if this path is a file?
                 return;
             }
             throw new FileNotFoundException("{$this->path} is not a directory");
@@ -1079,16 +1069,14 @@ class Path
     /**
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
-    public function rename(string|self $newPath): Path
+    public function rename(string|self $newPath): self
     {
         return $this->move($newPath);
     }
 
     /**
      * @throws IOException
-     *  TODO: manual test
      */
     public function readHash(string $algo, bool $binary = false): string
     {
@@ -1105,7 +1093,6 @@ class Path
      * @return self The target of the symbolic link as a new instance of the current class.
      * @throws FileNotFoundException If the path does not exist or is not a symbolic link.
      * @throws IOException If there is an error while getting the target of the symbolic link.
-     *  TODO: manual test
      */
     public function readLink(): self
     {
@@ -1126,7 +1113,6 @@ class Path
      * @return resource|false Returns a file pointer resource on success, or false on failure.
      * @throws FileNotFoundException If the path does not refer to a file.
      * @throws IOException If the file fails to open.
-     *  TODO: manual test
      */
     public function open(string $mode = 'r'): mixed
     {
@@ -1144,7 +1130,6 @@ class Path
 
     /**
      * @throws FileNotFoundException
-     *  TODO: manual test
      */
     public function walkDirs(): \Iterator
     {
@@ -1165,7 +1150,6 @@ class Path
      * @param callable $callback The callback function to be called with the file handle.
      * @param string $mode The mode in which to open the file. Defaults to 'r'.
      * @throws Throwable If an exception is thrown within the callback function.
-     *  TODO: manual test
      */
     public function with(callable $callback, string $mode = 'r'): mixed
     {
@@ -1188,7 +1172,6 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      * @throws Throwable
-     *  TODO: manual test
      */
     public function chunks(int $chunk_size = 8192): Generator
     {
@@ -1209,7 +1192,6 @@ class Path
      * Check whether this path is absolute.
      *
      * @return bool
-     *  TODO: manual test
      */
     public function isAbs(): bool
     {
@@ -1222,7 +1204,6 @@ class Path
      *
      * @param int $mode The new permissions (octal).
      * @throws FileNotFoundException|IOException
-     *  TODO: manual test
      */
     public function chmod(int $mode): void
     {
@@ -1236,7 +1217,6 @@ class Path
      * @param string $user The new owner username.
      * @param string $group The new owner group name.
      * @throws FileNotFoundException|IOException
-     *  TODO: manual test
      */
     public function chown(string $user, string $group): void
     {
@@ -1248,7 +1228,6 @@ class Path
      *
      * @throws IOException
      * @throws FileNotFoundException
-     *  TODO: manual test
      */
     public function chroot(): void
     {
@@ -1256,7 +1235,8 @@ class Path
             throw new FileNotFoundException("Dir does not exist : " . $this->path);
         }
 
-        $success = $this->builtin->chroot($this->path);
+        // TODO: not working as expected, see why (new working dir is '/' no matter what)
+        $success = $this->builtin->chroot($this->absPath()->path());
         if (!$success) {
             throw new IOException("Error changing root directory to " . $this->path);
         }
@@ -1266,7 +1246,6 @@ class Path
      * Checks if the file is a symbolic link.
      *
      * @return bool
-     *  TODO: manual test
      */
     public function isLink(): bool
     {
@@ -1277,7 +1256,6 @@ class Path
      * Checks if the path is a mount point.
      *
      * @return bool True if the path is a mount point, false otherwise.
-     *  TODO: manual test
      */
     public function isMount(): bool
     {
@@ -1292,7 +1270,6 @@ class Path
      * @throws FileExistsException
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
     public function link(string|self $newLink): self
     {
@@ -1316,11 +1293,10 @@ class Path
     }
 
     /**
-     * Like stat(), but do not follow symbolic links.
+     * Gives information about a file or symbolic link
      *
      * @return array
      * @throws IOException
-     *  TODO: manual test
      */
     public function lstat(): array
     {
@@ -1339,7 +1315,6 @@ class Path
      * @throws FileNotFoundException If the file or directory does not exist.
      * @throws FileExistsException If the symbolic link already exists.
      * @throws IOException If there was an error while creating the symbolic link.
-     *  TODO: manual test
      */
     public function symlink(string | self $newLink): self
     {
@@ -1372,7 +1347,6 @@ class Path
      *     >>> '/', 'foo', 'bar', 'baz'
      *
      * @return array
-     *  TODO: manual test
      */
     public function parts(): array
     {
@@ -1388,12 +1362,11 @@ class Path
      * Compute a version of this path that is relative to another path.
      *
      * @param string|Path $basePath
-     * @return string
+     * @return self
      * @throws FileNotFoundException
      * @throws IOException
-     *  TODO: manual test
      */
-    public function getRelativePath(string|self $basePath): string
+    public function getRelativePath(string|self $basePath): self
     {
         if (!$this->exists()) {
             throw new FileNotFoundException("{$this->path} is not a file or directory");
@@ -1415,6 +1388,10 @@ class Path
             array_shift($baseParts);
         }
 
-        return str_repeat('..' . DIRECTORY_SEPARATOR, count($baseParts)) . implode(DIRECTORY_SEPARATOR, $pathParts);
+        return $this->cast(
+            str_repeat(
+            '..' . DIRECTORY_SEPARATOR, count($baseParts)) . implode(DIRECTORY_SEPARATOR, $pathParts
+            )
+        );
     }
 }

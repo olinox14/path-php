@@ -1371,12 +1371,47 @@ class PathTest extends TestCase
         $path->method('isFile')->willReturn(True);
 
         $destination = "/bar/foo2.ext";
+        $destinationPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('cast')->with($destination)->willReturn($destinationPath);
+
         $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
 
         $path
             ->expects(self::once())
             ->method('copy')
-            ->with($destination, False)
+            ->with($destinationPath, False)
+            ->willReturn($newPath);
+
+        $this->assertEquals(
+            $newPath,
+            $path->copyTree($destination)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testCopyTreeDestinationIsFile(): void
+    {
+        $path = $this->getMock('foo.ext', 'copyTree');
+        $path->method('exists')->willReturn(True);
+        $path->method('isFile')->willReturn(True);
+
+        $destination = "/bar/foo2.ext";
+        $destinationPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('cast')->with($destination)->willReturn($destinationPath);
+
+        $destinationPath->method('isFile')->willReturn(True);
+
+        $destinationPath->expects(self::once())->method('remove');
+
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $path
+            ->method('copy')
+            ->with($destinationPath, False)
             ->willReturn($newPath);
 
         $this->assertEquals(
@@ -1413,32 +1448,54 @@ class PathTest extends TestCase
      */
     public function testCopyTreeIsDirWithNoSubDirs(): void
     {
-        $path = $this->getMock('foo.ext', 'copyTree');
+        $path = $this->getMock('/var', 'copyTree');
         $path->method('exists')->willReturn(True);
         $path->method('isFile')->willReturn(False);
+        $path->method('path')->willReturn('/var');
 
-        $file1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
-        $file2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
-
-        $path->method('files')->willReturn([$file1, $file2]);
-        $path->method('dirs')->willReturn([]);
-
-        $destination = "/bar/foo2.ext";
+        $destination = "/var/www";
         $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
 
         $path->method('cast')->with($destination)->willReturn($newPath);
 
+        $file1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $relativePath1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $file1->method('getRelativePath')->with('/var')->willReturn($relativePath1);
+
+        $file2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $relativePath2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $file2->method('getRelativePath')->with('/var')->willReturn($relativePath2);
+
+        $path->method('files')->willReturn([$file1, $file2]);
+        $path->method('dirs')->willReturn([]);
+
+        $newFilePath1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newFilePath2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $newPath
+            ->method('append')
+            ->willReturnMap([
+                [$relativePath1, $newFilePath1],
+                [$relativePath2, $newFilePath2],
+            ]);
+
+        $newFilePath1
+            ->expects(self::once())
+            ->method('remove_p');
+
         $file1
             ->expects(self::once())
             ->method('copy')
-            ->with($newPath, False)
-            ->willReturn($newPath);
+            ->with($newFilePath1, False);
+
+        $newFilePath2
+            ->expects(self::once())
+            ->method('remove_p');
 
         $file2
             ->expects(self::once())
             ->method('copy')
-            ->with($newPath, False)
-            ->willReturn($newPath);
+            ->with($newFilePath2, False);
 
         $this->assertEquals(
             $newPath,
@@ -1453,53 +1510,49 @@ class PathTest extends TestCase
      */
     public function testCopyTreeIsDirWithSubDirs(): void
     {
-        $path = $this->getMock('foo.ext', 'copyTree');
+        $path = $this->getMock('/var', 'copyTree');
         $path->method('exists')->willReturn(True);
         $path->method('isFile')->willReturn(False);
-
-        $file1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
-        $file2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('path')->willReturn('/var');
 
         $dir1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
         $dir1->method('exists')->willReturn(True);
         $dir1->method('isFile')->willReturn(False);
+        $relativeNewDir1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $dir1->method('getRelativePath')->with('/var')->willReturn($relativeNewDir1);
 
         $dir2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
         $dir2->method('exists')->willReturn(True);
         $dir2->method('isFile')->willReturn(False);
+        $relativeNewDir2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $dir2->method('getRelativePath')->with('/var')->willReturn($relativeNewDir2);
 
-        $path->method('files')->willReturn([$file1, $file2]);
+        $path->method('files')->willReturn([]);
         $path->method('dirs')->willReturn([$dir1, $dir2]);
 
         $destination = "/bar/foo2.ext";
         $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
-
         $path->method('cast')->with($destination)->willReturn($newPath);
-        $dir1->method('cast')->with($destination)->willReturn($newPath);
-        $dir2->method('cast')->with($destination)->willReturn($newPath);
 
-        $dir1->expects(self::once())->method('copyTree')->with($newPath);
-        $dir2->expects(self::once())->method('copyTree')->with($newPath);
+        $newDirPath1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newDirPath2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
 
-        $file1
-            ->expects(self::once())
-            ->method('copy')
-            ->with($newPath, False)
-            ->willReturn($newPath);
-
-        $file2
-            ->expects(self::once())
-            ->method('copy')
-            ->with($newPath, False)
-            ->willReturn($newPath);
+        $newPath
+            ->method('append')
+            ->willReturnMap([
+                [$relativeNewDir1, $newDirPath1],
+                [$relativeNewDir2, $newDirPath2],
+            ]);
 
         $dir1
             ->expects(self::once())
-            ->method('mkdir');
+            ->method('copyTree')
+            ->with($newDirPath1);
 
         $dir2
             ->expects(self::once())
-            ->method('mkdir');
+            ->method('copyTree')
+            ->with($newDirPath2);
 
         $this->assertEquals(
             $newPath,
@@ -2207,8 +2260,28 @@ class PathTest extends TestCase
             ->willReturn(16895);
 
         $this->assertEquals(
-            777,
+            16895,
             $path->getPermissions()
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGetPermissionsAsDecimal(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'getPermissions');
+        $path->method('exists')->willReturn(True);
+
+        $this->builtin
+            ->method('fileperms')
+            ->with('/foo/file.ext')
+            ->willReturn(16895);
+
+        $this->assertEquals(
+            777,
+            $path->getPermissions(false)
         );
     }
 
@@ -2258,15 +2331,50 @@ class PathTest extends TestCase
         $path->method('exists')->willReturn(True);
 
         $this->builtin
+            ->expects(self::once())
             ->method('chmod')
-            ->with('/foo/file.ext', 0777)
+            ->with('/foo/file.ext', 1411)
+            ->willReturn(True);
+
+        $path->setPermissions(777);
+    }
+
+    /**
+     * @throws FileNotFoundException|IOException
+     */
+    public function testSetPermissionsWithCacheClearing(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setPermissions');
+        $path->method('exists')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chmod')
+            ->with('/foo/file.ext', 1411)
             ->willReturn(True);
 
         $this->builtin
             ->expects(self::once())
             ->method('clearstatcache');
 
-        $path->setPermissions(0777, true);
+        $path->setPermissions(777, false, true);
+    }
+
+    /**
+     * @throws FileNotFoundException|IOException
+     */
+    public function testSetPermissionsWithDecimal(): void
+    {
+        $path = $this->getMock('/foo/file.ext', 'setPermissions');
+        $path->method('exists')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chmod')
+            ->with('/foo/file.ext', 16895)
+            ->willReturn(True);
+
+        $path->setPermissions(16895, true);
     }
 
     /**
@@ -2299,17 +2407,13 @@ class PathTest extends TestCase
         $path->method('exists')->willReturn(True);
 
         $this->builtin
-            ->expects(self::once())
-            ->method('clearstatcache');
-
-        $this->builtin
             ->method('chmod')
-            ->with('/foo/file.ext', 0777)
+            ->with('/foo/file.ext', 1411)
             ->willReturn(False);
 
         $this->expectException(IOException::class);
 
-        $path->setPermissions(0777, true);
+        $path->setPermissions(777);
     }
 
     /**
@@ -2526,14 +2630,28 @@ class PathTest extends TestCase
 
         $expandedPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
 
-        $path
+        $homePath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('cast')->with($_SERVER['HOME'])->willReturn($homePath);
+
+        $homePath
             ->expects(self::once())
-            ->method('cast')
-            ->with(Path::join($_SERVER['HOME'], '/file.ext'))
+            ->method('append')
+            ->with('file.ext')
             ->willReturn($expandedPath);
 
         $this->assertEquals(
             $expandedPath,
+            $path->expandUser()
+        );
+    }
+
+    public function testExpandUserNothingToExpand(): void
+    {
+        $path = $this->getMock('file.ext', 'expandUser');
+        $path->method('path')->willReturn('file.ext');
+
+        $this->assertEquals(
+            $path,
             $path->expandUser()
         );
     }
@@ -3082,7 +3200,8 @@ class PathTest extends TestCase
     public function testRemoveP(): void
     {
         $path = $this->getMock('/foo', 'remove_p');
-        $path->method('exists')->willReturn(True);
+        $path->method('isFile')->willReturn(True);
+        $path->method('isDir')->willReturn(False);
 
         $path
             ->expects(self::once())
@@ -3094,14 +3213,34 @@ class PathTest extends TestCase
     /**
      * @throws IOException
      */
-    public function testRemovePTargetDoesNotExists(): void
+    public function testRemovePFileDoesNotExists(): void
     {
         $path = $this->getMock('/foo', 'remove_p');
-        $path->method('exists')->willReturn(False);
+        $path->method('isFile')->willReturn(False);
+        $path->method('isDir')->willReturn(False);
 
         $path
             ->expects(self::never())
             ->method('remove');
+
+        $path->remove_p();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testRemovePTargetIsDir(): void
+    {
+        $path = $this->getMock('/foo', 'remove_p');
+        $path->method('isFile')->willReturn(False);
+        $path->method('isDir')->willReturn(True);
+
+        $path
+            ->expects(self::never())
+            ->method('remove');
+
+        $this->expectException(FileExistsException::class);
 
         $path->remove_p();
     }
@@ -3526,8 +3665,13 @@ class PathTest extends TestCase
      */
     public function testChRoot(): void
     {
-        $path = $this->getMock('/foo', 'chroot');
+        $path = $this->getMock('foo', 'chroot');
         $path->method('isDir')->willReturn(True);
+
+        $absPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('absPath')->willReturn($absPath);
+
+        $absPath->method('path')->willReturn('/foo');
 
         $this->builtin
             ->expects(self::once())
@@ -3562,6 +3706,11 @@ class PathTest extends TestCase
     {
         $path = $this->getMock('/foo', 'chroot');
         $path->method('isDir')->willReturn(True);
+
+        $absPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('absPath')->willReturn($absPath);
+
+        $absPath->method('path')->willReturn('/foo');
 
         $this->builtin
             ->expects(self::once())
@@ -3962,8 +4111,18 @@ class PathTest extends TestCase
             ->with($basePath)
             ->willReturn('/other/path');
 
+        $result = $this
+            ->getMockBuilder(TestablePath::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $path
+            ->method('cast')
+            ->with('../../foo/bar/file.ext')
+            ->willReturn($result);
+
         $this->assertEquals(
-            '../../foo/bar/file.ext',
+            $result,
             $path->getRelativePath($basePath)
         );
     }
