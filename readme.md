@@ -45,3 +45,23 @@ An intuitive and object-oriented file and path operations, inspired by the path.
     docker start path
     docker exec -it path bash
     XDEBUG_MODE=coverage vendor/bin/phpunit -c phpunit.xml
+
+#### Generate doc
+
+To install and execute the [phpdoc](https://docs.phpdoc.org/3.0/) container :
+
+    docker pull phpdoc/phpdoc
+
+    # Sur Linux
+    docker run --rm -v "$(pwd):/data" "phpdoc/phpdoc:3"
+
+    # Sous Windows
+    docker run --rm -v "%cd%:/data" "phpdoc/phpdoc:3"
+
+Then, on linux, you could create an alias :
+
+    alias phpdoc="docker run --rm -v $(pwd):/data phpdoc/phpdoc:3"
+
+And run phpdoc with :
+
+    phpdoc
