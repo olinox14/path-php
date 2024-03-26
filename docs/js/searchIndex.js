@@ -48,12 +48,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path",
             "name": "Path",
-            "summary": "Represents\u0020a\u0020file\u0020or\u0020directory\u0020path.",
+            "summary": "An\u0020object\u0020representing\u0020a\u0020file\u0020or\u0020directory.",
             "url": "classes/Path-Path.html"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Ajoin\u0028\u0029",
             "name": "join",
-            "summary": "Joins\u0020two\u0020or\u0020more\u0020parts\u0020of\u0020a\u0020path\u0020together,\u0020inserting\u0020\u0027\/\u0027\u0020as\u0020needed.",
+            "summary": "Joins\u0020two\u0020or\u0020more\u0020parts\u0020of\u0020a\u0020path\u0020together.",
             "url": "classes/Path-Path.html#method_join"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003A__construct\u0028\u0029",
@@ -68,7 +68,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Acast\u0028\u0029",
             "name": "cast",
-            "summary": "Casts\u0020the\u0020input\u0020into\u0020an\u0020instance\u0020of\u0020the\u0020current\u0020class.",
+            "summary": "Casts\u0020the\u0020input\u0020into\u0020a\u0020Path\u0020instance.",
             "url": "classes/Path-Path.html#method_cast"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003A\u0024path",
@@ -153,7 +153,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AnormCase\u0028\u0029",
             "name": "normCase",
-            "summary": "Converts\u0020the\u0020path\u0020to\u0020the\u0020normalized\u0020form.",
+            "summary": "Normalize\u0020the\u0020case\u0020of\u0020a\u0020pathname.",
             "url": "classes/Path-Path.html#method_normCase"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AnormPath\u0028\u0029",
@@ -173,17 +173,17 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Acopy\u0028\u0029",
             "name": "copy",
-            "summary": "Copy\u0020data\u0020and\u0020mode\u0020bits\u0020\u0028\u201Ccp\u0020src\u0020dst\u201D\u0029.\u0020The\u0020destination\u0020may\u0020be\u0020a\u0020directory.",
+            "summary": "Copy\u0020a\u0020file.",
             "url": "classes/Path-Path.html#method_copy"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AcopyTree\u0028\u0029",
             "name": "copyTree",
-            "summary": "Copies\u0020the\u0020content\u0020of\u0020a\u0020file\u0020or\u0020directory\u0020to\u0020the\u0020specified\u0020destination.",
+            "summary": "Recursively\u0020copy\u0020a\u0020directory\u0020tree\u0020and\u0020return\u0020the\u0020destination\u0020directory.",
             "url": "classes/Path-Path.html#method_copyTree"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Amove\u0028\u0029",
             "name": "move",
-            "summary": "Moves\u0020a\u0020file\u0020or\u0020directory\u0020to\u0020a\u0020new\u0020location.\u0020Existing\u0020files\u0020or\u0020dirs\u0020will\u0020be\u0020overwritten.",
+            "summary": "Recursively\u0020move\u0020a\u0020file\u0020or\u0020directory\u0020to\u0020another\u0020location.",
             "url": "classes/Path-Path.html#method_move"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Atouch\u0028\u0029",
@@ -193,7 +193,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Asize\u0028\u0029",
             "name": "size",
-            "summary": "Calculates\u0020the\u0020size\u0020of\u0020a\u0020file.",
+            "summary": "Size\u0020of\u0020the\u0020file,\u0020in\u0020bytes.",
             "url": "classes/Path-Path.html#method_size"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Aparent\u0028\u0029",
@@ -203,7 +203,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Adirname\u0028\u0029",
             "name": "dirname",
-            "summary": "Alias\u0020for\u0020Path\u002D\u003Eparent\u0028\u0029\u0020method",
+            "summary": "\u003E\u0020Alias\u0020for\u0020Path\u002D\u003Eparent\u0028\u0029\u0020method",
             "url": "classes/Path-Path.html#method_dirname"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Adirs\u0028\u0029",
@@ -233,7 +233,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Alines\u0028\u0029",
             "name": "lines",
-            "summary": "",
+            "summary": "Retrieves\u0020the\u0020content\u0020of\u0020a\u0020file\u0020as\u0020an\u0020array\u0020of\u0020lines.",
             "url": "classes/Path-Path.html#method_lines"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AputContent\u0028\u0029",
@@ -248,7 +248,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AgetPermissions\u0028\u0029",
             "name": "getPermissions",
-            "summary": "Retrieves\u0020the\u0020permissions\u0020of\u0020a\u0020file\u0020or\u0020directory\u0020as\u0020an\u0020octal.",
+            "summary": "Retrieves\u0020the\u0020permissions\u0020of\u0020a\u0020file\u0020or\u0020directory.",
             "url": "classes/Path-Path.html#method_getPermissions"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AsetPermissions\u0028\u0029",
@@ -263,7 +263,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Aexists\u0028\u0029",
             "name": "exists",
-            "summary": "Checks\u0020if\u0020a\u0020file\u0020exists.",
+            "summary": "Checks\u0020if\u0020a\u0020file\u0020or\u0020directory\u0020exists.",
             "url": "classes/Path-Path.html#method_exists"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AsameFile\u0028\u0029",
@@ -303,27 +303,27 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Aremove_p\u0028\u0029",
             "name": "remove_p",
-            "summary": "Like\u0020remove\u0028\u0029,\u0020but\u0020does\u0020not\u0020throw\u0020an\u0020exception\u0020if\u0020the\u0020file\u0020does\u0020not\u0020exist\nIt\u0020will\u0020still\u0020raise\u0020a\u0020FileExistsException\u0020if\u0020the\u0020target\u0020is\u0020an\u0020existing\u0020directory.",
+            "summary": "Like\u0020remove\u0028\u0029,\u0020but\u0020does\u0020not\u0020throw\u0020an\u0020exception\u0020if\u0020the\u0020file\u0020does\u0020not\u0020exist.",
             "url": "classes/Path-Path.html#method_remove_p"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Armdir\u0028\u0029",
             "name": "rmdir",
-            "summary": "Removes\u0020a\u0020directory\u0020and\u0020its\u0020contents.",
+            "summary": "Removes\u0020a\u0020directory,\u0020and\u0020its\u0020contents\u0020if\u0020recursive.",
             "url": "classes/Path-Path.html#method_rmdir"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Arename\u0028\u0029",
             "name": "rename",
-            "summary": "",
+            "summary": "\u003E\u0020Alias\u0020for\u0020Path\u002D\u003Emove\u0028\u0029",
             "url": "classes/Path-Path.html#method_rename"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AreadHash\u0028\u0029",
             "name": "readHash",
-            "summary": "",
+            "summary": "Retrieves\u0020the\u0020hash\u0020of\u0020a\u0020file\u0020or\u0020directory\u0020using\u0020the\u0020specified\u0020algorithm.",
             "url": "classes/Path-Path.html#method_readHash"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AreadLink\u0028\u0029",
             "name": "readLink",
-            "summary": "Reads\u0020the\u0020target\u0020of\u0020a\u0020symbolic\u0020link\u0020and\u0020returns\u0020a\u0020new\u0020instance\u0020of\u0020the\u0020current\u0020class.",
+            "summary": "Returns\u0020the\u0020target\u0020of\u0020a\u0020symbolic\u0020link.",
             "url": "classes/Path-Path.html#method_readLink"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Aopen\u0028\u0029",
@@ -333,12 +333,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AwalkDirs\u0028\u0029",
             "name": "walkDirs",
-            "summary": "",
+            "summary": "Walks\u0020through\u0020the\u0020directories\u0020of\u0020a\u0020given\u0020directory\u0020and\u0020returns\u0020an\u0020iterator.",
             "url": "classes/Path-Path.html#method_walkDirs"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Awith\u0028\u0029",
             "name": "with",
-            "summary": "Calls\u0020a\u0020callback\u0020with\u0020a\u0020file\u0020handle\u0020opened\u0020with\u0020the\u0020specified\u0020mode\u0020and\u0020closes\u0020the\u0020handle\u0020afterward.",
+            "summary": "Calls\u0020a\u0020callback\u0020with\u0020a\u0020file\u0020handle\u0020opened\u0020with\u0020the\u0020specified\u0020mode\u0020and\u0020closes\u0020the\nhandle\u0020afterward.",
             "url": "classes/Path-Path.html#method_with"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Achunks\u0028\u0029",
@@ -353,12 +353,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Achmod\u0028\u0029",
             "name": "chmod",
-            "summary": "\u003E\u0020Alias\u0020for\u0020Path\u002D\u003EsetPermissions\u0028\u0029\u0020method\nChanges\u0020permissions\u0020of\u0020the\u0020file.",
+            "summary": "\u003E\u0020Alias\u0020for\u0020Path\u002D\u003EsetPermissions\u0028\u0029\u0020method",
             "url": "classes/Path-Path.html#method_chmod"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Achown\u0028\u0029",
             "name": "chown",
-            "summary": "\u003E\u0020Alias\u0020for\u0020Path\u002D\u003EsetOwner\u0028\u0029\u0020method\nChanges\u0020ownership\u0020of\u0020the\u0020file.",
+            "summary": "\u003E\u0020Alias\u0020for\u0020Path\u002D\u003EsetOwner\u0028\u0029\u0020method",
             "url": "classes/Path-Path.html#method_chown"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Achroot\u0028\u0029",

@@ -25,6 +25,11 @@ An intuitive and object-oriented file and path operations, inspired by the path.
 
     echo($newPath->absPath()); // => '/foo/bar'
 
+
+> Require php8.0+
+
+[Full documentation here](https://olinox14.github.io/path-php/classes/Path-Path.html)
+
 ### Contribute 
 
 #### Build docker
