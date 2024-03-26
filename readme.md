@@ -31,10 +31,10 @@ An intuitive and object-oriented file and path operations, inspired by the path.
 
     docker build -t path .
 
-    # Sur Linux
+    # On Linux
     docker run -v "$(pwd)":/path --name path path
 
-    # Sous Windows
+    # On Windows
     docker run -d -v "%cd%:/path" --name path path
 
     docker exec -it path bash
@@ -52,13 +52,13 @@ To install and execute the [phpdoc](https://docs.phpdoc.org/3.0/) container :
 
     docker pull phpdoc/phpdoc
 
-    # Sur Linux
+    # On Linux
     docker run --rm -v "$(pwd):/data" "phpdoc/phpdoc:3"
 
-    # Sous Windows
+    # On Windows
     docker run --rm -v "%cd%:/data" "phpdoc/phpdoc:3"
 
-Then, on linux, you could create an alias :
+Then, if on linux, you may create an alias :
 
     alias phpdoc="docker run --rm -v $(pwd):/data phpdoc/phpdoc:3"
 
