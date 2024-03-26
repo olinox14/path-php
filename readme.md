@@ -28,16 +28,21 @@ An intuitive and object-oriented file and path operations, inspired by the path.
     var_dump($newPath->absPath());
 
 
+
+> Require php8.0+
+
+[Full documentation here](https://olinox14.github.io/path-php/classes/Path-Path.html)
+
 ### Contribute 
 
 #### Build docker
 
     docker build -t path .
 
-    # Linux
+    # On Linux
     docker run -v "$(pwd)":/path --name path path
 
-    # Windows
+    # On Windows
     docker run -d -v "%cd%:/path" --name path path
 
     docker exec -it path bash
@@ -48,3 +53,23 @@ An intuitive and object-oriented file and path operations, inspired by the path.
     docker start path
     docker exec -it path bash
     XDEBUG_MODE=coverage vendor/bin/phpunit -c phpunit.xml
+
+#### Generate doc
+
+To install and execute the [phpdoc](https://docs.phpdoc.org/3.0/) container :
+
+    docker pull phpdoc/phpdoc
+
+    # On Linux
+    docker run --rm -v "$(pwd):/data" "phpdoc/phpdoc:3"
+
+    # On Windows
+    docker run --rm -v "%cd%:/data" "phpdoc/phpdoc:3"
+
+Then, if on linux, you may create an alias :
+
+    alias phpdoc="docker run --rm -v $(pwd):/data phpdoc/phpdoc:3"
+
+And run phpdoc with :
+
+    phpdoc

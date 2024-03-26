@@ -8,3 +8,5 @@ vendor/
 composer.lock
 
 build/logs/clover.xml
+
+.phpdoc/
