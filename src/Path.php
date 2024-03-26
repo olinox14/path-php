@@ -10,7 +10,10 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Represents a file or directory path.
+ * An object representing a file or directory.
+ *
+ * Represents a filesystem path.
+ * Most of the methods rely on the php builtin methods, see each method's documentation for more.
  *
  * @package olinox14/path
  */
@@ -39,6 +42,8 @@ class Path
     protected BuiltinProxy $builtin;
 
     /**
+     * Joins two or more parts of a path together.
+     *
      * Joins two or more parts of a path together, inserting '/' as needed.
      * If any component is an absolute path, all previous path components
      * will be discarded. An empty last part will result in a path that
@@ -82,7 +87,7 @@ class Path
     }
 
     /**
-     * Casts the input into an instance of the current class.
+     * Casts the input into a Path instance.
      *
      * @param string|self $path The input path to be cast.
      * @return self An instance of the current class.
@@ -93,7 +98,7 @@ class Path
     }
 
     /**
-     * Retrieves the current path of the file or directory
+     * Retrieves the current path of the file or directory as a string.
      *
      * @return string The path of the file or directory
      */
@@ -106,7 +111,6 @@ class Path
      * Checks if the given path is equal to the current path.
      *
      * @param string|Path $path The path to compare against.
-     *
      * @return bool Returns true if the given path is equal to the current path, false otherwise.
      */
     public function eq(string|self $path): bool {
@@ -118,7 +122,7 @@ class Path
      *
      * @param string ...$parts The parts to be appended to the current path.
      * @return self Returns an instance of the class with the appended path.
-     *@see Path::join()
+     * @see Path::join()
      *
      */
     public function append(string|self ...$parts): self
@@ -128,6 +132,8 @@ class Path
 
     /**
      * Returns an absolute version of the current path.
+     *
+     * @see https://www.php.net/manual/fr/function.realpath.php
      *
      * @return self
      * @throws IOException
@@ -143,6 +149,7 @@ class Path
 
     /**
      * > Alias for absPath()
+     *
      * @throws IOException
      */
     public function realpath(): self
@@ -152,7 +159,13 @@ class Path
 
     /**
      * Checks the access rights for a given file or directory.
-     * From the python `os.access` method
+     *
+     * > Inspired from the python `os.access` method
+     *
+     * @see https://www.php.net/manual/fr/function.file-exists.php
+     * @see https://www.php.net/manual/fr/function.is-readable.php
+     * @see https://www.php.net/manual/fr/function.is-writable.php
+     * @see https://www.php.net/manual/fr/function.is-executable.php
      *
      * @param int $mode The access mode to check. Permitted values:
      *        - F_OK: checks for the existence of the file or directory.
@@ -175,6 +188,8 @@ class Path
     /**
      * Retrieves the last access time of a file or directory.
      *
+     * @see https://www.php.net/manual/fr/function.fileatime.php
+     *
      * @return int The last access time of the file or directory as a timestamp.
      * @throws IOException
      * @throws FileNotFoundException
@@ -193,6 +208,8 @@ class Path
 
     /**
      * Retrieves the creation time of a file or directory.
+     *
+     * @see https://www.php.net/manual/fr/function.filectime.php
      *
      * @return int The creation time of the file or directory as a timestamp.
      * @throws FileNotFoundException
@@ -213,6 +230,8 @@ class Path
     /**
      * Retrieves the last modified time of a file or directory.
      *
+     * @see https://www.php.net/manual/fr/function.filemtime.php
+     *
      * @return int The last modified time of the file or directory as a timestamp.
      * @throws FileNotFoundException
      * @throws IOException
@@ -232,7 +251,9 @@ class Path
     /**
      * Check if the path refers to a regular file.
      *
-     * @return bool Returns true if the path refers to a regular file, otherwise returns false.
+     * @see https://www.php.net/manual/fr/function.is-file.php
+     *
+     * @return bool Returns true if the path refers to a regular file, false otherwise.
      */
     public function isFile(): bool
     {
@@ -241,6 +262,8 @@ class Path
 
     /**
      * Check if the given path is a directory.
+     *
+     * @see https://www.php.net/manual/fr/function.is-dir.php
      *
      * @return bool Returns true if the path is a directory, false otherwise.
      */
@@ -251,6 +274,8 @@ class Path
 
     /**
      * Get the extension of the given path.
+     *
+     * @see https://www.php.net/manual/fr/function.pathinfo.php
      *
      * @return string Returns the extension of the path as a string if it exists, or an empty string otherwise.
      */
@@ -263,6 +288,7 @@ class Path
      * Get the base name of the path.
      *
      * Ex: Path('path/to/file.ext').basename() => 'file.ext'
+     * @see https://www.php.net/manual/fr/function.pathinfo.php
      *
      * @return string The base name of the path.
      */
@@ -273,6 +299,8 @@ class Path
 
     /**
      * Changes the current working directory to this path.
+     *
+     * @see https://www.php.net/manual/fr/function.chdir.php
      *
      * @throws FileNotFoundException
      * @throws IOException
@@ -303,6 +331,7 @@ class Path
      * Get the name of the file or path.
      *
      * Ex: Path('path/to/file.ext').name() => 'file'
+     * @see https://www.php.net/manual/fr/function.pathinfo.php
      *
      * @return string Returns the name of the file without its extension.
      */
@@ -312,7 +341,11 @@ class Path
     }
 
     /**
-     * Converts the path to the normalized form.
+     * Normalize the case of a pathname.
+     *
+     * On Windows, convert all characters in the pathname to lowercase, and also convert
+     * forward slashes to backward slashes. On other operating systems,
+     * return the path unchanged.
      *
      * @return self The instance of the current object.
      */
@@ -327,6 +360,10 @@ class Path
 
     /**
      * Normalizes the path of the file or directory.
+     *
+     * Normalize a pathname by collapsing redundant separators and up-level references so that A//B, A/B/, A/./B
+     * and A/foo/../B all become A/B. This string manipulation may change the meaning of a path that contains
+     * symbolic links. On Windows, it converts forward slashes to backward slashes. To normalize case, use normcase().
      *
      * > Thanks to https://stackoverflow.com/users/216254/troex
      * @return self A new instance of the class with the normalized path.
@@ -394,9 +431,10 @@ class Path
     /**
      * Creates a new directory.
      *
+     * @see https://www.php.net/manual/fr/function.mkdir.php
+     *
      * @param int $mode The permissions for the new directory. Default is 0777.
      * @param bool $recursive Indicates whether to create parent directories if they do not exist. Default is false.
-     *
      * @return void
      * @throws FileExistsException
      * @throws IOException
@@ -425,6 +463,9 @@ class Path
     /**
      * Deletes a file or a directory (non-recursively).
      *
+     * @see https://www.php.net/manual/fr/function.unlink.php
+     * @see https://www.php.net/manual/fr/function.rmdir.php
+     *
      * @return void
      * @throws FileNotFoundException
      * @throws IOException
@@ -449,9 +490,13 @@ class Path
     }
 
     /**
+     * Copy a file.
+     *
      * Copy data and mode bits (“cp src dst”). The destination may be a directory.
      * Return the file’s destination as a Path.
      * If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’s “cp -P src dst”.
+     * @see https://www.php.net/manual/fr/function.copy.php
+     * @see https://www.php.net/manual/fr/function.symlink.php
      *
      * @param string|self $destination The destination path or object to copy the file to.
      * @throws FileNotFoundException If the source file does not exist or is not a file.
@@ -486,7 +531,10 @@ class Path
     }
 
     /**
-     * Copies the content of a file or directory to the specified destination.
+     * Recursively copy a directory tree and return the destination directory.
+     *
+     * If the $follow_symlinks is true, symbolic links in the source tree result in symbolic links in
+     * the destination tree; if it is false, the contents of the files pointed to by symbolic links are copied.
      *
      * @param string|self $destination The destination path or directory to copy the content to.
      * @param bool $follow_symlinks (Optional) Whether to follow symbolic links.
@@ -539,11 +587,15 @@ class Path
     }
 
     /**
+     * Recursively move a file or directory to another location.
+     *
      * Moves a file or directory to a new location. Existing files or dirs will be overwritten.
      * Returns the path of the newly created file or directory.
+     * If the destination is a directory or a symlink to a directory, the source is moved
+     * inside the directory. The destination path must not already exist.
+     * @see https://www.php.net/manual/fr/function.rename.php
      *
      * @param string|Path $destination The new location where the file or directory should be moved to.
-     *
      * @return Path
      * @throws IOException
      * @throws FileNotFoundException
@@ -572,9 +624,10 @@ class Path
     /**
      * Updates the access and modification time of a file or creates a new empty file if it doesn't exist.
      *
+     * @see https://www.php.net/manual/en/function.touch.php
+     *
      * @param int|\DateTime|null $time (optional) The access and modification time to set. Default is the current time.
      * @param int|\DateTime|null $atime (optional) The access time to set. Default is the value of $time.
-     *
      * @return void
      * @throws IOException
      */
@@ -595,7 +648,9 @@ class Path
     }
 
     /**
-     * Calculates the size of a file.
+     * Size of the file, in bytes.
+     *
+     * @see https://www.php.net/manual/fr/function.filesize.php
      *
      * @return int The size of the file in bytes.
      * @throws FileNotFoundException
@@ -619,6 +674,8 @@ class Path
     /**
      * Retrieves the parent directory of a file or directory path.
      *
+     * @see https://www.php.net/manual/fr/function.dirname.php
+     *
      * @return self The parent directory of the specified path.
      */
     public function parent(int $levels = 1): self
@@ -629,7 +686,7 @@ class Path
     }
 
     /**
-     * Alias for Path->parent() method
+     * > Alias for Path->parent() method
      *
      * @param int $levels
      * @return self
@@ -703,7 +760,9 @@ class Path
     /**
      * Performs a pattern matching using the `fnmatch()` function.
      *
-     * @param string $pattern The pattern to match against.
+     * @see https://www.php.net/manual/fr/function.fnmatch.php
+     *
+     * @param string $pattern A filename pattern with wildcards.
      * @return bool True if the path matches the pattern, false otherwise.
      */
     public function fnmatch(string $pattern): bool
@@ -713,6 +772,8 @@ class Path
 
     /**
      * Retrieves the content of a file.
+     *
+     * @see https://www.php.net/manual/fr/function.file-get-contents.php
      *
      * @return string The content of the file as a string.
      * @throws FileNotFoundException|IOException
@@ -733,6 +794,7 @@ class Path
 
     /**
      * > Alias for getContent()
+     *
      * @return string
      * @throws FileNotFoundException
      * @throws IOException
@@ -743,6 +805,8 @@ class Path
     }
 
     /**
+     * Retrieves the content of a file as an array of lines.
+     *
      * @throws IOException
      * @throws FileNotFoundException
      */
@@ -753,6 +817,8 @@ class Path
 
     /**
      * Writes contents to a file.
+     *
+     * @see https://www.php.net/manual/fr/function.file-put-contents.php
      *
      * @param string $content The contents to be written to the file.
      * @param bool $append Append the content to the file's content instead of replacing it
@@ -800,7 +866,9 @@ class Path
     }
 
     /**
-     * Retrieves the permissions of a file or directory as an octal.
+     * Retrieves the permissions of a file or directory.
+     *
+     * @see https://www.php.net/manual/fr/function.fileperms.php
      *
      * @param bool $asOctal
      * @return int The permissions of the file or directory
@@ -828,6 +896,8 @@ class Path
 
     /**
      * Changes the permissions of a file or directory.
+     *
+     * @see https://www.php.net/manual/fr/function.chmod.php
      *
      * @param int $permissions The new permissions to set.
      * @param bool $asOctal
@@ -861,6 +931,9 @@ class Path
     /**
      * Changes ownership of the file.
      *
+     * @see https://www.php.net/manual/fr/function.chown.php
+     * @see https://www.php.net/manual/fr/function.chgrp.php
+     *
      * @param string $user The new owner username.
      * @param string $group The new owner group name.
      * @throws FileNotFoundException
@@ -886,7 +959,9 @@ class Path
     }
 
     /**
-     * Checks if a file exists.
+     * Checks if a file or directory exists.
+     *
+     * @see https://www.php.net/manual/fr/function.file-exists.php
      *
      * @return bool Returns true if the file exists, false otherwise.
      */
@@ -897,6 +972,7 @@ class Path
 
     /**
      * Return True if both pathname arguments refer to the same file or directory.
+     *
      * // TODO: make explicit that the two files/dirs have to exist
      *
      * @throws IOException
@@ -908,6 +984,10 @@ class Path
 
     /**
      * Expands the path by performing three operations: expanding user, expanding variables, and normalizing the path.
+     *
+     * @see Path::expandUser()
+     * @see Path::expandVars()
+     * @see Path::normPath()
      *
      * @return self The expanded path.
      */
@@ -934,7 +1014,8 @@ class Path
     /**
      * Expands variables in the path.
      *
-     * Searches for variable placeholders in the path and replaces them with their corresponding values from the environment variables.
+     * Searches for variable placeholders in the path and replaces them with their
+     * corresponding values from the environment variables.
      *
      * @return self The path with expanded variables.
      */
@@ -953,6 +1034,8 @@ class Path
 
     /**
      * Retrieves a list of files and directories that match a specified pattern.
+     *
+     * @see https://www.php.net/manual/fr/function.glob.php
      *
      * @param string $pattern The pattern to search for.
      * @return array<self> A list of files and directories that match the pattern.
@@ -982,9 +1065,10 @@ class Path
     /**
      * Removes the file.
      *
+     * @see https://www.php.net/manual/fr/function.unlink.php
+     *
      * @return void
      * @throws IOException if there was an error while removing the file.
-     *
      * @throws IOException|FileNotFoundException if the file does not exist or is not a file.
      */
     public function remove(): void
@@ -1000,6 +1084,7 @@ class Path
 
     /**
      * > Alias for Path->remove()
+     *
      * @return void
      * @throws IOException|FileNotFoundException
      */
@@ -1009,7 +1094,8 @@ class Path
     }
 
     /**
-     * Like remove(), but does not throw an exception if the file does not exist
+     * Like remove(), but does not throw an exception if the file does not exist.
+     *
      * It will still raise a FileExistsException if the target is an existing directory.
      *
      * @return void
@@ -1029,7 +1115,7 @@ class Path
     }
 
     /**
-     * Removes a directory and its contents.
+     * Removes a directory, and its contents if recursive.
      *
      * @throws FileNotFoundException
      * @throws IOException
@@ -1067,6 +1153,8 @@ class Path
     }
 
     /**
+     * > Alias for Path->move()
+     *
      * @throws FileNotFoundException
      * @throws IOException
      */
@@ -1076,7 +1164,14 @@ class Path
     }
 
     /**
-     * @throws IOException
+     * Retrieves the hash of a file or directory using the specified algorithm.
+     *
+     * @see https://www.php.net/manual/en/function.hash-file.php
+     *
+     * @param string $algo The hashing algorithm to use. Supported algorithms can be found at the PHP documentation.
+     * @param bool $binary (optional) Determines whether the hash should be returned as binary or hexadecimal. Default is false.
+     * @return string The computed hash of the file or directory.
+     * @throws IOException If there is an error computing the hash.
      */
     public function readHash(string $algo, bool $binary = false): string
     {
@@ -1088,7 +1183,9 @@ class Path
     }
 
     /**
-     * Reads the target of a symbolic link and returns a new instance of the current class.
+     * Returns the target of a symbolic link.
+     *
+     * @see https://www.php.net/manual/en/function.readlink.php
      *
      * @return self The target of the symbolic link as a new instance of the current class.
      * @throws FileNotFoundException If the path does not exist or is not a symbolic link.
@@ -1108,6 +1205,8 @@ class Path
 
     /**
      * Opens a file in the specified mode.
+     *
+     * @see https://www.php.net/manual/fr/function.fopen.php
      *
      * @param string $mode The mode in which to open the file. Defaults to 'r'.
      * @return resource|false Returns a file pointer resource on success, or false on failure.
@@ -1129,7 +1228,16 @@ class Path
     }
 
     /**
-     * @throws FileNotFoundException
+     * Walks through the directories of a given directory and returns an iterator.
+     *
+     * This method uses the built-in `RecursiveIteratorIterator` and `RecursiveDirectoryIterator` classes to
+     * traverse through all the files and directories within the given directory.
+     *
+     * @see https://www.php.net/manual/en/class.recursiveiteratoriterator.php
+     * @see https://www.php.net/manual/en/class.iterator.php
+     *
+     * @return \Iterator An iterator that yields each file or directory within the given directory
+     * @throws FileNotFoundException If the directory does not exist
      */
     public function walkDirs(): \Iterator
     {
@@ -1145,7 +1253,8 @@ class Path
     }
 
     /**
-     * Calls a callback with a file handle opened with the specified mode and closes the handle afterward.
+     * Calls a callback with a file handle opened with the specified mode and closes the
+     * handle afterward.
      *
      * @param callable $callback The callback function to be called with the file handle.
      * @param string $mode The mode in which to open the file. Defaults to 'r'.
@@ -1200,6 +1309,7 @@ class Path
 
     /**
      * > Alias for Path->setPermissions() method
+     *
      * Changes permissions of the file.
      *
      * @param int $mode The new permissions (octal).
@@ -1212,6 +1322,7 @@ class Path
 
     /**
      * > Alias for Path->setOwner() method
+     *
      * Changes ownership of the file.
      *
      * @param string $user The new owner username.
@@ -1223,8 +1334,12 @@ class Path
         $this->setOwner($user, $group);
     }
 
+    // TODO: implement chgrp()
+
     /**
      * Changes the root directory of the current process to the specified directory.
+     *
+     * @see https://www.php.net/manual/fr/function.chroot.php
      *
      * @throws IOException
      * @throws FileNotFoundException
@@ -1245,6 +1360,8 @@ class Path
     /**
      * Checks if the file is a symbolic link.
      *
+     * @see https://www.php.net/manual/fr/function.is-link.php
+     *
      * @return bool
      */
     public function isLink(): bool
@@ -1264,6 +1381,8 @@ class Path
 
     /**
      * Create a hard link pointing to this path.
+     *
+     * @see https://www.php.net/manual/fr/function.link.php
      *
      * @param string|Path $newLink
      * @return Path
@@ -1295,6 +1414,8 @@ class Path
     /**
      * Gives information about a file or symbolic link
      *
+     * @see https://www.php.net/manual/fr/function.lstat.php
+     *
      * @return array
      * @throws IOException
      */
@@ -1309,6 +1430,8 @@ class Path
 
     /**
      * Creates a symbolic link to the specified destination.
+     *
+     * @see https://www.php.net/manual/fr/function.symlink.php
      *
      * @param string|self $newLink The path or the instance of the symbolic link to create.
      * @return self The instance of the symbolic link that was created.

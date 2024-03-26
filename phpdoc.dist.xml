@@ -6,7 +6,7 @@
 >
     <title>Path-php</title>
     <paths>
-        <output>doc</output>
+        <output>docs</output>
         <cache>.phpdoc/cache</cache>
     </paths>
     <version number="0.1">

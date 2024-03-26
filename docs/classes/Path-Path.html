@@ -121,12 +121,15 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">17</span>
+    <span class="phpdocumentor-element-found-in__line">20</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Represents a file or directory path.</p>
+            <p class="phpdocumentor-summary">An object representing a file or directory.</p>
 
+    <section class="phpdocumentor-description"><p>Represents a filesystem path.
+Most of the methods rely on the php builtin methods, see each method's documentation for more.</p>
+</section>
 
 
 
@@ -279,16 +282,14 @@
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>&gt; Alias for Path-&gt;setPermissions() method
-Changes permissions of the file.</dd>
+<dd>&gt; Alias for Path-&gt;setPermissions() method</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_chown">chown()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>&gt; Alias for Path-&gt;setOwner() method
-Changes ownership of the file.</dd>
+<dd>&gt; Alias for Path-&gt;setOwner() method</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_chroot">chroot()</a>
@@ -309,14 +310,14 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: self    </span>
 </dt>
-<dd>Copy data and mode bits (“cp src dst”). The destination may be a directory.</dd>
+<dd>Copy a file.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_copyTree">copyTree()</a>
     <span>
                                 &nbsp;: self    </span>
 </dt>
-<dd>Copies the content of a file or directory to the specified destination.</dd>
+<dd>Recursively copy a directory tree and return the destination directory.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_ctime">ctime()</a>
@@ -337,7 +338,7 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: self    </span>
 </dt>
-<dd>Alias for Path-&gt;parent() method</dd>
+<dd>&gt; Alias for Path-&gt;parent() method</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_dirs">dirs()</a>
@@ -358,7 +359,7 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
-<dd>Checks if a file exists.</dd>
+<dd>Checks if a file or directory exists.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_expand">expand()</a>
@@ -414,7 +415,7 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: int    </span>
 </dt>
-<dd>Retrieves the permissions of a file or directory as an octal.</dd>
+<dd>Retrieves the permissions of a file or directory.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_getRelativePath">getRelativePath()</a>
@@ -470,13 +471,14 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: self    </span>
 </dt>
-<dd>Joins two or more parts of a path together, inserting &#039;/&#039; as needed.</dd>
+<dd>Joins two or more parts of a path together.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_lines">lines()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
+<dd>Retrieves the content of a file as an array of lines.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_link">link()</a>
@@ -504,7 +506,7 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: <a href="classes/Path-Path.html"><abbr title="\Path\Path">Path</abbr></a>    </span>
 </dt>
-<dd>Moves a file or directory to a new location. Existing files or dirs will be overwritten.</dd>
+<dd>Recursively move a file or directory to another location.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_mtime">mtime()</a>
@@ -525,7 +527,7 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: self    </span>
 </dt>
-<dd>Converts the path to the normalized form.</dd>
+<dd>Normalize the case of a pathname.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_normPath">normPath()</a>
@@ -560,7 +562,7 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: string    </span>
 </dt>
-<dd>Retrieves the current path of the file or directory</dd>
+<dd>Retrieves the current path of the file or directory as a string.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_putContent">putContent()</a>
@@ -581,13 +583,14 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: string    </span>
 </dt>
+<dd>Retrieves the hash of a file or directory using the specified algorithm.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_readLink">readLink()</a>
     <span>
                                 &nbsp;: self    </span>
 </dt>
-<dd>Reads the target of a symbolic link and returns a new instance of the current class.</dd>
+<dd>Returns the target of a symbolic link.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_readText">readText()</a>
@@ -615,21 +618,21 @@ Changes ownership of the file.</dd>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Like remove(), but does not throw an exception if the file does not exist
-It will still raise a FileExistsException if the target is an existing directory.</dd>
+<dd>Like remove(), but does not throw an exception if the file does not exist.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_rename">rename()</a>
     <span>
                                 &nbsp;: self    </span>
 </dt>
+<dd>&gt; Alias for Path-&gt;move()</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_rmdir">rmdir()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Removes a directory and its contents.</dd>
+<dd>Removes a directory, and its contents if recursive.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_sameFile">sameFile()</a>
@@ -657,7 +660,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <span>
                                 &nbsp;: int    </span>
 </dt>
-<dd>Calculates the size of a file.</dd>
+<dd>Size of the file, in bytes.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_symlink">symlink()</a>
@@ -685,20 +688,22 @@ It will still raise a FileExistsException if the target is an existing directory
     <span>
                                 &nbsp;: <abbr title="\Iterator">Iterator</abbr>    </span>
 </dt>
+<dd>Walks through the directories of a given directory and returns an iterator.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Path-Path.html#method_with">with()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Calls a callback with a file handle opened with the specified mode and closes the handle afterward.</dd>
+<dd>Calls a callback with a file handle opened with the specified mode and closes the
+handle afterward.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a href="classes/Path-Path.html#method_cast">cast()</a>
     <span>
                                 &nbsp;: self    </span>
 </dt>
-<dd>Casts the input into an instance of the current class.</dd>
+<dd>Casts the input into a Path instance.</dd>
 
     </dl>
 
@@ -724,7 +729,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">22</span>
+    <span class="phpdocumentor-element-found-in__line">25</span>
 
     </aside>
 
@@ -753,7 +758,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">26</span>
+    <span class="phpdocumentor-element-found-in__line">29</span>
 
     </aside>
 
@@ -782,7 +787,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">30</span>
+    <span class="phpdocumentor-element-found-in__line">33</span>
 
     </aside>
 
@@ -811,7 +816,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -856,7 +861,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">42</span>
 
     </aside>
 
@@ -889,7 +894,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">41</span>
 
     </aside>
 
@@ -922,7 +927,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">36</span>
+    <span class="phpdocumentor-element-found-in__line">39</span>
 
     </aside>
 
@@ -960,7 +965,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">68</span>
+    <span class="phpdocumentor-element-found-in__line">73</span>
 
     </aside>
 
@@ -1001,7 +1006,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">80</span>
+    <span class="phpdocumentor-element-found-in__line">85</span>
 
     </aside>
 
@@ -1036,7 +1041,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">135</span>
+    <span class="phpdocumentor-element-found-in__line">141</span>
 
     </aside>
 
@@ -1058,6 +1063,14 @@ It will still raise a FileExistsException if the target is an existing directory
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.realpath.php">https://www.php.net/manual/fr/function.realpath.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -1087,7 +1100,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">164</span>
+    <span class="phpdocumentor-element-found-in__line">177</span>
 
     </aside>
 
@@ -1099,7 +1112,9 @@ It will still raise a FileExistsException if the target is an existing directory
 
     <div class="phpdocumentor-label-line">
         </div>
-        <section class="phpdocumentor-description"><p>From the python <code class="prettyprint">os.access</code> method</p>
+        <section class="phpdocumentor-description"><blockquote>
+<p>Inspired from the python <code class="prettyprint">os.access</code> method</p>
+</blockquote>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -1122,6 +1137,45 @@ It will still raise a FileExistsException if the target is an existing directory
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_access#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.file-exists.php">https://www.php.net/manual/fr/function.file-exists.php</a></span>
+                                        
+                                             
+                                    </dd>
+                            <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.is-readable.php">https://www.php.net/manual/fr/function.is-readable.php</a></span>
+                                        
+                                             
+                                    </dd>
+                            <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.is-writable.php">https://www.php.net/manual/fr/function.is-writable.php</a></span>
+                                        
+                                             
+                                    </dd>
+                            <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.is-executable.php">https://www.php.net/manual/fr/function.is-executable.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -1147,7 +1201,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">124</span>
+    <span class="phpdocumentor-element-found-in__line">128</span>
 
     </aside>
 
@@ -1214,7 +1268,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">182</span>
+    <span class="phpdocumentor-element-found-in__line">197</span>
 
     </aside>
 
@@ -1236,6 +1290,14 @@ It will still raise a FileExistsException if the target is an existing directory
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.fileatime.php">https://www.php.net/manual/fr/function.fileatime.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -1277,7 +1339,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">269</span>
+    <span class="phpdocumentor-element-found-in__line">295</span>
 
     </aside>
 
@@ -1294,6 +1356,21 @@ It will still raise a FileExistsException if the target is an existing directory
 
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_basename#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.pathinfo.php">https://www.php.net/manual/fr/function.pathinfo.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -1319,7 +1396,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">280</span>
+    <span class="phpdocumentor-element-found-in__line">308</span>
 
     </aside>
 
@@ -1341,6 +1418,14 @@ It will still raise a FileExistsException if the target is an existing directory
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.chdir.php">https://www.php.net/manual/fr/function.chdir.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -1374,7 +1459,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">297</span>
+    <span class="phpdocumentor-element-found-in__line">325</span>
 
     </aside>
 
@@ -1429,12 +1514,11 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1208</span>
+    <span class="phpdocumentor-element-found-in__line">1318</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">&gt; Alias for Path-&gt;setPermissions() method
-Changes permissions of the file.</p>
+        <p class="phpdocumentor-summary">&gt; Alias for Path-&gt;setPermissions() method</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1442,7 +1526,9 @@ Changes permissions of the file.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
-    
+        <section class="phpdocumentor-description"><p>Changes permissions of the file.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1489,12 +1575,11 @@ Changes permissions of the file.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1221</span>
+    <span class="phpdocumentor-element-found-in__line">1332</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">&gt; Alias for Path-&gt;setOwner() method
-Changes ownership of the file.</p>
+        <p class="phpdocumentor-summary">&gt; Alias for Path-&gt;setOwner() method</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1502,7 +1587,9 @@ Changes ownership of the file.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
-    
+        <section class="phpdocumentor-description"><p>Changes ownership of the file.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1558,7 +1645,7 @@ Changes ownership of the file.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1232</span>
+    <span class="phpdocumentor-element-found-in__line">1347</span>
 
     </aside>
 
@@ -1580,6 +1667,14 @@ Changes ownership of the file.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.chroot.php">https://www.php.net/manual/fr/function.chroot.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -1613,7 +1708,7 @@ Changes ownership of the file.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1176</span>
+    <span class="phpdocumentor-element-found-in__line">1285</span>
 
     </aside>
 
@@ -1696,11 +1791,11 @@ Changes ownership of the file.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">461</span>
+    <span class="phpdocumentor-element-found-in__line">506</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Copy data and mode bits (“cp src dst”). The destination may be a directory.</p>
+        <p class="phpdocumentor-summary">Copy a file.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1708,7 +1803,8 @@ Changes ownership of the file.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
-        <section class="phpdocumentor-description"><p>Return the file’s destination as a Path.
+        <section class="phpdocumentor-description"><p>Copy data and mode bits (“cp src dst”). The destination may be a directory.
+Return the file’s destination as a Path.
 If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’s “cp -P src dst”.</p>
 </section>
 
@@ -1740,6 +1836,22 @@ If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.copy.php">https://www.php.net/manual/fr/function.copy.php</a></span>
+                                        
+                                             
+                                    </dd>
+                            <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.symlink.php">https://www.php.net/manual/fr/function.symlink.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -1787,11 +1899,11 @@ If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">500</span>
+    <span class="phpdocumentor-element-found-in__line">548</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Copies the content of a file or directory to the specified destination.</p>
+        <p class="phpdocumentor-summary">Recursively copy a directory tree and return the destination directory.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1799,7 +1911,10 @@ If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’
 
     <div class="phpdocumentor-label-line">
         </div>
-    
+        <section class="phpdocumentor-description"><p>If the $follow_symlinks is true, symbolic links in the source tree result in symbolic links in
+the destination tree; if it is false, the contents of the files pointed to by symbolic links are copied.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1886,7 +2001,7 @@ TODO: implement a 'errorOnExistingDestination' property (default: True)</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">201</span>
+    <span class="phpdocumentor-element-found-in__line">218</span>
 
     </aside>
 
@@ -1908,6 +2023,14 @@ TODO: implement a 'errorOnExistingDestination' property (default: True)</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.filectime.php">https://www.php.net/manual/fr/function.filectime.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -1949,7 +2072,7 @@ TODO: implement a 'errorOnExistingDestination' property (default: True)</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">432</span>
+    <span class="phpdocumentor-element-found-in__line">473</span>
 
     </aside>
 
@@ -1971,6 +2094,22 @@ TODO: implement a 'errorOnExistingDestination' property (default: True)</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.unlink.php">https://www.php.net/manual/fr/function.unlink.php</a></span>
+                                        
+                                             
+                                    </dd>
+                            <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.rmdir.php">https://www.php.net/manual/fr/function.rmdir.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -2004,11 +2143,11 @@ TODO: implement a 'errorOnExistingDestination' property (default: True)</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">637</span>
+    <span class="phpdocumentor-element-found-in__line">694</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Alias for Path-&gt;parent() method</p>
+        <p class="phpdocumentor-summary">&gt; Alias for Path-&gt;parent() method</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -2050,7 +2189,7 @@ TODO: implement a 'errorOnExistingDestination' property (default: True)</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">651</span>
+    <span class="phpdocumentor-element-found-in__line">708</span>
 
     </aside>
 
@@ -2104,7 +2243,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">112</span>
+    <span class="phpdocumentor-element-found-in__line">116</span>
 
     </aside>
 
@@ -2156,11 +2295,11 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">893</span>
+    <span class="phpdocumentor-element-found-in__line">968</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Checks if a file exists.</p>
+        <p class="phpdocumentor-summary">Checks if a file or directory exists.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -2171,6 +2310,21 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_exists#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.file-exists.php">https://www.php.net/manual/fr/function.file-exists.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -2196,7 +2350,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">914</span>
+    <span class="phpdocumentor-element-found-in__line">994</span>
 
     </aside>
 
@@ -2211,6 +2365,37 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_expand#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/Path-Path.html#method_expandUser"><abbr title="\Path\Path::expandUser()">Path::expandUser()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                            <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/Path-Path.html#method_expandVars"><abbr title="\Path\Path::expandVars()">Path::expandVars()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                            <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/Path-Path.html#method_normPath"><abbr title="\Path\Path::normPath()">Path::normPath()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -2236,7 +2421,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">924</span>
+    <span class="phpdocumentor-element-found-in__line">1004</span>
 
     </aside>
 
@@ -2276,7 +2461,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">941</span>
+    <span class="phpdocumentor-element-found-in__line">1022</span>
 
     </aside>
 
@@ -2288,7 +2473,8 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
 
     <div class="phpdocumentor-label-line">
         </div>
-        <section class="phpdocumentor-description"><p>Searches for variable placeholders in the path and replaces them with their corresponding values from the environment variables.</p>
+        <section class="phpdocumentor-description"><p>Searches for variable placeholders in the path and replaces them with their
+corresponding values from the environment variables.</p>
 </section>
 
     
@@ -2318,7 +2504,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">257</span>
+    <span class="phpdocumentor-element-found-in__line">282</span>
 
     </aside>
 
@@ -2333,6 +2519,21 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_ext#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.pathinfo.php">https://www.php.net/manual/fr/function.pathinfo.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -2358,7 +2559,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">680</span>
+    <span class="phpdocumentor-element-found-in__line">737</span>
 
     </aside>
 
@@ -2415,7 +2616,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">709</span>
+    <span class="phpdocumentor-element-found-in__line">768</span>
 
     </aside>
 
@@ -2435,13 +2636,28 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The pattern to match against.</p>
+                    <section class="phpdocumentor-description"><p>A filename pattern with wildcards.</p>
 </section>
 
             </dd>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_fnmatch#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.fnmatch.php">https://www.php.net/manual/fr/function.fnmatch.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -2467,7 +2683,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">720</span>
+    <span class="phpdocumentor-element-found-in__line">781</span>
 
     </aside>
 
@@ -2489,6 +2705,14 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.file-get-contents.php">https://www.php.net/manual/fr/function.file-get-contents.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -2522,11 +2746,11 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">810</span>
+    <span class="phpdocumentor-element-found-in__line">878</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Retrieves the permissions of a file or directory as an octal.</p>
+        <p class="phpdocumentor-summary">Retrieves the permissions of a file or directory.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -2554,6 +2778,14 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.fileperms.php">https://www.php.net/manual/fr/function.fileperms.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -2595,7 +2827,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1369</span>
+    <span class="phpdocumentor-element-found-in__line">1492</span>
 
     </aside>
 
@@ -2664,7 +2896,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">962</span>
+    <span class="phpdocumentor-element-found-in__line">1045</span>
 
     </aside>
 
@@ -2698,6 +2930,14 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.glob.php">https://www.php.net/manual/fr/function.glob.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -2739,7 +2979,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1196</span>
+    <span class="phpdocumentor-element-found-in__line">1305</span>
 
     </aside>
 
@@ -2775,7 +3015,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">247</span>
+    <span class="phpdocumentor-element-found-in__line">270</span>
 
     </aside>
 
@@ -2790,6 +3030,21 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_isDir#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.is-dir.php">https://www.php.net/manual/fr/function.is-dir.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -2815,7 +3070,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">237</span>
+    <span class="phpdocumentor-element-found-in__line">258</span>
 
     </aside>
 
@@ -2830,12 +3085,27 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_isFile#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.is-file.php">https://www.php.net/manual/fr/function.is-file.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">bool</span>
                     &mdash;
-                <section class="phpdocumentor-description"><p>Returns true if the path refers to a regular file, otherwise returns false.</p>
+                <section class="phpdocumentor-description"><p>Returns true if the path refers to a regular file, false otherwise.</p>
 </section>
 
             </section>
@@ -2855,7 +3125,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1250</span>
+    <span class="phpdocumentor-element-found-in__line">1367</span>
 
     </aside>
 
@@ -2870,6 +3140,21 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_isLink#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.is-link.php">https://www.php.net/manual/fr/function.is-link.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -2891,7 +3176,7 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1260</span>
+    <span class="phpdocumentor-element-found-in__line">1377</span>
 
     </aside>
 
@@ -2931,11 +3216,11 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">51</span>
+    <span class="phpdocumentor-element-found-in__line">56</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Joins two or more parts of a path together, inserting &#039;/&#039; as needed.</p>
+        <p class="phpdocumentor-summary">Joins two or more parts of a path together.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -2943,7 +3228,8 @@ This does not walk recursively into subdirectories (but see walkdirs())</p>
 
     <div class="phpdocumentor-label-line">
         </div>
-        <section class="phpdocumentor-description"><p>If any component is an absolute path, all previous path components
+        <section class="phpdocumentor-description"><p>Joins two or more parts of a path together, inserting '/' as needed.
+If any component is an absolute path, all previous path components
 will be discarded. An empty last part will result in a path that
 ends with a separator.</p>
 </section>
@@ -2996,11 +3282,12 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">749</span>
+    <span class="phpdocumentor-element-found-in__line">813</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Retrieves the content of a file as an array of lines.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">lines</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
@@ -3054,7 +3341,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1274</span>
+    <span class="phpdocumentor-element-found-in__line">1393</span>
 
     </aside>
 
@@ -3086,6 +3373,14 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.link.php">https://www.php.net/manual/fr/function.link.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -3131,7 +3426,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1301</span>
+    <span class="phpdocumentor-element-found-in__line">1422</span>
 
     </aside>
 
@@ -3153,6 +3448,14 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.lstat.php">https://www.php.net/manual/fr/function.lstat.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -3182,7 +3485,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">404</span>
+    <span class="phpdocumentor-element-found-in__line">442</span>
 
     </aside>
 
@@ -3225,6 +3528,14 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.mkdir.php">https://www.php.net/manual/fr/function.mkdir.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -3258,11 +3569,11 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">551</span>
+    <span class="phpdocumentor-element-found-in__line">603</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Moves a file or directory to a new location. Existing files or dirs will be overwritten.</p>
+        <p class="phpdocumentor-summary">Recursively move a file or directory to another location.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -3270,7 +3581,10 @@ ends with a separator.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
-        <section class="phpdocumentor-description"><p>Returns the path of the newly created file or directory.</p>
+        <section class="phpdocumentor-description"><p>Moves a file or directory to a new location. Existing files or dirs will be overwritten.
+Returns the path of the newly created file or directory.
+If the destination is a directory or a symlink to a directory, the source is moved
+inside the directory. The destination path must not already exist.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -3294,6 +3608,14 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.rename.php">https://www.php.net/manual/fr/function.rename.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -3331,7 +3653,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">220</span>
+    <span class="phpdocumentor-element-found-in__line">239</span>
 
     </aside>
 
@@ -3353,6 +3675,14 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.filemtime.php">https://www.php.net/manual/fr/function.filemtime.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -3394,7 +3724,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">309</span>
+    <span class="phpdocumentor-element-found-in__line">338</span>
 
     </aside>
 
@@ -3411,6 +3741,21 @@ ends with a separator.</p>
 
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_name#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.pathinfo.php">https://www.php.net/manual/fr/function.pathinfo.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -3436,11 +3781,11 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">319</span>
+    <span class="phpdocumentor-element-found-in__line">352</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Converts the path to the normalized form.</p>
+        <p class="phpdocumentor-summary">Normalize the case of a pathname.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -3448,7 +3793,11 @@ ends with a separator.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
-    
+        <section class="phpdocumentor-description"><p>On Windows, convert all characters in the pathname to lowercase, and also convert
+forward slashes to backward slashes. On other operating systems,
+return the path unchanged.</p>
+</section>
+
     
     
 
@@ -3476,7 +3825,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">334</span>
+    <span class="phpdocumentor-element-found-in__line">371</span>
 
     </aside>
 
@@ -3488,7 +3837,10 @@ ends with a separator.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
-        <section class="phpdocumentor-description"><blockquote>
+        <section class="phpdocumentor-description"><p>Normalize a pathname by collapsing redundant separators and up-level references so that A//B, A/B/, A/./B
+and A/foo/../B all become A/B. This string manipulation may change the meaning of a path that contains
+symbolic links. On Windows, it converts forward slashes to backward slashes. To normalize case, use normcase().</p>
+<blockquote>
 <p>Thanks to https://stackoverflow.com/users/216254/troex</p>
 </blockquote>
 </section>
@@ -3520,7 +3872,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1117</span>
+    <span class="phpdocumentor-element-found-in__line">1216</span>
 
     </aside>
 
@@ -3554,6 +3906,14 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.fopen.php">https://www.php.net/manual/fr/function.fopen.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -3599,7 +3959,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">624</span>
+    <span class="phpdocumentor-element-found-in__line">681</span>
 
     </aside>
 
@@ -3624,6 +3984,21 @@ ends with a separator.</p>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Path-Path.html#method_parent#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.dirname.php">https://www.php.net/manual/fr/function.dirname.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -3649,7 +4024,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1351</span>
+    <span class="phpdocumentor-element-found-in__line">1474</span>
 
     </aside>
 
@@ -3691,11 +4066,11 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">100</span>
+    <span class="phpdocumentor-element-found-in__line">105</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Retrieves the current path of the file or directory</p>
+        <p class="phpdocumentor-summary">Retrieves the current path of the file or directory as a string.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -3731,7 +4106,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">764</span>
+    <span class="phpdocumentor-element-found-in__line">830</span>
 
     </aside>
 
@@ -3783,6 +4158,14 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.file-put-contents.php">https://www.php.net/manual/fr/function.file-put-contents.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -3824,7 +4207,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">793</span>
+    <span class="phpdocumentor-element-found-in__line">859</span>
 
     </aside>
 
@@ -3917,11 +4300,12 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1081</span>
+    <span class="phpdocumentor-element-found-in__line">1176</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Retrieves the hash of a file or directory using the specified algorithm.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">readHash</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$algo</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$binary</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
@@ -3936,14 +4320,18 @@ ends with a separator.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                
+                    <section class="phpdocumentor-description"><p>The hashing algorithm to use. Supported algorithms can be found at the PHP documentation.</p>
+</section>
+
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$binary</span>
                 : <span class="phpdocumentor-signature__argument__return-type">bool</span>
                  = <span class="phpdocumentor-signature__argument__default-value">false</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                
+                    <section class="phpdocumentor-description"><p>(optional) Determines whether the hash should be returned as binary or hexadecimal. Default is false.</p>
+</section>
+
             </dd>
             </dl>
 
@@ -3955,18 +4343,32 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/en/function.hash-file.php">https://www.php.net/manual/en/function.hash-file.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
                                                                 <span class="phpdocumentor-tag-link"><a href="classes/Path-Exception-IOException.html"><abbr title="\Path\Exception\IOException">IOException</abbr></a></span>
                                                             
-                                             
+                                                 <section class="phpdocumentor-description"><p>If there is an error computing the hash.</p>
+</section>
+
                                     </dd>
                                             </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">string</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>The computed hash of the file or directory.</p>
+</section>
+
             </section>
 
 </article>
@@ -3984,11 +4386,11 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1097</span>
+    <span class="phpdocumentor-element-found-in__line">1194</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Reads the target of a symbolic link and returns a new instance of the current class.</p>
+        <p class="phpdocumentor-summary">Returns the target of a symbolic link.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -4006,6 +4408,14 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/en/function.readlink.php">https://www.php.net/manual/en/function.readlink.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -4051,7 +4461,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">740</span>
+    <span class="phpdocumentor-element-found-in__line">802</span>
 
     </aside>
 
@@ -4110,7 +4520,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">148</span>
+    <span class="phpdocumentor-element-found-in__line">155</span>
 
     </aside>
 
@@ -4161,7 +4571,7 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">990</span>
+    <span class="phpdocumentor-element-found-in__line">1074</span>
 
     </aside>
 
@@ -4183,6 +4593,14 @@ ends with a separator.</p>
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.unlink.php">https://www.php.net/manual/fr/function.unlink.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -4220,12 +4638,11 @@ ends with a separator.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1020</span>
+    <span class="phpdocumentor-element-found-in__line">1106</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Like remove(), but does not throw an exception if the file does not exist
-It will still raise a FileExistsException if the target is an existing directory.</p>
+        <p class="phpdocumentor-summary">Like remove(), but does not throw an exception if the file does not exist.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -4233,7 +4650,9 @@ It will still raise a FileExistsException if the target is an existing directory
 
     <div class="phpdocumentor-label-line">
         </div>
-    
+        <section class="phpdocumentor-description"><p>It will still raise a FileExistsException if the target is an existing directory.</p>
+</section>
+
     
     
     <h5 class="phpdocumentor-tag-list__heading" id="tags">
@@ -4284,11 +4703,12 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1073</span>
+    <span class="phpdocumentor-element-found-in__line">1161</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">&gt; Alias for Path-&gt;move()</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">rename</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string|self&nbsp;</span><span class="phpdocumentor-signature__argument__name">$newPath</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
@@ -4352,11 +4772,11 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1037</span>
+    <span class="phpdocumentor-element-found-in__line">1123</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Removes a directory and its contents.</p>
+        <p class="phpdocumentor-summary">Removes a directory, and its contents if recursive.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -4424,7 +4844,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">904</span>
+    <span class="phpdocumentor-element-found-in__line">980</span>
 
     </aside>
 
@@ -4487,7 +4907,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">869</span>
+    <span class="phpdocumentor-element-found-in__line">942</span>
 
     </aside>
 
@@ -4537,6 +4957,22 @@ It will still raise a FileExistsException if the target is an existing directory
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.chown.php">https://www.php.net/manual/fr/function.chown.php</a></span>
+                                        
+                                             
+                                    </dd>
+                            <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.chgrp.php">https://www.php.net/manual/fr/function.chgrp.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -4570,7 +5006,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">838</span>
+    <span class="phpdocumentor-element-found-in__line">908</span>
 
     </aside>
 
@@ -4618,6 +5054,14 @@ It will still raise a FileExistsException if the target is an existing directory
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.chmod.php">https://www.php.net/manual/fr/function.chmod.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -4651,11 +5095,11 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">604</span>
+    <span class="phpdocumentor-element-found-in__line">659</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Calculates the size of a file.</p>
+        <p class="phpdocumentor-summary">Size of the file, in bytes.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -4673,6 +5117,14 @@ It will still raise a FileExistsException if the target is an existing directory
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.filesize.php">https://www.php.net/manual/fr/function.filesize.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -4714,7 +5166,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1319</span>
+    <span class="phpdocumentor-element-found-in__line">1442</span>
 
     </aside>
 
@@ -4748,6 +5200,14 @@ It will still raise a FileExistsException if the target is an existing directory
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/fr/function.symlink.php">https://www.php.net/manual/fr/function.symlink.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -4803,7 +5263,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">581</span>
+    <span class="phpdocumentor-element-found-in__line">634</span>
 
     </aside>
 
@@ -4846,6 +5306,14 @@ It will still raise a FileExistsException if the target is an existing directory
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/en/function.touch.php">https://www.php.net/manual/en/function.touch.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -4871,7 +5339,7 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1006</span>
+    <span class="phpdocumentor-element-found-in__line">1091</span>
 
     </aside>
 
@@ -4918,18 +5386,22 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1134</span>
+    <span class="phpdocumentor-element-found-in__line">1242</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Walks through the directories of a given directory and returns an iterator.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">walkDirs</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Iterator">Iterator</abbr></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
-    
+        <section class="phpdocumentor-description"><p>This method uses the built-in <code class="prettyprint">RecursiveIteratorIterator</code> and <code class="prettyprint">RecursiveDirectoryIterator</code> classes to
+traverse through all the files and directories within the given directory.</p>
+</section>
+
     
     
     <h5 class="phpdocumentor-tag-list__heading" id="tags">
@@ -4939,18 +5411,40 @@ It will still raise a FileExistsException if the target is an existing directory
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/en/class.recursiveiteratoriterator.php">https://www.php.net/manual/en/class.recursiveiteratoriterator.php</a></span>
+                                        
+                                             
+                                    </dd>
+                            <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="https://www.php.net/manual/en/class.iterator.php">https://www.php.net/manual/en/class.iterator.php</a></span>
+                                        
+                                             
+                                    </dd>
+                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">throws</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
                                                                 <span class="phpdocumentor-tag-link"><a href="classes/Path-Exception-FileNotFoundException.html"><abbr title="\Path\Exception\FileNotFoundException">FileNotFoundException</abbr></a></span>
                                                             
-                                             
+                                                 <section class="phpdocumentor-description"><p>If the directory does not exist</p>
+</section>
+
                                     </dd>
                                             </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><abbr title="\Iterator">Iterator</abbr></span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>An iterator that yields each file or directory within the given directory</p>
+</section>
+
             </section>
 
 </article>
@@ -4968,11 +5462,12 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1154</span>
+    <span class="phpdocumentor-element-found-in__line">1263</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Calls a callback with a file handle opened with the specified mode and closes the handle afterward.</p>
+        <p class="phpdocumentor-summary">Calls a callback with a file handle opened with the specified mode and closes the
+handle afterward.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -5038,11 +5533,11 @@ It will still raise a FileExistsException if the target is an existing directory
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Path.php"><a href="files/src-path.html"><abbr title="src/Path.php">Path.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">90</span>
+    <span class="phpdocumentor-element-found-in__line">95</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Casts the input into an instance of the current class.</p>
+        <p class="phpdocumentor-summary">Casts the input into a Path instance.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
