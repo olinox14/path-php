@@ -368,6 +368,8 @@ class Path
      * and A/foo/../B all become A/B. This string manipulation may change the meaning of a path that contains
      * symbolic links. On Windows, it converts forward slashes to backward slashes. To normalize case, use normcase().
      *
+     * // TODO: becare of the normcase when we're getting to the windows compat
+     *
      * > Thanks to https://stackoverflow.com/users/216254/troex
      * @return self A new instance of the class with the normalized path.
      */

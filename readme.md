@@ -153,15 +153,26 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 0.1.2 :
 
 * [x] licence 
-* [] phpstan
-* [] cs-fixer
+* [x] phpstan
+* [x] cs-fixer
 * [x] contribution guide
 * [x] setup gitflow and protected branches
 * [x] complete documentation with installation / get started / examples sections
 
+0.1.3
+
+* [] add quality tools to CI
+* [] add 'ignore' and 'errorOnExistingDestination' to the copyTree method
+* [] implement the 'getOwner' method
+* [] implement the 'chgrp' method
+* [] fix the 'chroot' method
+* [] complete the 'sameFile' documentation
+* [] review the 'rmdir' error management
+
 0.2 :
 
-* [] multi os compat (windows, mac)
-* [] handle ftp / sftp
+* [] multi os compat (windows)
+* [] handle protocols (ftp, sftp, file, smb, http, ...etc)
+* [] handle unc paths (windows)
 * [] improve error management and tracebacks
 
