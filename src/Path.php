@@ -1,5 +1,4 @@
 <?php
-
 namespace Path;
 
 use Generator;
@@ -14,6 +13,8 @@ use Throwable;
  *
  * Represents a filesystem path.
  * Most of the methods rely on the php builtin methods, see each method's documentation for more.
+ *
+ * @see https://github.com/olinox14/path-php#path-php
  *
  * @package olinox14/path
  */
