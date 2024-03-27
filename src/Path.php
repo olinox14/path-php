@@ -1320,11 +1320,14 @@ class Path
      * Changes permissions of the file.
      *
      * @param int $mode The new permissions (octal).
-     * @throws FileNotFoundException|IOException
+     * @param bool $asOctal
+     * @param bool $clearStatCache
+     * @throws FileNotFoundException
+     * @throws IOException
      */
-    public function chmod(int $mode): void
+    public function chmod(int $mode, bool $asOctal = false, bool $clearStatCache = false): void
     {
-        $this->setPermissions($mode);
+        $this->setPermissions($mode, $asOctal, $clearStatCache);
     }
 
     /**

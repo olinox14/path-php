@@ -10,32 +10,36 @@ An intuitive and object-oriented file and path operations, inspired by the path.
     <?php
 
     use Path\Path;
-  
-    $path = new Path(__file__).parent();
 
-    echo($path->dirs());
-
-    $path = new Path('/home');
-
+    $dir = (new Path(__file__))->parent();
+    
+    var_dump(
+        $dir->dirs()
+    );
+    
+    $path = new Path('.');
+    
     foreach($path->files() as $file) {
-        $file->chmod(0555);
+        $file->chmod(755);
     }
-
-    $newPath = $path->append('bar');
+    
+    $newPath = $path->append('readme.md');
+    
+    var_dump($newPath->absPath());
 
     var_dump($newPath->absPath());
 
-### Requirement
+## Requirement
 
 path-php requires **php8.0 or ulterior versions**.
 
-### Installation
+## Installation
 
 Install with composer :
 
     composer require olinox14/path-php
 
-### Usage
+## Usage
 
 Import the Path class : 
 
@@ -60,11 +64,11 @@ your current script lies into .md files :
         }
     }
 
-### Documentation
+## Documentation
 
 > [API Documentation](https://olinox14.github.io/path-php/classes/Path-Path.html)
 
-### Contribute
+## Contribute
 
 ### Git branching
 
