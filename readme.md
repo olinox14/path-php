@@ -23,18 +23,65 @@ An intuitive and object-oriented file and path operations, inspired by the path.
 
     $newPath = $path->append('bar');
 
-    echo($newPath->absPath()); // => '/foo/bar'
+    var_dump($newPath->absPath());
 
+### Requirement
 
-> Require php8.0+
+path-php requires **php8.0 or ulterior versions**.
 
-[Full documentation here](https://olinox14.github.io/path-php/classes/Path-Path.html)
+### Installation
 
-### Contribute 
+Install with composer :
 
-#### Build docker
+    composer require olinox14/path-php
+
+### Usage
+
+Import the Path class : 
+
+    use Path\Path;
+
+Instantiate with some path : 
+
+    $path = new Path('./foo');
+    $path = new Path('/foo/bar/file.ext');
+    $path = new Path(__file__);
+
+And use it as you like. For example, if you want to rename all the html files in the directory where
+your current script lies into .md files : 
+
+    $path = new Path(__file__);
+
+    $dir = $path->parent();
+    
+    foreach ($dir->files() as $file) {
+        if ($file->ext() === 'html') {
+            $file->rename($file->name() . '.md');
+        }
+    }
+
+### Documentation
+
+> [API Documentation](https://olinox14.github.io/path-php/classes/Path-Path.html)
+
+### Contribute
+
+### Git branching
+
+Contributions shall follow the [gitflow](https://www.gitkraken.com/learn/git/git-flow) pattern.
+
+### Tests
+
+#### First build
+
+> Default php version in the dockerfile is set to be the oldest actively supported 
+> version of php, but you can change it locally before building your container.
+
+Build your docker container :
 
     docker build -t path .
+
+Run it (you can change the name): 
 
     # On Linux
     docker run -v "$(pwd)":/path --name path path
@@ -42,18 +89,44 @@ An intuitive and object-oriented file and path operations, inspired by the path.
     # On Windows
     docker run -d -v "%cd%:/path" --name path path
 
+Execute it and install : 
+
     docker exec -it path bash
     composer install
 
-#### Run tests
+Run the unit tests :
+
+    XDEBUG_MODE=coverage vendor/bin/phpunit -c phpunit.xml
+
+#### Next runs
+
+If you've already built your container, start it and run the unit tests with :
 
     docker start path
     docker exec -it path bash
     XDEBUG_MODE=coverage vendor/bin/phpunit -c phpunit.xml
 
-#### Generate doc
+### Run code quality tools 
 
-To install and execute the [phpdoc](https://docs.phpdoc.org/3.0/) container :
+#### Phpstan
+
+Build and start the docker as explained in the unit tests section, then run :
+
+    vendor/bin/phpstan analyse --memory-limit=-1
+
+> see: https://phpstan.org/
+
+#### CS Fixer
+
+Build and start the docker as explained in the unit tests section, then run :
+
+    vendor/bin/php-cs-fixer fix src
+
+> see https://github.com/PHP-CS-Fixer/PHP-CS-Fixer
+
+### Generate documentation
+
+To install and run [phpdoc](https://docs.phpdoc.org/3.0/) :
 
     docker pull phpdoc/phpdoc
 
@@ -63,10 +136,43 @@ To install and execute the [phpdoc](https://docs.phpdoc.org/3.0/) container :
     # On Windows
     docker run --rm -v "%cd%:/data" "phpdoc/phpdoc:3"
 
-Then, if on linux, you may create an alias :
+If you're on linux, you could create an alias with :
 
     alias phpdoc="docker run --rm -v $(pwd):/data phpdoc/phpdoc:3"
 
-And run phpdoc with :
+And then run phpdoc with :
 
     phpdoc
+
+## Licence 
+
+Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
+
+## Roadmap
+
+0.1.2 :
+
+* [x] licence 
+* [x] phpstan
+* [x] cs-fixer
+* [x] contribution guide
+* [x] setup gitflow and protected branches
+* [x] complete documentation with installation / get started / examples sections
+
+0.1.3
+
+* [] add quality tools to CI
+* [] add 'ignore' and 'errorOnExistingDestination' to the copyTree method
+* [] implement the 'getOwner' method
+* [] implement the 'chgrp' method
+* [] fix the 'chroot' method
+* [] complete the 'sameFile' documentation
+* [] review the 'rmdir' error management
+
+0.2 :
+
+* [] multi os compat (windows)
+* [] handle protocols (ftp, sftp, file, smb, http, ...etc)
+* [] handle unc paths (windows)
+* [] improve error management and tracebacks
+
