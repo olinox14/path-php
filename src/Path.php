@@ -15,6 +15,8 @@ use Throwable;
  * Represents a filesystem path.
  * Most of the methods rely on the php builtin methods, see each method's documentation for more.
  *
+ * @see https://github.com/olinox14/path-php#path-php
+ *
  * @package olinox14/path
  */
 class Path
@@ -22,19 +24,19 @@ class Path
     /**
      * File exists
      */
-    const F_OK = 0;
+    public const F_OK = 0;
     /**
      * Has read permission on the file
      */
-    const R_OK = 4;
+    public const R_OK = 4;
     /**
      * Has write permission on the file
      */
-    const W_OK = 2;
+    public const W_OK = 2;
     /**
      * Has execute permission on the file
      */
-    const X_OK = 1;
+    public const X_OK = 1;
 
     protected string $path;
 
@@ -53,10 +55,10 @@ class Path
      * @param string ...$parts The parts of the path to be joined.
      * @return self The resulting path after joining the parts using the directory separator.
      */
-    public static function join(string|self $path, string|self ...$parts): string
+    public static function join(string|self $path, string|self ...$parts): self
     {
         $path = (string)$path;
-        $parts = array_map(fn($p) => (string)$p, $parts);
+        $parts = array_map(fn ($p) => (string)$p, $parts);
 
         foreach ($parts as $part) {
             if (str_starts_with($part, DIRECTORY_SEPARATOR)) {
@@ -73,16 +75,16 @@ class Path
     public function __construct(string|self $path)
     {
         $this->builtin = new BuiltinProxy();
-        
+
         $this->path = (string)$path;
         $this->handle = null;
-        return $this;
     }
 
     /**
      * @return string
      */
-    public function __toString(): string {
+    public function __toString(): string
+    {
         return $this->path;
     }
 
@@ -113,7 +115,8 @@ class Path
      * @param string|Path $path The path to compare against.
      * @return bool Returns true if the given path is equal to the current path, false otherwise.
      */
-    public function eq(string|self $path): bool {
+    public function eq(string|self $path): bool
+    {
         return $this->cast($path)->path() === $this->path();
     }
 
@@ -174,7 +177,7 @@ class Path
      *        - X_OK: checks for execute permission.
      * @return bool Returns true if the permission check is successful; otherwise, returns false.
      */
-    function access(int $mode): bool
+    public function access(int $mode): bool
     {
         return match ($mode) {
             self::F_OK => $this->builtin->file_exists($this->path),
@@ -194,7 +197,7 @@ class Path
      * @throws IOException
      * @throws FileNotFoundException
      */
-    function atime(): int
+    public function atime(): int
     {
         if (!$this->exists()) {
             throw new FileNotFoundException('File does not exists : ' . $this->path);
@@ -215,7 +218,7 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    function ctime(): int
+    public function ctime(): int
     {
         if (!$this->exists()) {
             throw new FileNotFoundException('File does not exists : ' . $this->path);
@@ -236,7 +239,7 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    function mtime(): int
+    public function mtime(): int
     {
         if (!$this->exists()) {
             throw new FileNotFoundException('File does not exists : ' . $this->path);
@@ -365,6 +368,8 @@ class Path
      * and A/foo/../B all become A/B. This string manipulation may change the meaning of a path that contains
      * symbolic links. On Windows, it converts forward slashes to backward slashes. To normalize case, use normcase().
      *
+     * // TODO: becare of the normcase when we're getting to the windows compat
+     *
      * > Thanks to https://stackoverflow.com/users/216254/troex
      * @return self A new instance of the class with the normalized path.
      */
@@ -478,7 +483,7 @@ class Path
             if (!$result) {
                 throw new IOException("Error why deleting file : " . $this->path);
             }
-        } else if ($this->isDir()) {
+        } elseif ($this->isDir()) {
             $result = $this->builtin->rmdir($this->path);
 
             if (!$result) {
@@ -807,8 +812,9 @@ class Path
     /**
      * Retrieves the content of a file as an array of lines.
      *
-     * @throws IOException
+     * @return array<string>
      * @throws FileNotFoundException
+     * @throws IOException
      */
     public function lines(): array
     {
@@ -839,7 +845,7 @@ class Path
             $append ? FILE_APPEND : 0
         );
 
-        if ($result === False) {
+        if ($result === false) {
             throw new IOException("Error while putting content into $this->path");
         }
 
@@ -1023,7 +1029,7 @@ class Path
     {
         $path = preg_replace_callback(
             '/\$\{([^}]+)}|\$(\w+)/',
-            function($matches) {
+            function ($matches) {
                 return $this->builtin->getenv($matches[1] ?: $matches[2]);
             },
             $this->path()
@@ -1074,11 +1080,11 @@ class Path
     public function remove(): void
     {
         if (!$this->isFile()) {
-            throw new FileNotFoundException( $this->path . " is not a file");
+            throw new FileNotFoundException($this->path . " is not a file");
         }
         $result = $this->builtin->unlink($this->path);
         if (!$result) {
-            throw new IOException( "Error while removing the file " . $this->path);
+            throw new IOException("Error while removing the file " . $this->path);
         }
     }
 
@@ -1106,7 +1112,7 @@ class Path
     public function remove_p(): void
     {
         if ($this->isDir()) {
-            throw new FileExistsException( $this->path . " is a directory");
+            throw new FileExistsException($this->path . " is a directory");
         }
         if (!$this->isFile()) {
             return;
@@ -1133,7 +1139,7 @@ class Path
         $subDirs = $this->dirs();
         $files = $this->files();
 
-        if ((!empty($subdirs) || !empty($files)) && !$recursive) {
+        if ((!empty($subDirs) || !empty($files)) && !$recursive) {
             throw new IOException("Directory is not empty : " . $this->path);
         }
 
@@ -1264,13 +1270,14 @@ class Path
     {
         $handle = $this->open($mode);
         try {
-            return $callback($handle);
+            $result = $callback($handle);
         } finally {
             $closed = $this->builtin->fclose($handle);
             if (!$closed) {
                 throw new IOException("Could not close the file stream : " . $this->path);
             }
         }
+        return $result;
     }
 
     /**
@@ -1419,7 +1426,7 @@ class Path
      *
      * @see https://www.php.net/manual/fr/function.lstat.php
      *
-     * @return array
+     * @return array<string, int|float>
      * @throws IOException
      */
     public function lstat(): array
@@ -1472,7 +1479,7 @@ class Path
      *     Path('/foo/bar/baz').parts()
      *     >>> '/', 'foo', 'bar', 'baz'
      *
-     * @return array
+     * @return array<string>
      */
     public function parts(): array
     {
@@ -1516,7 +1523,11 @@ class Path
 
         return $this->cast(
             str_repeat(
-            '..' . DIRECTORY_SEPARATOR, count($baseParts)) . implode(DIRECTORY_SEPARATOR, $pathParts
+                '..' . DIRECTORY_SEPARATOR,
+                count($baseParts)
+            ) . implode(
+                DIRECTORY_SEPARATOR,
+                $pathParts
             )
         );
     }

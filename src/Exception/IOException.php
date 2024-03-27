@@ -4,8 +4,11 @@ namespace Path\Exception;
 
 class IOException extends \Exception
 {
-    public function __construct($message = "Read/write error", $code = 0, \Exception $previous = null)
-    {
+    public function __construct(
+        string $message = "Read/write error",
+        int $code = 0,
+        \Exception $previous = null
+    ) {
         parent::__construct($message, $code, $previous);
     }
 

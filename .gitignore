@@ -10,3 +10,5 @@ composer.lock
 build/logs/clover.xml
 
 .phpdoc/
+
+.php-cs-fixer.cache
