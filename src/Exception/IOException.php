@@ -8,8 +8,7 @@ class IOException extends \Exception
         string $message = "Read/write error",
         int $code = 0,
         \Exception $previous = null
-    )
-    {
+    ) {
         parent::__construct($message, $code, $previous);
     }
 

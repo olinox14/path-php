@@ -106,6 +106,23 @@ If you've already built your container, start it and run the unit tests with :
     docker exec -it path bash
     XDEBUG_MODE=coverage vendor/bin/phpunit -c phpunit.xml
 
+### Run code quality tools 
+
+#### Phpstan
+
+Build and start the docker as explained in the unit tests section, then run :
+
+    vendor/bin/phpstan analyse --memory-limit=-1
+
+> see: https://phpstan.org/
+
+#### CS Fixer
+
+Build and start the docker as explained in the unit tests section, then run :
+
+    vendor/bin/php-cs-fixer fix src
+
+> see https://github.com/PHP-CS-Fixer/PHP-CS-Fixer
 
 ### Generate documentation
 

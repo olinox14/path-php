@@ -1,4 +1,5 @@
 <?php
+
 namespace Path;
 
 use Generator;
@@ -23,19 +24,19 @@ class Path
     /**
      * File exists
      */
-    const F_OK = 0;
+    public const F_OK = 0;
     /**
      * Has read permission on the file
      */
-    const R_OK = 4;
+    public const R_OK = 4;
     /**
      * Has write permission on the file
      */
-    const W_OK = 2;
+    public const W_OK = 2;
     /**
      * Has execute permission on the file
      */
-    const X_OK = 1;
+    public const X_OK = 1;
 
     protected string $path;
 
@@ -57,7 +58,7 @@ class Path
     public static function join(string|self $path, string|self ...$parts): self
     {
         $path = (string)$path;
-        $parts = array_map(fn($p) => (string)$p, $parts);
+        $parts = array_map(fn ($p) => (string)$p, $parts);
 
         foreach ($parts as $part) {
             if (str_starts_with($part, DIRECTORY_SEPARATOR)) {
@@ -74,7 +75,7 @@ class Path
     public function __construct(string|self $path)
     {
         $this->builtin = new BuiltinProxy();
-        
+
         $this->path = (string)$path;
         $this->handle = null;
     }
@@ -82,7 +83,8 @@ class Path
     /**
      * @return string
      */
-    public function __toString(): string {
+    public function __toString(): string
+    {
         return $this->path;
     }
 
@@ -113,7 +115,8 @@ class Path
      * @param string|Path $path The path to compare against.
      * @return bool Returns true if the given path is equal to the current path, false otherwise.
      */
-    public function eq(string|self $path): bool {
+    public function eq(string|self $path): bool
+    {
         return $this->cast($path)->path() === $this->path();
     }
 
@@ -174,7 +177,7 @@ class Path
      *        - X_OK: checks for execute permission.
      * @return bool Returns true if the permission check is successful; otherwise, returns false.
      */
-    function access(int $mode): bool
+    public function access(int $mode): bool
     {
         return match ($mode) {
             self::F_OK => $this->builtin->file_exists($this->path),
@@ -194,7 +197,7 @@ class Path
      * @throws IOException
      * @throws FileNotFoundException
      */
-    function atime(): int
+    public function atime(): int
     {
         if (!$this->exists()) {
             throw new FileNotFoundException('File does not exists : ' . $this->path);
@@ -215,7 +218,7 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    function ctime(): int
+    public function ctime(): int
     {
         if (!$this->exists()) {
             throw new FileNotFoundException('File does not exists : ' . $this->path);
@@ -236,7 +239,7 @@ class Path
      * @throws FileNotFoundException
      * @throws IOException
      */
-    function mtime(): int
+    public function mtime(): int
     {
         if (!$this->exists()) {
             throw new FileNotFoundException('File does not exists : ' . $this->path);
@@ -478,7 +481,7 @@ class Path
             if (!$result) {
                 throw new IOException("Error why deleting file : " . $this->path);
             }
-        } else if ($this->isDir()) {
+        } elseif ($this->isDir()) {
             $result = $this->builtin->rmdir($this->path);
 
             if (!$result) {
@@ -840,7 +843,7 @@ class Path
             $append ? FILE_APPEND : 0
         );
 
-        if ($result === False) {
+        if ($result === false) {
             throw new IOException("Error while putting content into $this->path");
         }
 
@@ -1024,7 +1027,7 @@ class Path
     {
         $path = preg_replace_callback(
             '/\$\{([^}]+)}|\$(\w+)/',
-            function($matches) {
+            function ($matches) {
                 return $this->builtin->getenv($matches[1] ?: $matches[2]);
             },
             $this->path()
@@ -1075,11 +1078,11 @@ class Path
     public function remove(): void
     {
         if (!$this->isFile()) {
-            throw new FileNotFoundException( $this->path . " is not a file");
+            throw new FileNotFoundException($this->path . " is not a file");
         }
         $result = $this->builtin->unlink($this->path);
         if (!$result) {
-            throw new IOException( "Error while removing the file " . $this->path);
+            throw new IOException("Error while removing the file " . $this->path);
         }
     }
 
@@ -1107,7 +1110,7 @@ class Path
     public function remove_p(): void
     {
         if ($this->isDir()) {
-            throw new FileExistsException( $this->path . " is a directory");
+            throw new FileExistsException($this->path . " is a directory");
         }
         if (!$this->isFile()) {
             return;
@@ -1515,7 +1518,11 @@ class Path
 
         return $this->cast(
             str_repeat(
-            '..' . DIRECTORY_SEPARATOR, count($baseParts)) . implode(DIRECTORY_SEPARATOR, $pathParts
+                '..' . DIRECTORY_SEPARATOR,
+                count($baseParts)
+            ) . implode(
+                DIRECTORY_SEPARATOR,
+                $pathParts
             )
         );
     }

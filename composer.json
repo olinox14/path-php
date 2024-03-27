@@ -24,7 +24,8 @@
     "phpunit/phpunit": "^9.6",
     "ext-posix": "*",
     "php-coveralls/php-coveralls": "^2.7",
-    "phpstan/phpstan": "^1.10"
+    "phpstan/phpstan": "^1.10",
+    "friendsofphp/php-cs-fixer": "^3.52"
   },
   "minimum-stability": "dev",
   "prefer-stable": true

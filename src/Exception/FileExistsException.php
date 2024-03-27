@@ -8,8 +8,7 @@ class FileExistsException extends \Exception
         string $message = "File already exists",
         int $code = 0,
         \Exception $previous = null
-    )
-    {
+    ) {
         parent::__construct($message, $code, $previous);
     }
 

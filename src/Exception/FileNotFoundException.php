@@ -8,8 +8,7 @@ class FileNotFoundException extends \Exception
         string $message = "File not found",
         int $code = 0,
         \Exception $previous = null
-    )
-    {
+    ) {
         parent::__construct($message, $code, $previous);
     }
 

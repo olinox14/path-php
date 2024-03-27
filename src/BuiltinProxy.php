@@ -35,8 +35,7 @@ class BuiltinProxy
     public function pathinfo(
         string $path,
         #[ExpectedValues([PATHINFO_DIRNAME, PATHINFO_BASENAME, PATHINFO_EXTENSION, PATHINFO_FILENAME])] int $flags = PATHINFO_ALL
-    ): array|string
-    {
+    ): array|string {
         return pathinfo($path, $flags);
     }
 
@@ -150,7 +149,7 @@ class BuiltinProxy
         return filesize($filename);
     }
 
-    public function dirname(string $path, int $levels = 1 ): string
+    public function dirname(string $path, int $levels = 1): string
     {
         return dirname($path, $levels);
     }
@@ -175,7 +174,7 @@ class BuiltinProxy
         return fileperms($filename);
     }
 
-    public function clearstatcache(bool $clear_realpath_cache = false, string $filename = '' ): void
+    public function clearstatcache(bool $clear_realpath_cache = false, string $filename = ''): void
     {
         clearstatcache($clear_realpath_cache, $filename);
     }
@@ -200,7 +199,7 @@ class BuiltinProxy
         return chroot($directory);
     }
 
-    public function glob(string $pattern, int $flags = 0 ): array|false
+    public function glob(string $pattern, int $flags = 0): array|false
     {
         return glob($pattern, $flags);
     }
