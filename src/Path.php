@@ -54,7 +54,7 @@ class Path
      * @param string ...$parts The parts of the path to be joined.
      * @return self The resulting path after joining the parts using the directory separator.
      */
-    public static function join(string|self $path, string|self ...$parts): string
+    public static function join(string|self $path, string|self ...$parts): self
     {
         $path = (string)$path;
         $parts = array_map(fn($p) => (string)$p, $parts);
@@ -77,7 +77,6 @@ class Path
         
         $this->path = (string)$path;
         $this->handle = null;
-        return $this;
     }
 
     /**
@@ -808,8 +807,9 @@ class Path
     /**
      * Retrieves the content of a file as an array of lines.
      *
-     * @throws IOException
+     * @return array<string>
      * @throws FileNotFoundException
+     * @throws IOException
      */
     public function lines(): array
     {
@@ -1134,7 +1134,7 @@ class Path
         $subDirs = $this->dirs();
         $files = $this->files();
 
-        if ((!empty($subdirs) || !empty($files)) && !$recursive) {
+        if ((!empty($subDirs) || !empty($files)) && !$recursive) {
             throw new IOException("Directory is not empty : " . $this->path);
         }
 
@@ -1265,13 +1265,14 @@ class Path
     {
         $handle = $this->open($mode);
         try {
-            return $callback($handle);
+            $result = $callback($handle);
         } finally {
             $closed = $this->builtin->fclose($handle);
             if (!$closed) {
                 throw new IOException("Could not close the file stream : " . $this->path);
             }
         }
+        return $result;
     }
 
     /**
@@ -1417,7 +1418,7 @@ class Path
      *
      * @see https://www.php.net/manual/fr/function.lstat.php
      *
-     * @return array
+     * @return array<string, int|float>
      * @throws IOException
      */
     public function lstat(): array
@@ -1470,7 +1471,7 @@ class Path
      *     Path('/foo/bar/baz').parts()
      *     >>> '/', 'foo', 'bar', 'baz'
      *
-     * @return array
+     * @return array<string>
      */
     public function parts(): array
     {
