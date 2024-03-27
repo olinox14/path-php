@@ -29,17 +29,17 @@ An intuitive and object-oriented file and path operations, inspired by the path.
 
     var_dump($newPath->absPath());
 
-### Requirement
+## Requirement
 
 path-php requires **php8.0 or ulterior versions**.
 
-### Installation
+## Installation
 
 Install with composer :
 
     composer require olinox14/path-php
 
-### Usage
+## Usage
 
 Import the Path class : 
 
@@ -64,11 +64,11 @@ your current script lies into .md files :
         }
     }
 
-### Documentation
+## Documentation
 
 > [API Documentation](https://olinox14.github.io/path-php/classes/Path-Path.html)
 
-### Contribute
+## Contribute
 
 ### Git branching
 
