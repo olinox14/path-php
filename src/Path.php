@@ -6,7 +6,6 @@ use Generator;
 use Path\Exception\FileExistsException;
 use Path\Exception\FileNotFoundException;
 use Path\Exception\IOException;
-use RuntimeException;
 use Throwable;
 
 /**
@@ -21,23 +20,6 @@ use Throwable;
  */
 class Path
 {
-    /**
-     * File exists
-     */
-    public const F_OK = 0;
-    /**
-     * Has read permission on the file
-     */
-    public const R_OK = 4;
-    /**
-     * Has write permission on the file
-     */
-    public const W_OK = 2;
-    /**
-     * Has execute permission on the file
-     */
-    public const X_OK = 1;
-
     protected string $path;
 
     protected mixed $handle;
@@ -158,34 +140,6 @@ class Path
     public function realpath(): self
     {
         return $this->absPath();
-    }
-
-    /**
-     * Checks the access rights for a given file or directory.
-     *
-     * > Inspired from the python `os.access` method
-     *
-     * @see https://www.php.net/manual/fr/function.file-exists.php
-     * @see https://www.php.net/manual/fr/function.is-readable.php
-     * @see https://www.php.net/manual/fr/function.is-writable.php
-     * @see https://www.php.net/manual/fr/function.is-executable.php
-     *
-     * @param int $mode The access mode to check. Permitted values:
-     *        - F_OK: checks for the existence of the file or directory.
-     *        - R_OK: checks for read permission.
-     *        - W_OK: checks for write permission.
-     *        - X_OK: checks for execute permission.
-     * @return bool Returns true if the permission check is successful; otherwise, returns false.
-     */
-    public function access(int $mode): bool
-    {
-        return match ($mode) {
-            self::F_OK => $this->builtin->file_exists($this->path),
-            self::R_OK => $this->builtin->is_readable($this->path),
-            self::W_OK => $this->builtin->is_writable($this->path),
-            self::X_OK => $this->builtin->is_executable($this->path),
-            default => throw new RuntimeException('Invalid mode'),
-        };
     }
 
     /**
@@ -1475,6 +1429,54 @@ class Path
     public function isMount(): bool
     {
         return $this->builtin->disk_free_space($this->path) !== false;
+    }
+
+    /**
+     * Checks if the file or directory is readable.
+     *
+     * @see https://www.php.net/manual/fr/function.is-readable.php
+     *
+     * @return bool True if the file or directory is readable, false otherwise
+     * @throws FileNotFoundException If the file or directory does not exist
+     */
+    public function isReadable(): bool
+    {
+        if (!$this->exists()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this);
+        }
+
+        return $this->builtin->is_readable($this->path);
+    }
+
+    /**
+     * Determines if the file or directory is writable.
+     *
+     * @return bool Returns true if the file or directory is writable, false otherwise.
+     * @throws FileNotFoundException If the file or directory does not exist.
+     *
+     */
+    public function isWritable(): bool
+    {
+        if (!$this->exists()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this);
+        }
+
+        return $this->builtin->is_writable($this->path);
+    }
+
+    /**
+     * Determines if the file or directory is executable.
+     *
+     * @return bool Returns true if the file or directory is executable, false otherwise.
+     * @throws FileNotFoundException If the file or directory does not exist.
+     */
+    public function isExecutable(): bool
+    {
+        if (!$this->exists()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this);
+        }
+
+        return $this->builtin->is_executable($this->path);
     }
 
     /**

@@ -242,171 +242,6 @@ class PathTest extends TestCase
         );
     }
 
-    public function testAccessFileExist(): void
-    {
-        $path = $this->getMock('bar', 'access');
-
-        $this->builtin
-            ->expects(self::once())
-            ->method('file_exists')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_readable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_writable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_executable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->assertTrue(
-            $path->access(Path::F_OK)
-        );
-    }
-
-    public function testAccessIsReadable(): void
-    {
-        $path = $this->getMock('bar', 'access');
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('file_exists')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::once())
-            ->method('is_readable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_writable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_executable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->assertTrue(
-            $path->access(Path::R_OK)
-        );
-    }
-
-    public function testAccessIsWritable(): void
-    {
-        $path = $this->getMock('bar', 'access');
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('file_exists')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_readable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::once())
-            ->method('is_writable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_executable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->assertTrue(
-            $path->access(Path::W_OK)
-        );
-    }
-
-    public function testAccessIsExecutable(): void
-    {
-        $path = $this->getMock('bar', 'access');
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('file_exists')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_readable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_writable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::once())
-            ->method('is_executable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->assertTrue(
-            $path->access(Path::X_OK)
-        );
-    }
-
-    public function testAccessInvalidMode(): void
-    {
-        $path = $this->getMock('bar', 'access');
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('file_exists')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_readable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_writable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->builtin
-            ->expects(self::never())
-            ->method('is_executable')
-            ->with('bar')
-            ->willReturn(true);
-
-        $this->expectException(\RuntimeException::class);
-
-        $path->access(-1);
-    }
-
     /**
      * @throws IOException
      * @throws FileNotFoundException
@@ -4047,6 +3882,111 @@ class PathTest extends TestCase
         $this->assertFalse(
             $path->isMount()
         );
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testIsReadable(): void
+    {
+        $path = $this->getMock('/foo', 'isReadable');
+        $path->method('exists')->willReturn(true);
+
+        $this
+            ->builtin
+            ->expects(self::once())
+            ->method('is_readable')
+            ->willReturn(true);
+
+        $this->assertTrue($path->isReadable());
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testIsReadableFileDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo', 'isReadable');
+        $path->method('exists')->willReturn(false);
+
+        $this
+            ->builtin
+            ->expects(self::never())
+            ->method('is_readable');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $this->assertTrue($path->isReadable());
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testIsWritable(): void
+    {
+        $path = $this->getMock('/foo', 'isWritable');
+        $path->method('exists')->willReturn(true);
+
+        $this
+            ->builtin
+            ->expects(self::once())
+            ->method('is_writable')
+            ->willReturn(true);
+
+        $this->assertTrue($path->isWritable());
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testIsWritableFileDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo', 'isWritable');
+        $path->method('exists')->willReturn(false);
+
+        $this
+            ->builtin
+            ->expects(self::never())
+            ->method('is_writable');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $this->assertTrue($path->isWritable());
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testIsExecutable(): void
+    {
+        $path = $this->getMock('/foo', 'isExecutable');
+        $path->method('exists')->willReturn(true);
+
+        $this
+            ->builtin
+            ->expects(self::once())
+            ->method('is_executable')
+            ->willReturn(true);
+
+        $this->assertTrue($path->isExecutable());
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testIsExecutableFileDoesNotExist(): void
+    {
+        $path = $this->getMock('/foo', 'isExecutable');
+        $path->method('exists')->willReturn(false);
+
+        $this
+            ->builtin
+            ->expects(self::never())
+            ->method('is_executable');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $this->assertTrue($path->isExecutable());
     }
 
     /**
