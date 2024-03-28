@@ -169,18 +169,20 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 
 0.1.3
 
-* [] add quality tools to CI
-* [] add 'ignore' and 'errorOnExistingDestination' to the copyTree method
-* [] implement the 'getOwner' method
-* [] implement the 'chgrp' method
-* [] fix the 'chroot' method
-* [] complete the 'sameFile' documentation
-* [] review the 'rmdir' error management
+* [ ] add quality tools to CI
+* [ ] add 'ignore' and 'errorOnExistingDestination' to the copyTree method
+* [x] implement the 'getOwner' method
+* [x] implement the 'chgrp' method
+* [ ] fix the 'chroot' method
+* [x] complete the 'sameFile' documentation
+* [ ] review the 'rmdir' error management
+* [ ] implement the mergeTree method
+* [ ] remove the 'access' method and add 'isReadable', 'isWritable', 'isExecutable' methods
 
 0.2 :
 
-* [] multi os compat (windows)
-* [] handle protocols (ftp, sftp, file, smb, http, ...etc)
-* [] handle unc paths (windows)
-* [] improve error management and tracebacks
+* [ ] multi os compat (windows)
+* [ ] handle protocols (ftp, sftp, file, smb, http, ...etc)
+* [ ] handle unc paths (windows)
+* [ ] improve error management and tracebacks
 

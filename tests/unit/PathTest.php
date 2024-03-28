@@ -20,15 +20,6 @@ class TestablePath extends Path {
     {
         return parent::cast($path);
     }
-
-    public function rrmdir(): bool {
-        return $this->rrmdir();
-    }
-
-    public function getDirectoryIterator(): \DirectoryIterator
-    {
-        return parent::getDirectoryIterator();
-    }
 }
 
 class PathTest extends TestCase
@@ -2417,6 +2408,105 @@ class PathTest extends TestCase
     }
 
     /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGetOwnerId(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'getOwnerId');
+        $path->method('exists')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('fileowner')
+            ->with('foo/file.ext')
+            ->willReturn(1000);
+
+        $this->assertEquals(
+            1000,
+            $path->getOwnerId()
+        );
+    }
+
+    /**
+     * @throws IOException
+     */
+    public function testGetOwnerIdFileDoesNotExist(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'getOwnerId');
+        $path->method('exists')->willReturn(false);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('fileowner');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->getOwnerId();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testGetOwnerIdWithError(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'getOwnerId');
+        $path->method('exists')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('fileowner')
+            ->with('foo/file.ext')
+            ->willReturn(false);
+
+        $this->expectException(IOException::class);
+
+        $path->getOwnerId();
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testGetOwnerName(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'getOwnerName');
+
+        $path->method('getOwnerId')->willReturn(1000);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('posix_getpwuid')
+            ->with(1000)
+            ->willReturn(['name' => 'foo']);
+
+        $this->assertEquals(
+            'foo',
+            $path->getOwnerName()
+        );
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testGetOwnerNameWithError(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'getOwnerName');
+
+        $path->method('getOwnerId')->willReturn(1000);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('posix_getpwuid')
+            ->with(1000)
+            ->willReturn(false);
+
+        $this->expectException(IOException::class);
+
+        $path->getOwnerName();
+    }
+
+    /**
      * @throws FileNotFoundException
      * @throws IOException
      */
@@ -3648,17 +3738,192 @@ class PathTest extends TestCase
      * @throws IOException
      * @throws FileNotFoundException
      */
-    public function testChown(): void
+    public function testChownWithId(): void
     {
         $path = $this->getMock('foo/file.ext', 'chown');
         $path->method('exists')->willReturn(true);
 
-        $path
+        $this->builtin
             ->expects(self::once())
-            ->method('setOwner')
-            ->with('user', 'group');
+            ->method('chown')
+            ->with('foo/file.ext', 1000)
+            ->willReturn(true);
 
-        $path->chown('user', 'group');
+        $path->chown(1000);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testChownWithName(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'chown');
+        $path->method('exists')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chown')
+            ->with('foo/file.ext', 'user')
+            ->willReturn(true);
+
+        $path->chown('user');
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testChownWithClearCache(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'chown');
+        $path->method('exists')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chown')
+            ->with('foo/file.ext', 'user')
+            ->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('clearstatcache');
+
+        $path->chown('user', true);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testChownFileDoesNotExist(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'chown');
+        $path->method('exists')->willReturn(false);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('chown');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->chown('user');
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testChownWithError(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'chown');
+        $path->method('exists')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chown')
+            ->with('foo/file.ext', 'user')
+            ->willReturn(false);
+
+        $this->expectException(IOException::class);
+
+        $path->chown('user');
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testChgrpWithId(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'chgrp');
+        $path->method('exists')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chgrp')
+            ->with('foo/file.ext', 100)
+            ->willReturn(true);
+
+        $path->chgrp(100);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testChgrpWithName(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'chgrp');
+        $path->method('exists')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chgrp')
+            ->with('foo/file.ext', 'group')
+            ->willReturn(true);
+
+        $path->chgrp('group');
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testChgrpWithClearcache(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'chgrp');
+        $path->method('exists')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chgrp')
+            ->with('foo/file.ext', 'group')
+            ->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('clearstatcache');
+
+        $path->chgrp('group', true);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testChgrpWithIdFileDoesNotExist(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'chgrp');
+        $path->method('exists')->willReturn(false);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('chgrp');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->chgrp('group');
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function testChgrpWithError(): void
+    {
+        $path = $this->getMock('foo/file.ext', 'chgrp');
+        $path->method('exists')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('chgrp')
+            ->with('foo/file.ext', 'group')
+            ->willReturn(false);
+
+        $this->expectException(IOException::class);
+
+        $path->chgrp('group');
     }
 
     /**
