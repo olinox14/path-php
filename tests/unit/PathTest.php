@@ -3651,6 +3651,7 @@ class PathTest extends TestCase
     public function testChown(): void
     {
         $path = $this->getMock('foo/file.ext', 'chown');
+        $path->method('exists')->willReturn(true);
 
         $path
             ->expects(self::once())

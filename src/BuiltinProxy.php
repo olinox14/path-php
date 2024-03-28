@@ -194,6 +194,16 @@ class BuiltinProxy
         return chgrp($filename, $group);
     }
 
+    public function fileowner(string $filename): false|int
+    {
+        return fileowner($filename);
+    }
+
+    public function posix_getpwuid(int $id): false|array
+    {
+        return posix_getpwuid($id);
+    }
+
     public function chroot(string $directory): bool
     {
         return chroot($directory);

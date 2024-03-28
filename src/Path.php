@@ -145,7 +145,7 @@ class Path
     {
         $absPath = $this->builtin->realpath($this->path);
         if ($absPath === false) {
-            throw new IOException("Error while getting abspath of `" . $this->path . "`");
+            throw new IOException("An error occurred while getting abspath of `" . $this->path . "`");
         }
         return $this->cast($absPath);
     }
@@ -315,7 +315,7 @@ class Path
         }
         $result = $this->builtin->chdir($this->path);
         if (!$result) {
-            throw new IOException('Error while changing working directory to ' . $this->path);
+            throw new IOException('An error occurred while changing working directory to ' . $this->path);
         }
     }
 
@@ -461,7 +461,7 @@ class Path
         $result = $this->builtin->mkdir($this->path, $mode, $recursive);
 
         if (!$result) {
-            throw new IOException("Error why creating the new directory : " . $this->path);
+            throw new IOException("An error occurred while creating the new directory : " . $this->path);
         }
     }
 
@@ -481,13 +481,13 @@ class Path
             $result = $this->builtin->unlink($this->path);
 
             if (!$result) {
-                throw new IOException("Error why deleting file : " . $this->path);
+                throw new IOException("Error while deleting file : " . $this->path);
             }
         } elseif ($this->isDir()) {
             $result = $this->builtin->rmdir($this->path);
 
             if (!$result) {
-                throw new IOException("Error why deleting directory : " . $this->path);
+                throw new IOException("An error occurred while deleting directory : " . $this->path);
             }
         } else {
             throw new FileNotFoundException("File or directory does not exist : " . $this);
@@ -529,7 +529,7 @@ class Path
 
         $success = $this->builtin->copy($this->path, $destination->path());
         if (!$success) {
-            throw new IOException("Error copying file {$this->path} to {$destination->path()}");
+            throw new IOException("An error occurred while copying file {$this->path} to {$destination->path()}");
         }
 
         return $destination;
@@ -620,7 +620,7 @@ class Path
         $success = $this->builtin->rename($this->path, $destination->path());
 
         if (!$success) {
-            throw new IOException("Error while moving " . $this->path . " to " . $destination->path());
+            throw new IOException("An error occurred while moving " . $this->path . " to " . $destination->path());
         }
 
         return $destination;
@@ -648,7 +648,7 @@ class Path
         $success = $this->builtin->touch($this->path, $time, $atime);
 
         if (!$success) {
-            throw new IOException("Error while touching " . $this->path);
+            throw new IOException("An error occurred while touching " . $this->path);
         }
     }
 
@@ -670,7 +670,7 @@ class Path
         $result = $this->builtin->filesize($this->path);
 
         if ($result === false) {
-            throw new IOException("Error while getting the size of " . $this->path);
+            throw new IOException("An error occurred while getting the size of " . $this->path);
         }
 
         return $result;
@@ -846,7 +846,7 @@ class Path
         );
 
         if ($result === false) {
-            throw new IOException("Error while putting content into $this->path");
+            throw new IOException("An error occurred while putting content into $this->path");
         }
 
         return $result;
@@ -890,7 +890,7 @@ class Path
         $perms = $this->builtin->fileperms($this->path);
 
         if ($perms === false) {
-            throw new IOException("Error while getting permissions on " . $this->path);
+            throw new IOException("An error occurred while getting permissions on " . $this->path);
         }
 
         if (!$asOctal) {
@@ -928,11 +928,55 @@ class Path
         $success = $this->builtin->chmod($this->path, $permissions);
 
         if ($success === false) {
-            throw new IOException("Error while setting permissions on " . $this->path);
+            throw new IOException("An error occurred while setting permissions on " . $this->path);
         }
     }
 
-    // TODO: implement getOwner()
+    /**
+     * Retrieves the id of the owner of the file or directory.
+     *
+     * @see https://www.php.net/manual/fr/function.fileowner.php
+     *
+     * @return int The owner identifier of the file or directory
+     * @throws FileNotFoundException if the file or directory does not exist
+     * @throws IOException if there is an error while retrieving the owner
+     */
+    public function getOwnerId(): int
+    {
+        if (!$this->exists()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this->path);
+        }
+
+        $owner = $this->builtin->fileowner($this->path);
+
+        if ($owner === false) {
+            throw new IOException("An error occurred while getting owner of " . $this->path);
+        }
+
+        return $owner;
+    }
+
+    /**
+     * Retrieves the name of the owner of the file or directory.
+     *
+     * @see https://www.php.net/manual/fr/function.posix-getpwuid.php
+     *
+     * @return string The name of the owner
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public function getOwnerName(): string
+    {
+        $ownerId = $this->getOwnerId();
+
+        $userInfo = $this->builtin->posix_getpwuid($ownerId);
+
+        if ($userInfo === false) {
+            throw new IOException("An error occurred while getting infos about owner of " . $this->path);
+        }
+
+        return $userInfo['name'];
+    }
 
     /**
      * Changes ownership of the file.
@@ -960,7 +1004,7 @@ class Path
             $this->builtin->chgrp($this->path, $group);
 
         if ($success === false) {
-            throw new IOException("Error while setting owner of " . $this->path);
+            throw new IOException("An error occurred while setting owner of " . $this->path);
         }
     }
 
@@ -978,8 +1022,8 @@ class Path
 
     /**
      * Return True if both pathname arguments refer to the same file or directory.
-     *
-     * // TODO: make explicit that the two files/dirs have to exist
+     * As this method relies on the realpath method, this will throw an exception if one of the two files does
+     * not exist.
      *
      * @throws IOException
      */
@@ -1059,7 +1103,7 @@ class Path
         $result = $this->builtin->glob($pattern->path());
 
         if ($result === false) {
-            throw new IOException("Error while getting glob on " . $this->path);
+            throw new IOException("An error occurred while getting glob on " . $this->path);
         }
 
         return array_map(
@@ -1084,7 +1128,7 @@ class Path
         }
         $result = $this->builtin->unlink($this->path);
         if (!$result) {
-            throw new IOException("Error while removing the file " . $this->path);
+            throw new IOException("An error occurred while removing the file " . $this->path);
         }
     }
 
@@ -1154,7 +1198,7 @@ class Path
         $result = $this->builtin->rmdir($this->path());
 
         if ($result === false) {
-            throw new IOException("Error while removing directory : " . $this->path);
+            throw new IOException("An error occurred while removing directory : " . $this->path);
         }
     }
 
@@ -1183,7 +1227,7 @@ class Path
     {
         $result = $this->builtin->hash_file($algo, $this->path, $binary);
         if ($result === false) {
-            throw new IOException("Error while computing the hash of " . $this->path);
+            throw new IOException("An error occurred while computing the hash of " . $this->path);
         }
         return $result;
     }
@@ -1204,7 +1248,7 @@ class Path
         }
         $result = $this->builtin->readLink($this->path);
         if ($result === false) {
-            throw new IOException("Error while getting the target of the symbolic link " . $this->path);
+            throw new IOException("An error occurred while getting the target of the symbolic link " . $this->path);
         }
         return $this->cast($result);
     }
@@ -1331,20 +1375,64 @@ class Path
     }
 
     /**
-     * > Alias for Path->setOwner() method
+     * Changes the owner of a file or directory.
      *
-     * Changes ownership of the file.
+     * @see https://www.php.net/manual/fr/function.chown.php
      *
-     * @param string $user The new owner username.
-     * @param string $group The new owner group name.
-     * @throws FileNotFoundException|IOException
+     * @param int|string $user The new owner of the file or directory. Accepts either the user's numeric ID or username.
+     * @param bool $clearStatCache Optional. Whether to clear the stat cache before changing the owner. Default is false.
+     *
+     * @throws FileNotFoundException If the file or directory does not exist.
+     * @throws IOException If an error occurs while changing the owner of the file or directory.
+     *
+     * @return void
      */
-    public function chown(string $user, string $group): void
+    public function chown(int|string $user, bool $clearStatCache = false): void
     {
-        $this->setOwner($user, $group);
+        if (!$this->exists()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this->path);
+        }
+
+        if ($clearStatCache) {
+            $this->builtin->clearstatcache();
+        }
+
+        $success = $this->builtin->chown($this->path, $user);
+
+        if (!$success) {
+            throw new IOException("An error occurred while changing the owner of " . $this->path);
+        }
     }
 
-    // TODO: implement chgrp()
+    /**
+     * Changes the group ownership of a file or directory.
+     *
+     * @see https://www.php.net/manual/fr/function.chgrp.php
+     *
+     * @param int|string $group The group name or ID. If a string is provided, it must be a valid group name.
+     *                          If an integer is provided, it must be a valid group ID.
+     * @param bool $clearStatCache Whether to clear the stat cache before changing the group ownership.
+     *                             Defaults to false.
+     * @return void
+     * @throws FileNotFoundException If the file or directory does not exist.
+     * @throws IOException If there is an error changing the group ownership.
+     */
+    public function chgrp(int|string $group, bool $clearStatCache = false): void
+    {
+        if (!$this->exists()) {
+            throw new FileNotFoundException("File or dir does not exist : " . $this->path);
+        }
+
+        if ($clearStatCache) {
+            $this->builtin->clearstatcache();
+        }
+
+        $success = $this->builtin->chgrp($this->path, $group);
+
+        if (!$success) {
+            throw new IOException("An error occurred while changing root directory to " . $this->path);
+        }
+    }
 
     /**
      * Changes the root directory of the current process to the specified directory.
@@ -1363,7 +1451,7 @@ class Path
         // TODO: not working as expected, see why (new working dir is '/' no matter what)
         $success = $this->builtin->chroot($this->absPath()->path());
         if (!$success) {
-            throw new IOException("Error changing root directory to " . $this->path);
+            throw new IOException("An error occurred while changing root directory to " . $this->path);
         }
     }
 
@@ -1415,7 +1503,7 @@ class Path
         $success = $this->builtin->link($this->path, (string)$newLink);
 
         if ($success === false) {
-            throw new IOException("Error while creating the link from " . $this->path . " to " . $newLink);
+            throw new IOException("An error occurred while creating the link from " . $this->path . " to " . $newLink);
         }
 
         return $newLink;
@@ -1433,7 +1521,7 @@ class Path
     {
         $result = $this->builtin->lstat($this->path);
         if ($result === false) {
-            throw new IOException("Error while getting lstat of " . $this->path);
+            throw new IOException("An error occurred while getting lstat of " . $this->path);
         }
         return $result;
     }
@@ -1464,7 +1552,7 @@ class Path
         $success = $this->builtin->symlink($this->path, (string)$newLink);
 
         if ($success === false) {
-            throw new IOException("Error while creating the symbolic link from " . $this->path . " to " . $newLink);
+            throw new IOException("An error occurred while creating the symbolic link from " . $this->path . " to " . $newLink);
         }
 
         return $newLink;
