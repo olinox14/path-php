@@ -5,28 +5,32 @@
 
 > This library is still under development, DO NOT USE IN PRODUCTION. Contributions, however, are welcome.
 
-An intuitive and object-oriented file and path operations, inspired by the path.py python library.
+An intuitive and object-oriented library for file and path operations, inspired by the path.py python library.
 
     <?php
 
     use Path\Path;
 
+    // Get the parent directory of the current script file
     $dir = (new Path(__file__))->parent();
     
+    // Display the liste of the subdirectories of this directory
     var_dump(
         $dir->dirs()
     );
     
+    // Get the path of the working directory
     $path = new Path('.');
     
+    // Iterate over the files in this directory and change the permissions of these files to 755
     foreach($path->files() as $file) {
         $file->chmod(755);
     }
     
+    // Create a new path by adding a file's name to the previous path
     $newPath = $path->append('readme.md');
     
-    var_dump($newPath->absPath());
-
+    // Display the absolute path of this file
     var_dump($newPath->absPath());
 
 ## Requirement
@@ -51,7 +55,7 @@ Instantiate with some path :
     $path = new Path('/foo/bar/file.ext');
     $path = new Path(__file__);
 
-And use it as you like. For example, if you want to rename all the html files in the directory where
+And use it as needed. For example, if you want to rename all the html files in the directory where
 your current script lies into .md files : 
 
     $path = new Path(__file__);
@@ -104,7 +108,7 @@ Run the unit tests :
 
 #### Next runs
 
-If you've already built your container, start it and run the unit tests with :
+If you've already built your container, start it and run unit tests with :
 
     docker start path
     docker exec -it path bash
@@ -140,7 +144,7 @@ To install and run [phpdoc](https://docs.phpdoc.org/3.0/) :
     # On Windows
     docker run --rm -v "%cd%:/data" "phpdoc/phpdoc:3"
 
-If you're on linux, you could create an alias with :
+If you're on Linux, you could create an alias with :
 
     alias phpdoc="docker run --rm -v $(pwd):/data phpdoc/phpdoc:3"
 
