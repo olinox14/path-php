@@ -173,8 +173,8 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 * [x] implement the 'chgrp' method
 * [x] complete the 'sameFile' documentation
 * [x] remove the 'access' method and add 'isReadable', 'isWritable', 'isExecutable' methods
-* [ ] review the 'rmdir' error management
-* [ ] fix the 'chroot' method
+* [x] review the 'rmdir' error management
+* [x] fix the 'chroot' method
 * [ ] add quality tools to CI
 
 0.2 :

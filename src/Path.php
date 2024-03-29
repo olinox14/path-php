@@ -1119,7 +1119,12 @@ class Path
     }
 
     /**
-     * Removes a directory, and its contents if recursive.
+     * Removes a directory.
+     *
+     * If $recursive is true, the directory will be removed with its content. Else, an IOException will be
+     * raised. If the target directory does not exist, a FileNotFoundException will be raised, except if
+     * $permissive is set to true. If the target is an existing file, a FileNotFoundException will be raised even
+     * if $permissive is true.
      *
      * @throws FileNotFoundException
      * @throws IOException
@@ -1127,8 +1132,7 @@ class Path
     public function rmdir(bool $recursive = false, bool $permissive = false): void
     {
         if (!$this->isDir()) {
-            if ($permissive) {
-                // TODO: should we throw an error if this path is a file?
+            if ($permissive && !$this->isFile()) {
                 return;
             }
             throw new FileNotFoundException("{$this->path} is not a directory");
@@ -1402,7 +1406,6 @@ class Path
             throw new FileNotFoundException("Dir does not exist : " . $this->path);
         }
 
-        // TODO: not working as expected, see why (new working dir is '/' no matter what)
         $success = $this->builtin->chroot($this->absPath()->path());
         if (!$success) {
             throw new IOException("An error occurred while changing root directory to " . $this->path);
