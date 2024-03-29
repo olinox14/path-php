@@ -175,7 +175,7 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 * [x] remove the 'access' method and add 'isReadable', 'isWritable', 'isExecutable' methods
 * [x] review the 'rmdir' error management
 * [x] fix the 'chroot' method
-* [ ] add quality tools to CI
+* [x] add quality tools to CI
 
 0.2 :
 
