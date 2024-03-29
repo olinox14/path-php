@@ -324,7 +324,6 @@ class Path
      *
      * // TODO: becare of the normcase when we're getting to the windows compat
      *
-     * > Thanks to https://stackoverflow.com/users/216254/troex
      * @return self A new instance of the class with the normalized path.
      */
     public function normPath(): self
@@ -458,8 +457,10 @@ class Path
      * @see https://www.php.net/manual/fr/function.symlink.php
      *
      * @param string|self $destination The destination path or object to copy the file to.
-     * @throws FileNotFoundException If the source file does not exist or is not a file.
+     * @param bool $follow_symlinks
+     * @return Path
      * @throws FileExistsException
+     * @throws FileNotFoundException If the source file does not exist or is not a file.
      * @throws IOException
      */
     public function copy(string|self $destination, bool $follow_symlinks = false): self
@@ -474,10 +475,13 @@ class Path
         }
 
         if ($destination->isFile()) {
+            // TODO: add an '$erase' argument which default to true
             throw new FileExistsException("File already exists : " . $destination->path());
         }
 
         if (!$follow_symlinks && $this->isLink()) {
+            // TODO: wrong behavior here, we should read the target of the current link, then create a symlink to
+            //       this target at destination
             return $this->symlink($destination);
         }
 
@@ -570,6 +574,8 @@ class Path
         if ($destination->isDir()) {
             $destination = $destination->append($this->basename());
         }
+
+        // TODO: test here if destination exists
 
         $success = $this->builtin->rename($this->path, $destination->path());
 
@@ -976,7 +982,8 @@ class Path
 
     /**
      * Return True if both pathname arguments refer to the same file or directory.
-     * As this method relies on the realpath method, this will throw an exception if one of the two files does
+     *
+     * As this method relies on the realpath method, this will throw an exception if any of the two files does
      * not exist.
      *
      * @throws IOException
