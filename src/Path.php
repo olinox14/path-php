@@ -458,12 +458,13 @@ class Path
      *
      * @param string|self $destination The destination path or object to copy the file to.
      * @param bool $follow_symlinks
+     * @param bool $erase
      * @return Path
      * @throws FileExistsException
      * @throws FileNotFoundException If the source file does not exist or is not a file.
      * @throws IOException
      */
-    public function copy(string|self $destination, bool $follow_symlinks = false): self
+    public function copy(string|self $destination, bool $follow_symlinks = false, bool $erase = true): self
     {
         if (!$this->isFile()) {
             throw new FileNotFoundException("File does not exist or is not a file : " . $this);
@@ -474,8 +475,7 @@ class Path
             $destination = $destination->append($this->basename());
         }
 
-        if ($destination->isFile()) {
-            // TODO: add an '$erase' argument which default to true
+        if ($destination->isFile() && !$erase) {
             throw new FileExistsException("File already exists : " . $destination->path());
         }
 

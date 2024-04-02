@@ -1038,6 +1038,38 @@ class PathTest extends TestCase
 
         $destination = "/bar/foo2.ext";
         $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newPath->method('eq')->with($destination)->willReturn(True);
+        $newPath->method('isDir')->willReturn(False);
+        $newPath->method('isFile')->willReturn(False);
+        $newPath->method('path')->willReturn($destination);
+
+        $path->method('cast')->with($destination)->willReturn($newPath);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('copy')
+            ->with('foo.ext', $destination)
+            ->willReturn(True);
+
+        $result = $path->copy($destination);
+
+        $this->assertTrue(
+            $result->eq($destination)
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testCopyFileAlreadyExistsNotErasing()
+    {
+        $path = $this->getMock('foo.ext', 'copy');
+        $path->method('isFile')->willReturn(True);
+
+        $destination = "/bar/foo2.ext";
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
         $newPath->method('isDir')->willReturn(False);
         $newPath->method('isFile')->willReturn(True);
 
@@ -1049,7 +1081,7 @@ class PathTest extends TestCase
 
         $this->expectException(FileExistsException::class);
 
-        $path->copy($destination);
+        $path->copy($destination, false, false);
     }
 
     /**
@@ -1058,6 +1090,52 @@ class PathTest extends TestCase
      * @throws FileExistsException
      */
     public function testCopyFileDestIsDirButFileAlreadyExists()
+    {
+        $path = $this->getMock('foo.ext', 'copy');
+
+        $path->method('isFile')->willReturn(True);
+        $path->method('isLink')->willReturn(False);
+        $path->method('basename')->willReturn('foo.ext');
+
+        $destination = "/bar";
+
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newPath->method('isDir')->willReturn(True);
+
+        $newDest = $destination . "/foo.ext";
+
+        $extendedNewPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $extendedNewPath->method('path')->willReturn($newDest);
+        $extendedNewPath->method('isFile')->willReturn(False);
+
+        $newPath
+            ->expects(self::once())
+            ->method('append')
+            ->with('foo.ext')
+            ->willReturn($extendedNewPath);
+
+        $path->method('cast')->with($destination)->willReturn($newPath);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('copy')
+            ->with('foo.ext', $newDest)
+            ->willReturn(True);
+
+        $result = $path->copy($destination);
+
+        $this->assertEquals(
+            $result->path(),
+            $extendedNewPath->path()
+        );
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testCopyFileDestIsDirButFileAlreadyExistsNotErasing()
     {
         $path = $this->getMock('foo.ext', 'copy');
         $path->method('isFile')->willReturn(True);
@@ -1089,7 +1167,7 @@ class PathTest extends TestCase
 
         $this->expectException(FileExistsException::class);
 
-        $path->copy($destination);
+        $path->copy($destination, false, false);
     }
 
     /**
