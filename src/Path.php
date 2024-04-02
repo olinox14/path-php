@@ -504,8 +504,6 @@ class Path
      * @throws FileExistsException If the destination path or directory already exists.
      * @throws FileNotFoundException If the source file or directory does not exist.
      * @throws IOException
-     *  TODO: implement an 'ignore' callback property or an 'ignorePattern' property
-     *  TODO: implement a 'errorOnExistingDestination' property (default: True)
      */
     public function copyTree(string|self $destination, bool $follow_symlinks = false): self
     {
@@ -561,6 +559,7 @@ class Path
      * @return Path
      * @throws IOException
      * @throws FileNotFoundException
+     * @throws FileExistsException
      */
     public function move(string|self $destination): self
     {
@@ -574,7 +573,9 @@ class Path
             $destination = $destination->append($this->basename());
         }
 
-        // TODO: test here if destination exists
+        if ($destination->exists()) {
+            throw new FileExistsException('File or directory already exists at ' . $destination->path());
+        }
 
         $success = $this->builtin->rename($this->path, $destination->path());
 

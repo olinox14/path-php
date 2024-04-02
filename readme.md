@@ -181,8 +181,7 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 
 * [x] add an '$erase' argument to the copy method, which default to true
 * [x] fix the copy method when $follow_symlinks is false and source is a symlink
-* [ ] add 'ignore' and 'errorOnExistingDestination' to the copyTree method
-* [ ] move: test if destination exists after it has been computed
+* [x] move: test if destination exists after it has been computed
 * [ ] study the interest of implementing a 'mergeTree' method
 * [ ] review copyTree performances
 
@@ -192,3 +191,4 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 * [ ] handle protocols (ftp, sftp, file, smb, http, ...etc)
 * [ ] handle unc paths (windows)
 * [ ] improve error management and tracebacks
+* [ ] add 'ignore' and 'errorOnExistingDestination' to the copyTree method

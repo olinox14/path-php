@@ -1608,6 +1608,40 @@ class PathTest extends TestCase
         $path->move($destination);
     }
 
+
+    /**
+     * @throws IOException|FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testMoveTargetExist()
+    {
+        $path = $this->getMock('foo.ext', 'move');
+        $path->method('exists')->willReturn(True);
+        $path->method('basename')->willReturn('foo.ext');
+
+        $destination = "/bar";
+
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newPath->method('isDir')->willReturn(True);
+
+        $newDest = $destination . "/foo.ext";
+        $extendedNewPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $extendedNewPath->method('path')->willReturn($newDest);
+        $extendedNewPath->method('exists')->willReturn(true);
+
+        $newPath->method('append')->with('foo.ext')->willReturn($extendedNewPath);
+
+        $path->method('cast')->with($destination)->willReturn($newPath);
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('rename');
+
+        $this->expectException(FileExistsException::class);
+
+        $result = $path->move($destination);
+    }
+
     /**
      * @throws IOException
      */
