@@ -453,17 +453,19 @@ class Path
      * Copy data and mode bits (“cp src dst”). The destination may be a directory.
      * Return the file’s destination as a Path.
      * If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’s “cp -P src dst”.
+     * This method does *not* conserve permissions.
      * @see https://www.php.net/manual/fr/function.copy.php
      * @see https://www.php.net/manual/fr/function.symlink.php
      *
      * @param string|self $destination The destination path or object to copy the file to.
      * @param bool $follow_symlinks
+     * @param bool $erase
      * @return Path
      * @throws FileExistsException
      * @throws FileNotFoundException If the source file does not exist or is not a file.
      * @throws IOException
      */
-    public function copy(string|self $destination, bool $follow_symlinks = false): self
+    public function copy(string|self $destination, bool $follow_symlinks = false, bool $erase = true): self
     {
         if (!$this->isFile()) {
             throw new FileNotFoundException("File does not exist or is not a file : " . $this);
@@ -474,15 +476,13 @@ class Path
             $destination = $destination->append($this->basename());
         }
 
-        if ($destination->isFile()) {
-            // TODO: add an '$erase' argument which default to true
+        if ($destination->isFile() && !$erase) {
             throw new FileExistsException("File already exists : " . $destination->path());
         }
 
         if (!$follow_symlinks && $this->isLink()) {
-            // TODO: wrong behavior here, we should read the target of the current link, then create a symlink to
-            //       this target at destination
-            return $this->symlink($destination);
+            $target = $this->readLink();
+            return $destination->symlink($target);
         }
 
         $success = $this->builtin->copy($this->path, $destination->path());
@@ -505,8 +505,6 @@ class Path
      * @throws FileExistsException If the destination path or directory already exists.
      * @throws FileNotFoundException If the source file or directory does not exist.
      * @throws IOException
-     *  TODO: implement an 'ignore' callback property or an 'ignorePattern' property
-     *  TODO: implement a 'errorOnExistingDestination' property (default: True)
      */
     public function copyTree(string|self $destination, bool $follow_symlinks = false): self
     {
@@ -562,6 +560,7 @@ class Path
      * @return Path
      * @throws IOException
      * @throws FileNotFoundException
+     * @throws FileExistsException
      */
     public function move(string|self $destination): self
     {
@@ -575,7 +574,9 @@ class Path
             $destination = $destination->append($this->basename());
         }
 
-        // TODO: test here if destination exists
+        if ($destination->exists()) {
+            throw new FileExistsException('File or directory already exists at ' . $destination->path());
+        }
 
         $success = $this->builtin->rename($this->path, $destination->path());
 
