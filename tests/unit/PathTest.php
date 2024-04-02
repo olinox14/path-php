@@ -1251,10 +1251,13 @@ class PathTest extends TestCase
 
         $path->method('cast')->with($destination)->willReturn($newPath);
 
-        $path
+        $targetPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('readLink')->willReturn($targetPath);
+
+        $newPath
             ->expects(self::once())
             ->method('symlink')
-            ->with($newPath);
+            ->with($targetPath);
 
         $this->builtin
             ->expects(self::never())

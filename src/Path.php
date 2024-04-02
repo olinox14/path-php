@@ -480,9 +480,8 @@ class Path
         }
 
         if (!$follow_symlinks && $this->isLink()) {
-            // TODO: wrong behavior here, we should read the target of the current link, then create a symlink to
-            //       this target at destination
-            return $this->symlink($destination);
+            $target = $this->readLink();
+            return $destination->symlink($target);
         }
 
         $success = $this->builtin->copy($this->path, $destination->path());
