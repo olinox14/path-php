@@ -184,7 +184,7 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 * [ ] add 'ignore' and 'errorOnExistingDestination' to the copyTree method
 * [ ] move: test if destination exists after it has been computed
 * [ ] study the interest of implementing a 'mergeTree' method
-
+* [ ] review copyTree performances
 
 0.2 :
 
