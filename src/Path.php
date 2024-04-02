@@ -453,6 +453,7 @@ class Path
      * Copy data and mode bits (“cp src dst”). The destination may be a directory.
      * Return the file’s destination as a Path.
      * If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’s “cp -P src dst”.
+     * This method does *not* conserve permissions.
      * @see https://www.php.net/manual/fr/function.copy.php
      * @see https://www.php.net/manual/fr/function.symlink.php
      *
