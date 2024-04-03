@@ -125,6 +125,7 @@ class Path
      */
     public function absPath(): self
     {
+        // FIXME: does not work on symlinks!
         $absPath = $this->builtin->realpath($this->path);
         if ($absPath === false) {
             throw new IOException("An error occurred while getting abspath of `" . $this->path . "`");
@@ -467,7 +468,7 @@ class Path
      */
     public function copy(string|self $destination, bool $follow_symlinks = false, bool $erase = true): self
     {
-        if (!$this->isFile()) {
+        if (!$this->isFile() && !$this->isLink()) {
             throw new FileNotFoundException("File does not exist or is not a file : " . $this);
         }
 
@@ -476,13 +477,21 @@ class Path
             $destination = $destination->append($this->basename());
         }
 
-        if ($destination->isFile() && !$erase) {
-            throw new FileExistsException("File already exists : " . $destination->path());
+        if ($this->isLink()) {
+            $target = $this->readLink();
+            if ($follow_symlinks) {
+                if (!$target->isFile()) {
+                    throw new FileNotFoundException("File does not exist or is not a file : " . $target);
+                }
+                // TODO: Shall the newly created file be named after the target of the link? or after the link itself?
+                return $target->copy($destination);
+            } else {
+                return $target->symlink($destination);
+            }
         }
 
-        if (!$follow_symlinks && $this->isLink()) {
-            $target = $this->readLink();
-            return $destination->symlink($target);
+        if ($destination->isFile() && !$erase) {
+            throw new FileExistsException("File already exists : " . $destination->path());
         }
 
         $success = $this->builtin->copy($this->path, $destination->path());
@@ -508,7 +517,7 @@ class Path
      */
     public function copyTree(string|self $destination, bool $follow_symlinks = false): self
     {
-        if (!$this->exists()) {
+        if (!$this->exists() && !$this->isLink()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this);
         }
 
@@ -518,7 +527,8 @@ class Path
             $destination->remove();
         }
 
-        if ($this->isFile()) {
+        if ($this->isFile() || ($this->isLink() && (!$follow_symlinks || $this->readLink()->isFile()))) {
+            // TODO: shall we recursively create the parent directory of the destination file?
             return $this->copy($destination, $follow_symlinks);
         }
 
@@ -526,6 +536,8 @@ class Path
             $mode = $this->getPermissions();
             $destination->mkdir($mode, true);
         }
+
+        // TODO: maybe prevent recursion if copytree copy a dir in itself
 
         foreach ($this->dirs() as $dir) {
             $newDir = $destination->append(
@@ -715,7 +727,8 @@ class Path
 
             $child = $this->append($filename);
 
-            if ($child->isFile()) {
+            // TODO: shall we return symlinks here? needed for copyTree, but maybe under conditions?
+            if ($child->isFile() || $child->isLink()) {
                 $files[] = $child;
             }
         }
@@ -978,6 +991,7 @@ class Path
      */
     public function exists(): bool
     {
+        // TODO: shall exists return true if the target is a symlink?
         return $this->builtin->file_exists($this->path);
     }
 
@@ -1602,7 +1616,7 @@ class Path
      */
     public function getRelativePath(string|self $basePath): self
     {
-        if (!$this->exists()) {
+        if (!$this->exists() && !$this->isLink()) {
             throw new FileNotFoundException("{$this->path} is not a file or directory");
         }
 
