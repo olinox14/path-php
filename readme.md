@@ -162,12 +162,13 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 
 * [x] Review the name of a copied symlink with $followSymlink = true
 * [x] Review the expected behavior when copyTree on a file into a non existing directory
-* [ ] Prevent infinite recursion when using copyTree
-* [ ] Review `files` and `exists` method: what about symlinks 
+* [x] Prevent infinite recursion when using copyTree
+* [x] Review `files` and `exists` method: what about symlinks 
 * [ ] Move should erase existing file or dir, not throw an error
 * [ ] Study if a $followSymlinks is pertinent in the move method
+* [ ] Fix unit tests
 
-0.2 :
+0.1.6 :
 
 * [ ] multi os compat (windows)
 * [ ] handle protocols (ftp, sftp, file, smb, http, ...etc)
@@ -177,7 +178,3 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 * [ ] review copyTree performances
 * [ ] study the interest of implementing a 'mergeTree' method
 * [ ] study the interest of mimic the perms of the source when using the copy, copyTree and move methods
-
-0.3 : 
-
-* [Feature] Add a $followSymlink property to the absPath method (currently always true according to php realpath behavior)
