@@ -985,7 +985,6 @@ class Path
      */
     public function exists(): bool
     {
-        // TODO: shall exists return true if the target is a symlink?
         return $this->builtin->file_exists($this->path);
     }
 
