@@ -125,7 +125,6 @@ class Path
      */
     public function absPath(): self
     {
-        // FIXME: does not work on symlinks!
         $absPath = $this->builtin->realpath($this->path);
         if ($absPath === false) {
             throw new IOException("An error occurred while getting abspath of `" . $this->path . "`");
@@ -455,6 +454,9 @@ class Path
      * Return the file’s destination as a Path.
      * If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’s “cp -P src dst”.
      * This method does *not* conserve permissions.
+     * If $follow_symlinks is true and if $destination is a directory, the newly created file will have the
+     * filename of the symlink, and not the one of its target.
+     *
      * @see https://www.php.net/manual/fr/function.copy.php
      * @see https://www.php.net/manual/fr/function.symlink.php
      *
@@ -483,7 +485,6 @@ class Path
                 if (!$target->isFile()) {
                     throw new FileNotFoundException("File does not exist or is not a file : " . $target);
                 }
-                // TODO: Shall the newly created file be named after the target of the link? or after the link itself?
                 return $target->copy($destination);
             } else {
                 return $target->symlink($destination);
@@ -505,46 +506,40 @@ class Path
     /**
      * Recursively copy a directory tree and return the destination directory.
      *
-     * If the $follow_symlinks is true, symbolic links in the source tree result in symbolic links in
-     * the destination tree; if it is false, the contents of the files pointed to by symbolic links are copied.
+     * If $follow_symlinks is false, symbolic links in the source tree result in symbolic links in
+     * the destination tree; if it is true, the contents of the files pointed to by symbolic links are copied.
      *
      * @param string|self $destination The destination path or directory to copy the content to.
-     * @param bool $follow_symlinks (Optional) Whether to follow symbolic links.
-     * @return self The object on which the method is called.
+     * @param bool $followSymlinks Whether to follow symbolic links (default is false).
+     * @return self The newly created file or directory as a Path
+     *
      * @throws FileExistsException If the destination path or directory already exists.
      * @throws FileNotFoundException If the source file or directory does not exist.
      * @throws IOException
      */
-    public function copyTree(string|self $destination, bool $follow_symlinks = false): self
+    public function copyTree(string|self $destination, bool $followSymlinks = false): self
     {
-        if (!$this->exists() && !$this->isLink()) {
-            throw new FileNotFoundException("File or dir does not exist : " . $this);
+        if (!$this->isDir() || (!$followSymlinks && $this->isLink())) {
+            throw new FileNotFoundException("Directory does not exist or is not a directory : " . $this);
         }
 
         $destination = $this->cast($destination);
 
-        if ($destination->isFile()) {
-            $destination->remove();
+        if ($destination->exists() || $destination->isLink()) {
+            throw new FileExistsException('A file or directory already exists at ' . $destination);
         }
-
-        if ($this->isFile() || ($this->isLink() && (!$follow_symlinks || $this->readLink()->isFile()))) {
-            // TODO: shall we recursively create the parent directory of the destination file?
-            return $this->copy($destination, $follow_symlinks);
-        }
-
-        if (!$destination->isDir()) {
-            $mode = $this->getPermissions();
-            $destination->mkdir($mode, true);
-        }
-
-        // TODO: maybe prevent recursion if copytree copy a dir in itself
 
         foreach ($this->dirs() as $dir) {
             $newDir = $destination->append(
                 $dir->getRelativePath($this->path())
             );
 
-            $dir->copyTree($newDir, $follow_symlinks);
+            $dir->copyTree($newDir, $followSymlinks);
+        }
+
+        if (!$destination->isDir()) {
+            $mode = $this->getPermissions();
+            $destination->mkdir($mode, true);
         }
 
         foreach ($this->files() as $file) {
@@ -553,7 +548,7 @@ class Path
             );
 
             $newFile->remove_p();
-            $file->copy($newFile, $follow_symlinks);
+            $file->copy($newFile, $followSymlinks);
         }
 
         return $destination;
@@ -586,6 +581,7 @@ class Path
             $destination = $destination->append($this->basename());
         }
 
+        // FIXME: existing destination should be overwritten
         if ($destination->exists()) {
             throw new FileExistsException('File or directory already exists at ' . $destination->path());
         }
