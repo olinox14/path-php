@@ -531,7 +531,7 @@ class Path
 
         foreach ($this->dirs() as $dir) {
             $newDir = $destination->append(
-                $dir->getRelativePath($this->path())
+                $dir->basename()
             );
 
             $dir->copyTree($newDir, $followSymlinks);
@@ -544,7 +544,7 @@ class Path
 
         foreach ($this->files() as $file) {
             $newFile = $destination->append(
-                $file->getRelativePath($this->path())
+                $file->basename()
             );
 
             $newFile->remove_p();
@@ -581,7 +581,6 @@ class Path
             $destination = $destination->append($this->basename());
         }
 
-        // FIXME: existing destination should be overwritten
         if ($destination->exists()) {
             throw new FileExistsException('File or directory already exists at ' . $destination->path());
         }
@@ -708,7 +707,7 @@ class Path
      * @return array<self> An array of files present in the directory.
      * @throws FileNotFoundException If the directory specified in the path does not exist.
      */
-    public function files(): array
+    public function files(bool $includeSymlinks = true): array
     {
         if (!$this->isDir()) {
             throw new FileNotFoundException("Directory does not exist: " . $this->path);
@@ -723,8 +722,7 @@ class Path
 
             $child = $this->append($filename);
 
-            // TODO: shall we return symlinks here? needed for copyTree, but maybe under conditions?
-            if ($child->isFile() || $child->isLink()) {
+            if ($child->isFile() || ($includeSymlinks && $child->isLink())) {
                 $files[] = $child;
             }
         }
