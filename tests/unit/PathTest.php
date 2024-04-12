@@ -1244,6 +1244,41 @@ class PathTest extends TestCase
      * @throws FileNotFoundException
      * @throws FileExistsException
      */
+    public function testCopyIsLinkWithFollowAndInexistingTarget()
+    {
+        $path = $this->getMock('foo.ext', 'copy');
+        $path->method('isFile')->willReturn(False);
+        $path->method('isLink')->willReturn(True);
+
+        $destination = "/bar/foo2.ext";
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newPath->method('isDir')->willReturn(False);
+        $newPath->method('eq')->with($destination)->willReturn(True);
+
+        $target = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $target->method('isFile')->willReturn(False);
+        $path->method('readLink')->willReturn($target);
+
+        $path->method('cast')->with($destination)->willReturn($newPath);
+
+        $target
+            ->expects(self::never())
+            ->method('copy');
+
+        $this->builtin
+            ->expects(self::never())
+            ->method('copy');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->copy($destination, True);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
     public function testCopyIsLinkNoFollow()
     {
         $path = $this->getMock('foo.ext', 'copy');
@@ -1332,7 +1367,54 @@ class PathTest extends TestCase
      * @throws FileNotFoundException
      * @throws FileExistsException
      */
+    public function testCopyTreeDestinationIsLink(): void
+    {
+        $path = $this->getMock('foo.ext', 'copyTree');
+        $path->method('isDir')->willReturn(True);
+
+        $destination = "/bar/foo2.ext";
+        $destinationPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('cast')->with($destination)->willReturn($destinationPath);
+        $destinationPath->method('exists')->willReturn(False);
+        $destinationPath->method('isLink')->willReturn(True);
+
+        $path
+            ->expects(self::never())
+            ->method('copy')
+            ->with($destinationPath, False);
+
+        $this->expectException(FileExistsException::class);
+
+        $path->copyTree($destination);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
     public function testCopyTreeDoesNotExist(): void
+    {
+        $path = $this->getMock('foo.ext', 'copyTree');
+        $path->method('exists')->willReturn(False);
+
+        $destination = "/bar/foo2.ext";
+
+        $path
+            ->expects(self::never())
+            ->method('copy');
+
+        $this->expectException(FileNotFoundException::class);
+
+        $path->copyTree($destination);
+    }
+
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testCopyTreeIsLinkNoFollow(): void
     {
         $path = $this->getMock('foo.ext', 'copyTree');
         $path->method('exists')->willReturn(False);
@@ -1456,7 +1538,85 @@ class PathTest extends TestCase
     }
 
     /**
-     * @throws IOException|FileNotFoundException
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws FileExistsException
+     */
+    public function testCopyTreeIsDirWithSubDirsAndFilesAndFollowSymlinks(): void
+    {
+        $path = $this->getMock('/var', 'copyTree');
+        $path->method('isDir')->willReturn(True);
+
+        $destination = "/var/www";
+        $newPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->method('cast')->with($destination)->willReturn($newPath);
+
+        $dir1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $dir1->method('basename')->willReturn('dir1');
+
+        $dir2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $dir2->method('basename')->willReturn('dir2');
+
+        $file1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $file1->method('basename')->willReturn('file1.ext');
+
+        $file2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $file2->method('basename')->willReturn('file2.ext');
+
+        $path->method('files')->willReturn([$file1, $file2]);
+        $path->method('dirs')->willReturn([$dir1, $dir2]);
+
+        $newFilePath1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newFilePath2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $newFilePath1
+            ->expects(self::once())
+            ->method('remove_p');
+
+        $file1
+            ->expects(self::once())
+            ->method('copy')
+            ->with($newFilePath1, true);
+
+        $newFilePath2
+            ->expects(self::once())
+            ->method('remove_p');
+
+        $file2
+            ->expects(self::once())
+            ->method('copy')
+            ->with($newFilePath2, true);
+
+        $newDirPath1 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $newDirPath2 = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $newPath
+            ->method('append')
+            ->willReturnMap([
+                ['file1.ext', $newFilePath1],
+                ['file2.ext', $newFilePath2],
+                ['dir1', $newDirPath1],
+                ['dir2', $newDirPath2],
+            ]);
+
+        $dir1
+            ->expects(self::once())
+            ->method('copyTree')
+            ->with($newDirPath1, true);
+
+        $dir2
+            ->expects(self::once())
+            ->method('copyTree')
+            ->with($newDirPath2, true);
+
+        $this->assertEquals(
+            $newPath,
+            $path->copyTree($destination, true)
+        );
+    }
+
+    /**
+     * @throws IOException|FileNotFoundException|FileExistsException
      */
     public function testMove()
     {
