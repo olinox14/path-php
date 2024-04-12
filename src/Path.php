@@ -454,6 +454,9 @@ class Path
      * Return the file’s destination as a Path.
      * If follow_symlinks is false, symlinks won’t be followed. This resembles GNU’s “cp -P src dst”.
      * This method does *not* conserve permissions.
+     * If $follow_symlinks is true and if $destination is a directory, the newly created file will have the
+     * filename of the symlink, and not the one of its target.
+     *
      * @see https://www.php.net/manual/fr/function.copy.php
      * @see https://www.php.net/manual/fr/function.symlink.php
      *
@@ -467,7 +470,7 @@ class Path
      */
     public function copy(string|self $destination, bool $follow_symlinks = false, bool $erase = true): self
     {
-        if (!$this->isFile()) {
+        if (!$this->isFile() && !$this->isLink()) {
             throw new FileNotFoundException("File does not exist or is not a file : " . $this);
         }
 
@@ -476,13 +479,20 @@ class Path
             $destination = $destination->append($this->basename());
         }
 
-        if ($destination->isFile() && !$erase) {
-            throw new FileExistsException("File already exists : " . $destination->path());
+        if ($this->isLink()) {
+            $target = $this->readLink();
+            if ($follow_symlinks) {
+                if (!$target->isFile()) {
+                    throw new FileNotFoundException("File does not exist or is not a file : " . $target);
+                }
+                return $target->copy($destination);
+            } else {
+                return $target->symlink($destination);
+            }
         }
 
-        if (!$follow_symlinks && $this->isLink()) {
-            $target = $this->readLink();
-            return $destination->symlink($target);
+        if ($destination->isFile() && !$erase) {
+            throw new FileExistsException("File already exists : " . $destination->path());
         }
 
         $success = $this->builtin->copy($this->path, $destination->path());
@@ -496,30 +506,35 @@ class Path
     /**
      * Recursively copy a directory tree and return the destination directory.
      *
-     * If the $follow_symlinks is true, symbolic links in the source tree result in symbolic links in
-     * the destination tree; if it is false, the contents of the files pointed to by symbolic links are copied.
+     * If $follow_symlinks is false, symbolic links in the source tree result in symbolic links in
+     * the destination tree; if it is true, the contents of the files pointed to by symbolic links are copied.
      *
      * @param string|self $destination The destination path or directory to copy the content to.
-     * @param bool $follow_symlinks (Optional) Whether to follow symbolic links.
-     * @return self The object on which the method is called.
+     * @param bool $followSymlinks Whether to follow symbolic links (default is false).
+     * @return self The newly created file or directory as a Path
+     *
      * @throws FileExistsException If the destination path or directory already exists.
      * @throws FileNotFoundException If the source file or directory does not exist.
      * @throws IOException
      */
-    public function copyTree(string|self $destination, bool $follow_symlinks = false): self
+    public function copyTree(string|self $destination, bool $followSymlinks = false): self
     {
-        if (!$this->exists()) {
-            throw new FileNotFoundException("File or dir does not exist : " . $this);
+        if (!$this->isDir() || (!$followSymlinks && $this->isLink())) {
+            throw new FileNotFoundException("Directory does not exist or is not a directory : " . $this);
         }
 
         $destination = $this->cast($destination);
 
-        if ($destination->isFile()) {
-            $destination->remove();
+        if ($destination->exists() || $destination->isLink()) {
+            throw new FileExistsException('A file or directory already exists at ' . $destination);
         }
 
-        if ($this->isFile()) {
-            return $this->copy($destination, $follow_symlinks);
+        foreach ($this->dirs() as $dir) {
+            $newDir = $destination->append(
+                $dir->basename()
+            );
+
+            $dir->copyTree($newDir, $followSymlinks);
         }
 
         if (!$destination->isDir()) {
@@ -527,21 +542,13 @@ class Path
             $destination->mkdir($mode, true);
         }
 
-        foreach ($this->dirs() as $dir) {
-            $newDir = $destination->append(
-                $dir->getRelativePath($this->path())
-            );
-
-            $dir->copyTree($newDir, $follow_symlinks);
-        }
-
         foreach ($this->files() as $file) {
             $newFile = $destination->append(
-                $file->getRelativePath($this->path())
+                $file->basename()
             );
 
             $newFile->remove_p();
-            $file->copy($newFile, $follow_symlinks);
+            $file->copy($newFile, $followSymlinks);
         }
 
         return $destination;
@@ -700,7 +707,7 @@ class Path
      * @return array<self> An array of files present in the directory.
      * @throws FileNotFoundException If the directory specified in the path does not exist.
      */
-    public function files(): array
+    public function files(bool $includeSymlinks = true): array
     {
         if (!$this->isDir()) {
             throw new FileNotFoundException("Directory does not exist: " . $this->path);
@@ -715,7 +722,7 @@ class Path
 
             $child = $this->append($filename);
 
-            if ($child->isFile()) {
+            if ($child->isFile() || ($includeSymlinks && $child->isLink())) {
                 $files[] = $child;
             }
         }
@@ -1602,7 +1609,7 @@ class Path
      */
     public function getRelativePath(string|self $basePath): self
     {
-        if (!$this->exists()) {
+        if (!$this->exists() && !$this->isLink()) {
             throw new FileNotFoundException("{$this->path} is not a file or directory");
         }
 

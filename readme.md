@@ -158,32 +158,7 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 
 ## Roadmap
 
-0.1.2 :
-
-* [x] licence 
-* [x] phpstan
-* [x] cs-fixer
-* [x] contribution guide
-* [x] setup gitflow and protected branches
-* [x] complete documentation with installation / get started / examples sections
-
-0.1.3
-
-* [x] implement the 'getOwner' method
-* [x] implement the 'chgrp' method
-* [x] complete the 'sameFile' documentation
-* [x] remove the 'access' method and add 'isReadable', 'isWritable', 'isExecutable' methods
-* [x] review the 'rmdir' error management
-* [x] fix the 'chroot' method
-* [x] add quality tools to CI
-
-0.1.4
-
-* [x] add an '$erase' argument to the copy method, which default to true
-* [x] fix the copy method when $follow_symlinks is false and source is a symlink
-* [x] move: test if destination exists after it has been computed
-
-0.2 :
+0.1.6 :
 
 * [ ] multi os compat (windows)
 * [ ] handle protocols (ftp, sftp, file, smb, http, ...etc)
@@ -192,4 +167,4 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 * [ ] add 'ignore' and 'errorOnExistingDestination' to the copyTree method
 * [ ] review copyTree performances
 * [ ] study the interest of implementing a 'mergeTree' method
-* [ ] study the interest of mimic the perms when using the copy method
+* [ ] study the interest of mimic the perms of the source when using the copy, copyTree and move methods
