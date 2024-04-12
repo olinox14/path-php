@@ -158,16 +158,6 @@ Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
 
 ## Roadmap
 
-0.1.5 : 
-
-* [x] Review the name of a copied symlink with $followSymlink = true
-* [x] Review the expected behavior when copyTree on a file into a non existing directory
-* [x] Prevent infinite recursion when using copyTree
-* [x] Review `files` and `exists` method: what about symlinks 
-* [ ] Move should erase existing file or dir, not throw an error
-* [ ] Study if a $followSymlinks is pertinent in the move method
-* [ ] Fix unit tests
-
 0.1.6 :
 
 * [ ] multi os compat (windows)
