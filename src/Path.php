@@ -54,6 +54,49 @@ class Path
         return new self($path);
     }
 
+    /**
+     * Split the pathname path into a pair (drive, tail) where drive is either a mount point or the empty string.
+     * On systems which do not use drive specifications, drive will always be the empty string. In all cases,
+     * drive + tail will be the same as path.
+     *
+     * On Windows, splits a pathname into drive/UNC sharepoint and relative path.
+     *
+     * If the path contains a drive letter, drive will contain everything up to and including the colon:
+     *
+     *     Path::splitDrive("c:/dir")
+     *     >>> ["c:", "/dir"]
+     *
+     * If the path contains a UNC path, drive will contain the host name and share:
+     *
+     *     Path::splitDrive("//host/computer/dir")
+     *     >>> ["//host/computer", "/dir"]
+     *
+     * @param string|self $path The path with the drive.
+     * @return array An array containing the drive and the path.
+     */
+    public static function splitDrive(string|self $path): array {
+        $path = (string)$path;
+
+        $matches = [];
+
+        preg_match('/(^[a-zA-Z]:)(.*)/', $path, $matches);
+        if ($matches) {
+            return array_slice($matches, -2);
+        }
+
+        $rx =
+            DIRECTORY_SEPARATOR === '/' ?
+                '/(^\/\/[\w\-\s]{2,15}\/[\w\-\s]+)(.*)/' :
+                '/(^\\\\\\\\[\w\-\s]{2,15}\\\[\w\-\s]+)(.*)/';
+
+        preg_match($rx, $path, $matches);
+        if ($matches) {
+            return array_slice($matches, -2);
+        }
+
+        return ['', $path];
+    }
+
     public function __construct(string|self $path)
     {
         $this->builtin = new BuiltinProxy();
@@ -322,33 +365,26 @@ class Path
      * and A/foo/../B all become A/B. This string manipulation may change the meaning of a path that contains
      * symbolic links. On Windows, it converts forward slashes to backward slashes. To normalize case, use normcase().
      *
-     * // TODO: becare of the normcase when we're getting to the windows compat
-     *
      * @return self A new instance of the class with the normalized path.
      */
     public function normPath(): self
     {
-        $path = $this->normCase()->path();
+        $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->path());
 
-        // TODO: handle case where path start with //
         if (empty($path)) {
             return $this->cast('.');
         }
 
         // Also tests some special cases we can't really do anything with
-        if (!str_contains($path, '/') || $path === '/' || '.' === $path || '..' === $path) {
+        if (!str_contains($path, DIRECTORY_SEPARATOR) || $path === '/' || '.' === $path || '..' === $path) {
             return $this->cast($path);
         }
 
-        $path = rtrim($path, '/');
+        $path = rtrim($path, DIRECTORY_SEPARATOR);
 
-        // Extract the scheme if any
-        $scheme = null;
-        if (strpos($path, '://')) {
-            list($scheme, $path) = explode('://', $path, 2);
-        }
+        [$prefix, $path] = $this->splitDrive($path);
 
-        $parts = explode('/', $path);
+        $parts = explode(DIRECTORY_SEPARATOR, $path);
         $newParts = [];
 
         foreach ($parts as $part) {
@@ -376,12 +412,14 @@ class Path
         }
 
         // Rebuild path
-        $newPath = implode('/', $newParts);
-
-        // Add scheme if any
-        if ($scheme !== null) {
-            $newPath = $scheme . '://' . $newPath;
+        if ($prefix) {
+            array_shift($newParts); // Get rid of the leading empty string resulting from slitDrive result
+            array_unshift($newParts, rtrim($prefix, DIRECTORY_SEPARATOR));
         }
+
+        $newPath = implode(DIRECTORY_SEPARATOR, $newParts);
+
+
 
         return $this->cast($newPath);
     }
