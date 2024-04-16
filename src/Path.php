@@ -381,7 +381,7 @@ class Path
 
         $path = rtrim($path, DIRECTORY_SEPARATOR);
 
-        [$prefix, $path] = $this->splitDrive($path);
+        [$prefix, $path] = self::splitDrive($path);
 
         $parts = explode(DIRECTORY_SEPARATOR, $path);
         $newParts = [];
@@ -417,8 +417,6 @@ class Path
         }
 
         $newPath = implode(DIRECTORY_SEPARATOR, $newParts);
-
-
 
         return $this->cast($newPath);
     }
@@ -1373,7 +1371,7 @@ class Path
     public function isAbs(): bool
     {
         [$drive, $path] = Path::splitDrive($this->path());
-        return !empty($drive) || (DIRECTORY_SEPARATOR === '/' && str_starts_with($path, '/'));
+        return !empty($drive) || str_starts_with($path, '/');
     }
 
     /**
