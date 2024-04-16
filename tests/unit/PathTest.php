@@ -28,6 +28,7 @@ class PathTest extends TestCase
 
     public function setUp(): void
     {
+        BuiltinProxy::$DIRECTORY_SEPARATOR = DIRECTORY_SEPARATOR;
         $this->builtin = $this->getMockBuilder(BuiltinProxy::class)->getMock();
     }
 
@@ -63,6 +64,38 @@ class PathTest extends TestCase
         $this->assertEquals(
             '/user/documents',
             Path::join('home/', '/user', 'documents')
+        );
+    }
+
+    public function testSplitDrive(): void
+    {
+        BuiltinProxy::$DIRECTORY_SEPARATOR = '/';
+
+        $this->assertEquals(
+            ['', '/home/user'],
+            Path::splitDrive('/home/user')
+        );
+
+        $this->assertEquals(
+            ['', 'home/user'],
+            Path::splitDrive('home/user')
+        );
+
+        $this->assertEquals(
+            ['//network/computer', '/home/user'],
+            Path::splitDrive('//network/computer/home/user')
+        );
+
+        BuiltinProxy::$DIRECTORY_SEPARATOR = '\\';
+
+        $this->assertEquals(
+            ['c:', '\\dir\\foo'],
+            Path::splitDrive('c:\\dir\\foo')
+        );
+
+        $this->assertEquals(
+            ['\\\\network\\computer', '\\home\\dir'],
+            Path::splitDrive('\\\\network\\computer\\home\\dir')
         );
     }
 

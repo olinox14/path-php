@@ -12,6 +12,8 @@ use RecursiveIteratorIterator;
  */
 class BuiltinProxy
 {
+    public static string $DIRECTORY_SEPARATOR = DIRECTORY_SEPARATOR;
+
     public function date(string $format, int $time): string
     {
         return date($format, $time);

@@ -43,12 +43,12 @@ class Path
         $parts = array_map(fn ($p) => (string)$p, $parts);
 
         foreach ($parts as $part) {
-            if (str_starts_with($part, DIRECTORY_SEPARATOR)) {
+            if (str_starts_with($part, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
                 $path = $part;
-            } elseif (!$path || str_ends_with($path, DIRECTORY_SEPARATOR)) {
+            } elseif (!$path || str_ends_with($path, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
                 $path .= $part;
             } else {
-                $path .= DIRECTORY_SEPARATOR . $part;
+                $path .= BuiltinProxy::$DIRECTORY_SEPARATOR . $part;
             }
         }
         return new self($path);
@@ -85,7 +85,7 @@ class Path
         }
 
         $rx =
-            DIRECTORY_SEPARATOR === '/' ?
+            BuiltinProxy::$DIRECTORY_SEPARATOR === '/' ?
                 '/(^\/\/[\w\-\s]{2,15}\/[\w\-\s]+)(.*)/' :
                 '/(^\\\\\\\\[\w\-\s]{2,15}\\\[\w\-\s]+)(.*)/';
 
@@ -352,7 +352,7 @@ class Path
     {
         return $this->cast(
             strtolower(
-                str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->path())
+                str_replace(['/', '\\'], BuiltinProxy::$DIRECTORY_SEPARATOR, $this->path())
             )
         );
     }
@@ -368,22 +368,22 @@ class Path
      */
     public function normPath(): self
     {
-        $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->path());
+        $path = str_replace(['/', '\\'], BuiltinProxy::$DIRECTORY_SEPARATOR, $this->path());
 
         if (empty($path)) {
             return $this->cast('.');
         }
 
         // Also tests some special cases we can't really do anything with
-        if (!str_contains($path, DIRECTORY_SEPARATOR) || $path === '/' || '.' === $path || '..' === $path) {
+        if (!str_contains($path, BuiltinProxy::$DIRECTORY_SEPARATOR) || $path === '/' || '.' === $path || '..' === $path) {
             return $this->cast($path);
         }
 
-        $path = rtrim($path, DIRECTORY_SEPARATOR);
+        $path = rtrim($path, BuiltinProxy::$DIRECTORY_SEPARATOR);
 
         [$prefix, $path] = self::splitDrive($path);
 
-        $parts = explode(DIRECTORY_SEPARATOR, $path);
+        $parts = explode(BuiltinProxy::$DIRECTORY_SEPARATOR, $path);
         $newParts = [];
 
         foreach ($parts as $part) {
@@ -413,10 +413,10 @@ class Path
         // Rebuild path
         if ($prefix) {
             array_shift($newParts); // Get rid of the leading empty string resulting from slitDrive result
-            array_unshift($newParts, rtrim($prefix, DIRECTORY_SEPARATOR));
+            array_unshift($newParts, rtrim($prefix, BuiltinProxy::$DIRECTORY_SEPARATOR));
         }
 
-        $newPath = implode(DIRECTORY_SEPARATOR, $newParts);
+        $newPath = implode(BuiltinProxy::$DIRECTORY_SEPARATOR, $newParts);
 
         return $this->cast($newPath);
     }
@@ -1638,12 +1638,12 @@ class Path
         $parts = [];
 
         if ($prefix) {
-            $path = ltrim($path, DIRECTORY_SEPARATOR);
-        } else if (str_starts_with($path, DIRECTORY_SEPARATOR)) {
-            $parts[] = DIRECTORY_SEPARATOR;
+            $path = ltrim($path, BuiltinProxy::$DIRECTORY_SEPARATOR);
+        } else if (str_starts_with($path, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
+            $parts[] = BuiltinProxy::$DIRECTORY_SEPARATOR;
         }
 
-        $parts += explode(DIRECTORY_SEPARATOR, $path);
+        $parts += explode(BuiltinProxy::$DIRECTORY_SEPARATOR, $path);
 
         if ($prefix) {
             array_unshift($parts, $prefix);
@@ -1675,8 +1675,8 @@ class Path
             throw new FileNotFoundException("$basePath does not exist or unable to get a real path");
         }
 
-        $pathParts = explode(DIRECTORY_SEPARATOR, $path);
-        $baseParts = explode(DIRECTORY_SEPARATOR, $realBasePath);
+        $pathParts = explode(BuiltinProxy::$DIRECTORY_SEPARATOR, $path);
+        $baseParts = explode(BuiltinProxy::$DIRECTORY_SEPARATOR, $realBasePath);
 
         while (count($pathParts) && count($baseParts) && ($pathParts[0] == $baseParts[0])) {
             array_shift($pathParts);
@@ -1685,10 +1685,10 @@ class Path
 
         return $this->cast(
             str_repeat(
-                '..' . DIRECTORY_SEPARATOR,
+                '..' . BuiltinProxy::$DIRECTORY_SEPARATOR,
                 count($baseParts)
             ) . implode(
-                DIRECTORY_SEPARATOR,
+                BuiltinProxy::$DIRECTORY_SEPARATOR,
                 $pathParts
             )
         );
