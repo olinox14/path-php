@@ -343,9 +343,8 @@ class Path
     /**
      * Normalize the case of a pathname.
      *
-     * On Windows, convert all characters in the pathname to lowercase, and also convert
-     * forward slashes to backward slashes. On other operating systems,
-     * return the path unchanged.
+     * Convert all characters in the pathname to lowercase, and also convert
+     * forward slashes to backward slashes.
      *
      * @return self The instance of the current object.
      */
@@ -1057,14 +1056,20 @@ class Path
      * Expands the user directory in the file path.
      *
      * @return self The modified instance with the expanded user path.
+     * @throws IOException
      */
     public function expandUser(): self
     {
         if (!str_starts_with($this->path(), '~/')) {
             return $this;
         }
+        $home = PHP_OS_FAMILY == 'Windows' ? $_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'] : $_SERVER['HOME'];
 
-        $home = $this->cast($_SERVER['HOME']);
+        if (!$home) {
+            throw new IOException("Error while getting home directory");
+        }
+
+        $home = $this->cast($home);
         return $home->append(substr($this->path(), 2));
     }
 
@@ -1218,6 +1223,7 @@ class Path
      *
      * @throws FileNotFoundException
      * @throws IOException
+     * @throws FileExistsException
      */
     public function rename(string|self $newPath): self
     {
@@ -1366,7 +1372,8 @@ class Path
      */
     public function isAbs(): bool
     {
-        return str_starts_with($this->path, '/');
+        [$drive, $path] = Path::splitDrive($this->path());
+        return !empty($drive) || (DIRECTORY_SEPARATOR === '/' && str_starts_with($path, '/'));
     }
 
     /**
@@ -1629,16 +1636,27 @@ class Path
      */
     public function parts(): array
     {
+        [$prefix, $path] = self::splitDrive($this->path());
         $parts = [];
-        if (str_starts_with($this->path, DIRECTORY_SEPARATOR)) {
+
+        if ($prefix) {
+            $path = ltrim($path, DIRECTORY_SEPARATOR);
+        } else if (str_starts_with($path, DIRECTORY_SEPARATOR)) {
             $parts[] = DIRECTORY_SEPARATOR;
         }
-        $parts += explode(DIRECTORY_SEPARATOR, $this->path);
+
+        $parts += explode(DIRECTORY_SEPARATOR, $path);
+
+        if ($prefix) {
+            array_unshift($parts, $prefix);
+        }
         return $parts;
     }
 
     /**
      * Compute a version of this path that is relative to another path.
+     * This method relies on the php `realpath` method and then requires the path to refer to
+     * an existing file.
      *
      * @param string|Path $basePath
      * @return self
