@@ -72,7 +72,7 @@ class Path
      *     >>> ["//host/computer", "/dir"]
      *
      * @param string|self $path The path with the drive.
-     * @return array An array containing the drive and the path.
+     * @return array<string> An array containing the drive and the path.
      */
     public static function splitDrive(string|self $path): array {
         $path = (string)$path;
