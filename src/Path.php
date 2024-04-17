@@ -74,7 +74,8 @@ class Path
      * @param string|self $path The path with the drive.
      * @return array<string> An array containing the drive and the path.
      */
-    public static function splitDrive(string|self $path): array {
+    public static function splitDrive(string|self $path): array
+    {
         $path = (string)$path;
 
         $matches = [];
@@ -1639,7 +1640,7 @@ class Path
 
         if ($prefix) {
             $path = ltrim($path, BuiltinProxy::$DIRECTORY_SEPARATOR);
-        } else if (str_starts_with($path, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
+        } elseif (str_starts_with($path, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
             $parts[] = BuiltinProxy::$DIRECTORY_SEPARATOR;
         }
 
