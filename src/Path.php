@@ -43,15 +43,59 @@ class Path
         $parts = array_map(fn ($p) => (string)$p, $parts);
 
         foreach ($parts as $part) {
-            if (str_starts_with($part, DIRECTORY_SEPARATOR)) {
+            if (str_starts_with($part, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
                 $path = $part;
-            } elseif (!$path || str_ends_with($path, DIRECTORY_SEPARATOR)) {
+            } elseif (!$path || str_ends_with($path, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
                 $path .= $part;
             } else {
-                $path .= DIRECTORY_SEPARATOR . $part;
+                $path .= BuiltinProxy::$DIRECTORY_SEPARATOR . $part;
             }
         }
         return new self($path);
+    }
+
+    /**
+     * Split the pathname path into a pair (drive, tail) where drive is either a mount point or the empty string.
+     * On systems which do not use drive specifications, drive will always be the empty string. In all cases,
+     * drive + tail will be the same as path.
+     *
+     * On Windows, splits a pathname into drive/UNC sharepoint and relative path.
+     *
+     * If the path contains a drive letter, drive will contain everything up to and including the colon:
+     *
+     *     Path::splitDrive("c:/dir")
+     *     >>> ["c:", "/dir"]
+     *
+     * If the path contains a UNC path, drive will contain the host name and share:
+     *
+     *     Path::splitDrive("//host/computer/dir")
+     *     >>> ["//host/computer", "/dir"]
+     *
+     * @param string|self $path The path with the drive.
+     * @return array<string> An array containing the drive and the path.
+     */
+    public static function splitDrive(string|self $path): array
+    {
+        $path = (string)$path;
+
+        $matches = [];
+
+        preg_match('/(^[a-zA-Z]:)(.*)/', $path, $matches);
+        if ($matches) {
+            return array_slice($matches, -2);
+        }
+
+        $rx =
+            BuiltinProxy::$DIRECTORY_SEPARATOR === '/' ?
+                '/(^\/\/[\w\-\s]{2,15}\/[\w\-\s]+)(.*)/' :
+                '/(^\\\\\\\\[\w\-\s]{2,15}\\\[\w\-\s]+)(.*)/';
+
+        preg_match($rx, $path, $matches);
+        if ($matches) {
+            return array_slice($matches, -2);
+        }
+
+        return ['', $path];
     }
 
     public function __construct(string|self $path)
@@ -300,9 +344,8 @@ class Path
     /**
      * Normalize the case of a pathname.
      *
-     * On Windows, convert all characters in the pathname to lowercase, and also convert
-     * forward slashes to backward slashes. On other operating systems,
-     * return the path unchanged.
+     * Convert all characters in the pathname to lowercase, and also convert
+     * forward slashes to backward slashes.
      *
      * @return self The instance of the current object.
      */
@@ -310,7 +353,7 @@ class Path
     {
         return $this->cast(
             strtolower(
-                str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->path())
+                str_replace(['/', '\\'], BuiltinProxy::$DIRECTORY_SEPARATOR, $this->path())
             )
         );
     }
@@ -322,33 +365,26 @@ class Path
      * and A/foo/../B all become A/B. This string manipulation may change the meaning of a path that contains
      * symbolic links. On Windows, it converts forward slashes to backward slashes. To normalize case, use normcase().
      *
-     * // TODO: becare of the normcase when we're getting to the windows compat
-     *
      * @return self A new instance of the class with the normalized path.
      */
     public function normPath(): self
     {
-        $path = $this->normCase()->path();
+        $path = str_replace(['/', '\\'], BuiltinProxy::$DIRECTORY_SEPARATOR, $this->path());
 
-        // TODO: handle case where path start with //
         if (empty($path)) {
             return $this->cast('.');
         }
 
         // Also tests some special cases we can't really do anything with
-        if (!str_contains($path, '/') || $path === '/' || '.' === $path || '..' === $path) {
+        if (!str_contains($path, BuiltinProxy::$DIRECTORY_SEPARATOR) || $path === '/' || '.' === $path || '..' === $path) {
             return $this->cast($path);
         }
 
-        $path = rtrim($path, '/');
+        $path = rtrim($path, BuiltinProxy::$DIRECTORY_SEPARATOR);
 
-        // Extract the scheme if any
-        $scheme = null;
-        if (strpos($path, '://')) {
-            list($scheme, $path) = explode('://', $path, 2);
-        }
+        [$prefix, $path] = self::splitDrive($path);
 
-        $parts = explode('/', $path);
+        $parts = explode(BuiltinProxy::$DIRECTORY_SEPARATOR, $path);
         $newParts = [];
 
         foreach ($parts as $part) {
@@ -376,12 +412,12 @@ class Path
         }
 
         // Rebuild path
-        $newPath = implode('/', $newParts);
-
-        // Add scheme if any
-        if ($scheme !== null) {
-            $newPath = $scheme . '://' . $newPath;
+        if ($prefix) {
+            array_shift($newParts); // Get rid of the leading empty string resulting from slitDrive result
+            array_unshift($newParts, rtrim($prefix, BuiltinProxy::$DIRECTORY_SEPARATOR));
         }
+
+        $newPath = implode(BuiltinProxy::$DIRECTORY_SEPARATOR, $newParts);
 
         return $this->cast($newPath);
     }
@@ -1019,14 +1055,20 @@ class Path
      * Expands the user directory in the file path.
      *
      * @return self The modified instance with the expanded user path.
+     * @throws IOException
      */
     public function expandUser(): self
     {
         if (!str_starts_with($this->path(), '~/')) {
             return $this;
         }
+        $home = $this->builtin->getHome();
 
-        $home = $this->cast($_SERVER['HOME']);
+        if (!$home) {
+            throw new IOException("Error while getting home directory");
+        }
+
+        $home = $this->cast($home);
         return $home->append(substr($this->path(), 2));
     }
 
@@ -1180,6 +1222,7 @@ class Path
      *
      * @throws FileNotFoundException
      * @throws IOException
+     * @throws FileExistsException
      */
     public function rename(string|self $newPath): self
     {
@@ -1328,7 +1371,8 @@ class Path
      */
     public function isAbs(): bool
     {
-        return str_starts_with($this->path, '/');
+        [$drive, $path] = Path::splitDrive($this->path());
+        return !empty($drive) || str_starts_with($path, '/');
     }
 
     /**
@@ -1591,16 +1635,27 @@ class Path
      */
     public function parts(): array
     {
+        [$prefix, $path] = self::splitDrive($this->path());
         $parts = [];
-        if (str_starts_with($this->path, DIRECTORY_SEPARATOR)) {
-            $parts[] = DIRECTORY_SEPARATOR;
+
+        if ($prefix) {
+            $path = ltrim($path, BuiltinProxy::$DIRECTORY_SEPARATOR);
+        } elseif (str_starts_with($path, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
+            $parts[] = BuiltinProxy::$DIRECTORY_SEPARATOR;
         }
-        $parts += explode(DIRECTORY_SEPARATOR, $this->path);
+
+        $parts += explode(BuiltinProxy::$DIRECTORY_SEPARATOR, $path);
+
+        if ($prefix) {
+            array_unshift($parts, $prefix);
+        }
         return $parts;
     }
 
     /**
      * Compute a version of this path that is relative to another path.
+     * This method relies on the php `realpath` method and then requires the path to refer to
+     * an existing file.
      *
      * @param string|Path $basePath
      * @return self
@@ -1621,8 +1676,8 @@ class Path
             throw new FileNotFoundException("$basePath does not exist or unable to get a real path");
         }
 
-        $pathParts = explode(DIRECTORY_SEPARATOR, $path);
-        $baseParts = explode(DIRECTORY_SEPARATOR, $realBasePath);
+        $pathParts = explode(BuiltinProxy::$DIRECTORY_SEPARATOR, $path);
+        $baseParts = explode(BuiltinProxy::$DIRECTORY_SEPARATOR, $realBasePath);
 
         while (count($pathParts) && count($baseParts) && ($pathParts[0] == $baseParts[0])) {
             array_shift($pathParts);
@@ -1631,10 +1686,10 @@ class Path
 
         return $this->cast(
             str_repeat(
-                '..' . DIRECTORY_SEPARATOR,
+                '..' . BuiltinProxy::$DIRECTORY_SEPARATOR,
                 count($baseParts)
             ) . implode(
-                DIRECTORY_SEPARATOR,
+                BuiltinProxy::$DIRECTORY_SEPARATOR,
                 $pathParts
             )
         );

@@ -12,6 +12,15 @@ use RecursiveIteratorIterator;
  */
 class BuiltinProxy
 {
+    public static string $DIRECTORY_SEPARATOR = DIRECTORY_SEPARATOR;
+
+    public function getHome(): string
+    {
+        return PHP_OS_FAMILY == 'Windows' ?
+            $_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'] :
+            $_SERVER['HOME'];
+    }
+
     public function date(string $format, int $time): string
     {
         return date($format, $time);
