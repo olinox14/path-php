@@ -1,37 +1,43 @@
 [![CI](https://github.com/olinox14/path-php/actions/workflows/php.yml/badge.svg)](https://github.com/olinox14/path-php/actions/workflows/php.yml)
 [![Coverage Status](https://coveralls.io/repos/github/olinox14/path-php/badge.svg?branch=master)](https://coveralls.io/github/olinox14/path-php?branch=master)
+[![Version](http://poser.pugx.org/olinox14/path-php/version)](https://packagist.org/packages/olinox14/path-php)
+[![License](http://poser.pugx.org/olinox14/path-php/license)](https://packagist.org/packages/olinox14/path-php)
+[![PHP Version Require](http://poser.pugx.org/olinox14/path-php/require/php)](https://packagist.org/packages/olinox14/path-php)
 
 # Path-php
 
-> This library is still under development, DO NOT USE IN PRODUCTION. Contributions, however, are welcome.
+> This library is still under development, **USE WITH CAUTION**.
 
-An intuitive and object-oriented library for file and path operations, inspired by the path.py python library.
+An **intuitive**, **standalone**, and **object-oriented** library for file and path operations, 
+inspired by the ['path' python library](https://path.readthedocs.io/en/latest/api.html#path.Path.parts).
 
     <?php
-
     use Path\Path;
 
-    // Get the parent directory of the current script file
-    $dir = (new Path(__file__))->parent();
+    // Get the parent directory of the current script file and list its subdirs
+    $script = new Path(__file__);
+    $dir = $script->parent();
+    var_dump($dir->dirs());
     
-    // Display the liste of the subdirectories of this directory
-    var_dump(
-        $dir->dirs()
-    );
-    
-    // Get the path of the working directory
+
+    // Get the path of the working directory, iterate over its files and change their permissions
     $path = new Path('.');
     
-    // Iterate over the files in this directory and change the permissions of these files to 755
     foreach($path->files() as $file) {
         $file->chmod(755);
     }
     
-    // Create a new path by adding a file's name to the previous path
-    $newPath = $path->append('readme.md');
+
+    // Put content into a file 
+    $path = (new Path('.'))->append('readme.md');
     
-    // Display the absolute path of this file
-    var_dump($newPath->absPath());
+    $path->putContent('new readme content');
+
+    // And many more...
+
+
+Full documentation : [API Documentation](https://olinox14.github.io/path-php/classes/Path-Path.html)
+
 
 ## Requirement
 
@@ -67,10 +73,6 @@ your current script lies into .md files :
             $file->rename($file->name() . '.md');
         }
     }
-
-## Documentation
-
-> [API Documentation](https://olinox14.github.io/path-php/classes/Path-Path.html)
 
 ## Contribute
 
@@ -155,16 +157,3 @@ And then run phpdoc with :
 ## Licence 
 
 Path-php is under the [MIT](http://opensource.org/licenses/MIT) licence.
-
-## Roadmap
-
-0.1.6 :
-
-* [ ] multi os compat (windows)
-* [ ] handle protocols (ftp, sftp, file, smb, http, ...etc)
-* [ ] handle unc paths (windows)
-* [ ] improve error management and tracebacks
-* [ ] add 'ignore' and 'errorOnExistingDestination' to the copyTree method
-* [ ] review copyTree performances
-* [ ] study the interest of implementing a 'mergeTree' method
-* [ ] study the interest of mimic the perms of the source when using the copy, copyTree and move methods
