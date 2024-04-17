@@ -1061,7 +1061,7 @@ class Path
         if (!str_starts_with($this->path(), '~/')) {
             return $this;
         }
-        $home = PHP_OS_FAMILY == 'Windows' ? $_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'] : $_SERVER['HOME'];
+        $home = $this->builtin->getHome();
 
         if (!$home) {
             throw new IOException("Error while getting home directory");
