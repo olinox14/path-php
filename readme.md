@@ -11,15 +11,16 @@
 An **intuitive**, **standalone**, and **object-oriented** library for file and path operations, 
 inspired by the ['path' python library](https://path.readthedocs.io/en/latest/api.html#path.Path.parts).
 
+```php
     <?php
     use Path\Path;
-
+    
     // Get the parent directory of the current script file and list its subdirs
     $script = new Path(__file__);
     $dir = $script->parent();
     var_dump($dir->dirs());
     
-
+    
     // Get the path of the working directory, iterate over its files and change their permissions
     $path = new Path('.');
     
@@ -27,14 +28,14 @@ inspired by the ['path' python library](https://path.readthedocs.io/en/latest/ap
         $file->chmod(755);
     }
     
-
+    
     // Put content into a file 
     $path = (new Path('.'))->append('readme.md');
     
     $path->putContent('new readme content');
-
+    
     // And many more...
-
+```
 
 Full documentation : [API Documentation](https://olinox14.github.io/path-php/classes/Path-Path.html)
 
@@ -57,13 +58,16 @@ Import the Path class :
 
 Instantiate with some path : 
 
+```php
     $path = new Path('./foo');
     $path = new Path('/foo/bar/file.ext');
     $path = new Path(__file__);
+```
 
 And use it as needed. For example, if you want to rename all the html files in the directory where
 your current script lies into .md files : 
 
+```php
     $path = new Path(__file__);
 
     $dir = $path->parent();
@@ -73,6 +77,7 @@ your current script lies into .md files :
             $file->rename($file->name() . '.md');
         }
     }
+```
 
 ## Contribute
 
