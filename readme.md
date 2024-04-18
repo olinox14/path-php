@@ -9,35 +9,35 @@
 > This library is still under development, **USE WITH CAUTION**.
 
 An **intuitive**, **standalone**, and **object-oriented** library for file and path operations, 
-inspired by the ['path' python library](https://path.readthedocs.io/en/latest/api.html#path.Path.parts).
+inspired by the [path python library](https://github.com/jaraco/path).
 
 ```php
-    <?php
-    use Path\Path;
-    
-    // Get the parent directory of the current script file and list its subdirs
-    $script = new Path(__file__);
-    $dir = $script->parent();
-    var_dump($dir->dirs());
-    
-    
-    // Get the path of the working directory, iterate over its files and change their permissions
-    $path = new Path('.');
-    
-    foreach($path->files() as $file) {
-        $file->chmod(755);
-    }
-    
-    
-    // Put content into a file 
-    $path = (new Path('.'))->append('readme.md');
-    
-    $path->putContent('new readme content');
-    
-    // And many more...
+<?php
+use Path\Path;
+
+// Get the parent directory of the current script file and list its subdirs
+$script = new Path(__file__);
+$dir = $script->parent();
+var_dump($dir->dirs());
+
+
+// Get the path of the working directory, iterate over its files and change their permissions
+$path = new Path('.');
+
+foreach($path->files() as $file) {
+    $file->chmod(755);
+}
+
+
+// Put content into a file 
+$path = (new Path('.'))->append('readme.md');
+
+$path->putContent('new readme content');
+
+// And many more...
 ```
 
-Full documentation : [API Documentation](https://olinox14.github.io/path-php/classes/Path-Path.html)
+**Full documentation here : [API Documentation](https://olinox14.github.io/path-php/classes/Path-Path.html)**
 
 
 ## Requirement
@@ -54,29 +54,31 @@ Install with composer :
 
 Import the Path class : 
 
-    use Path\Path;
+```php
+use Path\Path;
+```
 
 Instantiate with some path : 
 
 ```php
-    $path = new Path('./foo');
-    $path = new Path('/foo/bar/file.ext');
-    $path = new Path(__file__);
+$path = new Path('./foo');
+$path = new Path('/foo/bar/file.ext');
+$path = new Path(__file__);
 ```
 
 And use it as needed. For example, if you want to rename all the html files in the directory where
 your current script lies into .md files : 
 
 ```php
-    $path = new Path(__file__);
+$path = new Path(__file__);
 
-    $dir = $path->parent();
-    
-    foreach ($dir->files() as $file) {
-        if ($file->ext() === 'html') {
-            $file->rename($file->name() . '.md');
-        }
+$dir = $path->parent();
+
+foreach ($dir->files() as $file) {
+    if ($file->ext() === 'html') {
+        $file->rename($file->name() . '.md');
     }
+}
 ```
 
 ## Contribute
@@ -96,7 +98,7 @@ Build your docker container :
 
     docker build -t path .
 
-Run it (you can change the name): 
+Run it (name can be changed): 
 
     # On Linux
     docker run -v "$(pwd)":/path --name path path
@@ -104,7 +106,7 @@ Run it (you can change the name):
     # On Windows
     docker run -d -v "%cd%:/path" --name path path
 
-Execute it and install : 
+Execute it and install dependencies : 
 
     docker exec -it path bash
     composer install
@@ -113,7 +115,7 @@ Run the unit tests :
 
     XDEBUG_MODE=coverage vendor/bin/phpunit -c phpunit.xml
 
-#### Next runs
+#### Run on a built container
 
 If you've already built your container, start it and run unit tests with :
 
