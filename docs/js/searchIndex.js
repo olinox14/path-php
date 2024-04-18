@@ -48,13 +48,18 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path",
             "name": "Path",
-            "summary": "An\u0020object\u0020representing\u0020a\u0020file\u0020or\u0020directory.",
+            "summary": "Represents\u0020a\u0020filesystem\u0020path.",
             "url": "classes/Path-Path.html"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Ajoin\u0028\u0029",
             "name": "join",
             "summary": "Joins\u0020two\u0020or\u0020more\u0020parts\u0020of\u0020a\u0020path\u0020together.",
             "url": "classes/Path-Path.html#method_join"
+        },                {
+            "fqsen": "\\Path\\Path\u003A\u003AsplitDrive\u0028\u0029",
+            "name": "splitDrive",
+            "summary": "Split\u0020the\u0020pathname\u0020path\u0020into\u0020a\u0020pair\u0020\u0028drive,\u0020tail\u0029\u0020where\u0020drive\u0020is\u0020either\u0020a\u0020mount\u0020point\u0020or\u0020the\u0020empty\u0020string.",
+            "url": "classes/Path-Path.html#method_splitDrive"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
@@ -83,7 +88,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Aappend\u0028\u0029",
             "name": "append",
-            "summary": "Appends\u0020parts\u0020to\u0020the\u0020current\u0020path.",
+            "summary": "Appends\u0020part\u0028s\u0029\u0020to\u0020the\u0020current\u0020path.",
             "url": "classes/Path-Path.html#method_append"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AabsPath\u0028\u0029",
@@ -95,11 +100,6 @@ Search.appendIndex(
             "name": "realpath",
             "summary": "\u003E\u0020Alias\u0020for\u0020absPath\u0028\u0029",
             "url": "classes/Path-Path.html#method_realpath"
-        },                {
-            "fqsen": "\\Path\\Path\u003A\u003Aaccess\u0028\u0029",
-            "name": "access",
-            "summary": "Checks\u0020the\u0020access\u0020rights\u0020for\u0020a\u0020given\u0020file\u0020or\u0020directory.",
-            "url": "classes/Path-Path.html#method_access"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Aatime\u0028\u0029",
             "name": "atime",
@@ -148,7 +148,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Aname\u0028\u0029",
             "name": "name",
-            "summary": "Get\u0020the\u0020name\u0020of\u0020the\u0020file\u0020or\u0020path.",
+            "summary": "Get\u0020the\u0020name\u0020of\u0020the\u0020file\u0020or\u0020path,\u0020without\u0020its\u0020extension.",
             "url": "classes/Path-Path.html#method_name"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AnormCase\u0028\u0029",
@@ -188,7 +188,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Atouch\u0028\u0029",
             "name": "touch",
-            "summary": "Updates\u0020the\u0020access\u0020and\u0020modification\u0020time\u0020of\u0020a\u0020file\u0020or\u0020creates\u0020a\u0020new\u0020empty\u0020file\u0020if\u0020it\u0020doesn\u0027t\u0020exist.",
+            "summary": "Updates\u0020the\u0020access\u0020and\u0020modification\u0020time\u0020of\u0020a\u0020file,\u0020or\u0020creates\u0020a\u0020new\u0020empty\u0020file\u0020if\u0020it\u0020doesn\u0027t\u0020exist.",
             "url": "classes/Path-Path.html#method_touch"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Asize\u0028\u0029",
@@ -256,6 +256,16 @@ Search.appendIndex(
             "summary": "Changes\u0020the\u0020permissions\u0020of\u0020a\u0020file\u0020or\u0020directory.",
             "url": "classes/Path-Path.html#method_setPermissions"
         },                {
+            "fqsen": "\\Path\\Path\u003A\u003AgetOwnerId\u0028\u0029",
+            "name": "getOwnerId",
+            "summary": "Retrieves\u0020the\u0020id\u0020of\u0020the\u0020owner\u0020of\u0020the\u0020file\u0020or\u0020directory.",
+            "url": "classes/Path-Path.html#method_getOwnerId"
+        },                {
+            "fqsen": "\\Path\\Path\u003A\u003AgetOwnerName\u0028\u0029",
+            "name": "getOwnerName",
+            "summary": "Retrieves\u0020the\u0020name\u0020of\u0020the\u0020owner\u0020of\u0020the\u0020file\u0020or\u0020directory.",
+            "url": "classes/Path-Path.html#method_getOwnerName"
+        },                {
             "fqsen": "\\Path\\Path\u003A\u003AsetOwner\u0028\u0029",
             "name": "setOwner",
             "summary": "Changes\u0020ownership\u0020of\u0020the\u0020file.",
@@ -308,7 +318,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Armdir\u0028\u0029",
             "name": "rmdir",
-            "summary": "Removes\u0020a\u0020directory,\u0020and\u0020its\u0020contents\u0020if\u0020recursive.",
+            "summary": "Removes\u0020a\u0020directory.",
             "url": "classes/Path-Path.html#method_rmdir"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Arename\u0028\u0029",
@@ -358,8 +368,13 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Achown\u0028\u0029",
             "name": "chown",
-            "summary": "\u003E\u0020Alias\u0020for\u0020Path\u002D\u003EsetOwner\u0028\u0029\u0020method",
+            "summary": "Changes\u0020the\u0020owner\u0020of\u0020a\u0020file\u0020or\u0020directory.",
             "url": "classes/Path-Path.html#method_chown"
+        },                {
+            "fqsen": "\\Path\\Path\u003A\u003Achgrp\u0028\u0029",
+            "name": "chgrp",
+            "summary": "Changes\u0020the\u0020group\u0020ownership\u0020of\u0020a\u0020file\u0020or\u0020directory.",
+            "url": "classes/Path-Path.html#method_chgrp"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Achroot\u0028\u0029",
             "name": "chroot",
@@ -375,6 +390,21 @@ Search.appendIndex(
             "name": "isMount",
             "summary": "Checks\u0020if\u0020the\u0020path\u0020is\u0020a\u0020mount\u0020point.",
             "url": "classes/Path-Path.html#method_isMount"
+        },                {
+            "fqsen": "\\Path\\Path\u003A\u003AisReadable\u0028\u0029",
+            "name": "isReadable",
+            "summary": "Checks\u0020if\u0020the\u0020file\u0020or\u0020directory\u0020is\u0020readable.",
+            "url": "classes/Path-Path.html#method_isReadable"
+        },                {
+            "fqsen": "\\Path\\Path\u003A\u003AisWritable\u0028\u0029",
+            "name": "isWritable",
+            "summary": "Determines\u0020if\u0020the\u0020file\u0020or\u0020directory\u0020is\u0020writable.",
+            "url": "classes/Path-Path.html#method_isWritable"
+        },                {
+            "fqsen": "\\Path\\Path\u003A\u003AisExecutable\u0028\u0029",
+            "name": "isExecutable",
+            "summary": "Determines\u0020if\u0020the\u0020file\u0020or\u0020directory\u0020is\u0020executable.",
+            "url": "classes/Path-Path.html#method_isExecutable"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Alink\u0028\u0029",
             "name": "link",
@@ -398,28 +428,8 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003AgetRelativePath\u0028\u0029",
             "name": "getRelativePath",
-            "summary": "Compute\u0020a\u0020version\u0020of\u0020this\u0020path\u0020that\u0020is\u0020relative\u0020to\u0020another\u0020path.",
+            "summary": "Computes\u0020a\u0020version\u0020of\u0020this\u0020path\u0020that\u0020is\u0020relative\u0020to\u0020another\u0020path.",
             "url": "classes/Path-Path.html#method_getRelativePath"
-        },                {
-            "fqsen": "\\Path\\Path\u003A\u003AF_OK",
-            "name": "F_OK",
-            "summary": "File\u0020exists",
-            "url": "classes/Path-Path.html#constant_F_OK"
-        },                {
-            "fqsen": "\\Path\\Path\u003A\u003AR_OK",
-            "name": "R_OK",
-            "summary": "Has\u0020read\u0020permission\u0020on\u0020the\u0020file",
-            "url": "classes/Path-Path.html#constant_R_OK"
-        },                {
-            "fqsen": "\\Path\\Path\u003A\u003AW_OK",
-            "name": "W_OK",
-            "summary": "Has\u0020write\u0020permission\u0020on\u0020the\u0020file",
-            "url": "classes/Path-Path.html#constant_W_OK"
-        },                {
-            "fqsen": "\\Path\\Path\u003A\u003AX_OK",
-            "name": "X_OK",
-            "summary": "Has\u0020execute\u0020permission\u0020on\u0020the\u0020file",
-            "url": "classes/Path-Path.html#constant_X_OK"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003A\u0024handle",
             "name": "handle",
