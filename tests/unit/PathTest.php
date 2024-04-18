@@ -65,6 +65,12 @@ class PathTest extends TestCase
             '/user/documents',
             Path::join('home/', '/user', 'documents')
         );
+
+        // Absolute path passed in $parts
+        $this->assertEquals(
+            '/user/',
+            Path::join('home/', '/user', '')
+        );
     }
 
     public function testSplitDrive(): void
