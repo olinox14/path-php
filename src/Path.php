@@ -9,13 +9,10 @@ use Path\Exception\IOException;
 use Throwable;
 
 /**
- * An object representing a file or directory.
- *
  * Represents a filesystem path.
  * Most of the methods rely on the php builtin methods, see each method's documentation for more.
  *
  * @see https://github.com/olinox14/path-php#path-php
- *
  * @package olinox14/path
  */
 class Path
@@ -32,6 +29,11 @@ class Path
      * If any component is an absolute path, all previous path components
      * will be discarded. An empty last part will result in a path that
      * ends with a separator.
+     *
+     * Example :
+     *
+     *     Path::join('/home', 'user')
+     *     >>> '/home/user'
      *
      * @param string|Path $path The base path
      * @param string ...$parts The parts of the path to be joined.
@@ -56,10 +58,6 @@ class Path
 
     /**
      * Split the pathname path into a pair (drive, tail) where drive is either a mount point or the empty string.
-     * On systems which do not use drive specifications, drive will always be the empty string. In all cases,
-     * drive + tail will be the same as path.
-     *
-     * On Windows, splits a pathname into drive/UNC sharepoint and relative path.
      *
      * If the path contains a drive letter, drive will contain everything up to and including the colon:
      *
@@ -71,8 +69,8 @@ class Path
      *     Path::splitDrive("//host/computer/dir")
      *     >>> ["//host/computer", "/dir"]
      *
-     * @param string|self $path The path with the drive.
-     * @return array<string> An array containing the drive and the path.
+     * @param string|self $path
+     * @return array<string> An 2-members array containing the drive and the path.
      */
     public static function splitDrive(string|self $path): array
     {
@@ -118,7 +116,7 @@ class Path
      * Casts the input into a Path instance.
      *
      * @param string|self $path The input path to be cast.
-     * @return self An instance of the current class.
+     * @return self
      */
     protected function cast(string|self $path): self
     {
@@ -126,9 +124,9 @@ class Path
     }
 
     /**
-     * Retrieves the current path of the file or directory as a string.
+     * The current path as a string.
      *
-     * @return string The path of the file or directory
+     * @return string
      */
     public function path(): string
     {
@@ -137,9 +135,10 @@ class Path
 
     /**
      * Checks if the given path is equal to the current path.
+     * NB: This method does not perform any path resolution.
      *
      * @param string|Path $path The path to compare against.
-     * @return bool Returns true if the given path is equal to the current path, false otherwise.
+     * @return bool
      */
     public function eq(string|self $path): bool
     {
@@ -147,12 +146,11 @@ class Path
     }
 
     /**
-     * Appends parts to the current path.
+     * Appends part(s) to the current path.
      *
-     * @param string ...$parts The parts to be appended to the current path.
-     * @return self Returns an instance of the class with the appended path.
+     * @param string ...$parts The part(s) to be appended to the current path.
+     * @return self
      * @see Path::join()
-     *
      */
     public function append(string|self ...$parts): self
     {
@@ -162,6 +160,8 @@ class Path
     /**
      * Returns an absolute version of the current path.
      *
+     * As this method relies on the php `realpath` method, it will fail if the path refers to a
+     * non-existing file.
      * @see https://www.php.net/manual/fr/function.realpath.php
      *
      * @return self
@@ -179,6 +179,7 @@ class Path
     /**
      * > Alias for absPath()
      *
+     * @see absPath()
      * @throws IOException
      */
     public function realpath(): self
@@ -254,7 +255,7 @@ class Path
      *
      * @see https://www.php.net/manual/fr/function.is-file.php
      *
-     * @return bool Returns true if the path refers to a regular file, false otherwise.
+     * @return bool
      */
     public function isFile(): bool
     {
@@ -266,7 +267,7 @@ class Path
      *
      * @see https://www.php.net/manual/fr/function.is-dir.php
      *
-     * @return bool Returns true if the path is a directory, false otherwise.
+     * @return bool
      */
     public function isDir(): bool
     {
@@ -288,10 +289,14 @@ class Path
     /**
      * Get the base name of the path.
      *
-     * Ex: Path('path/to/file.ext').basename() => 'file.ext'
+     * Example :
+     *
+     *      Path('path/to/file.ext').basename()
+     *      >>> 'file.ext'
+     *
      * @see https://www.php.net/manual/fr/function.pathinfo.php
      *
-     * @return string The base name of the path.
+     * @return string
      */
     public function basename(): string
     {
@@ -320,6 +325,7 @@ class Path
     /**
      * > Alias for Path->cd($path)
      *
+     * @see cd()
      * @throws FileNotFoundException
      * @throws IOException
      */
@@ -329,12 +335,16 @@ class Path
     }
 
     /**
-     * Get the name of the file or path.
+     * Get the name of the file or path, without its extension.
      *
-     * Ex: Path('path/to/file.ext').name() => 'file'
+     * Example :
+     *
+     *     Path('path/to/file.ext').name()
+     *     >>> 'file'
+     *
      * @see https://www.php.net/manual/fr/function.pathinfo.php
      *
-     * @return string Returns the name of the file without its extension.
+     * @return string
      */
     public function name(): string
     {
@@ -345,9 +355,9 @@ class Path
      * Normalize the case of a pathname.
      *
      * Convert all characters in the pathname to lowercase, and also convert
-     * forward slashes to backward slashes.
+     * forward slashes and backslashes to the current directory separator.
      *
-     * @return self The instance of the current object.
+     * @return self
      */
     public function normCase(): self
     {
@@ -411,7 +421,6 @@ class Path
             $newParts[] = $part;
         }
 
-        // Rebuild path
         if ($prefix) {
             array_shift($newParts); // Get rid of the leading empty string resulting from slitDrive result
             array_unshift($newParts, rtrim($prefix, BuiltinProxy::$DIRECTORY_SEPARATOR));
@@ -631,7 +640,7 @@ class Path
     }
 
     /**
-     * Updates the access and modification time of a file or creates a new empty file if it doesn't exist.
+     * Updates the access and modification time of a file, or creates a new empty file if it doesn't exist.
      *
      * @see https://www.php.net/manual/en/function.touch.php
      *
@@ -685,7 +694,8 @@ class Path
      *
      * @see https://www.php.net/manual/fr/function.dirname.php
      *
-     * @return self The parent directory of the specified path.
+     * @param int $levels
+     * @return self
      */
     public function parent(int $levels = 1): self
     {
@@ -697,6 +707,7 @@ class Path
     /**
      * > Alias for Path->parent() method
      *
+     * @see parent()
      * @param int $levels
      * @return self
      */
@@ -708,8 +719,7 @@ class Path
     /**
      * Retrieves an array of this directory’s subdirectories.
      *
-     * The elements of the list are Path objects.
-     * This does not walk recursively into subdirectories (but see walkdirs())
+     * This does not walk recursively into subdirectories (but @see walkDirs())
      *
      * @return array<self>
      * @throws FileNotFoundException
@@ -804,6 +814,7 @@ class Path
     /**
      * > Alias for getContent()
      *
+     * @see getContent()
      * @return string
      * @throws FileNotFoundException
      * @throws IOException
@@ -910,8 +921,8 @@ class Path
      * @see https://www.php.net/manual/fr/function.chmod.php
      *
      * @param int $permissions The new permissions to set.
-     * @param bool $asOctal
-     * @param bool $clearStatCache
+     * @param bool $asOctal Set to true if permissions are given as octal
+     * @param bool $clearStatCache Force a clear cache of the php stat cache
      * @throws FileNotFoundException
      * @throws IOException
      */
@@ -1017,7 +1028,7 @@ class Path
      *
      * @see https://www.php.net/manual/fr/function.file-exists.php
      *
-     * @return bool Returns true if the file exists, false otherwise.
+     * @return bool
      */
     public function exists(): bool
     {
@@ -1027,7 +1038,7 @@ class Path
     /**
      * Return True if both pathname arguments refer to the same file or directory.
      *
-     * As this method relies on the realpath method, this will throw an exception if any of the two files does
+     * As this method relies on the `realpath` method, this will throw an exception if any of the two files does
      * not exist.
      *
      * @throws IOException
@@ -1040,11 +1051,11 @@ class Path
     /**
      * Expands the path by performing three operations: expanding user, expanding variables, and normalizing the path.
      *
+     * @return self The expanded path.
+     * @throws IOException
      * @see Path::expandUser()
      * @see Path::expandVars()
      * @see Path::normPath()
-     *
-     * @return self The expanded path.
      */
     public function expand(): self
     {
@@ -1130,7 +1141,7 @@ class Path
      *
      * @return void
      * @throws IOException if there was an error while removing the file.
-     * @throws IOException|FileNotFoundException if the file does not exist or is not a file.
+     * @throws IOException|FileNotFoundException If the file does not exist or is not a file.
      */
     public function remove(): void
     {
@@ -1146,6 +1157,7 @@ class Path
     /**
      * > Alias for Path->remove()
      *
+     * @see remove()
      * @return void
      * @throws IOException|FileNotFoundException
      */
@@ -1157,7 +1169,7 @@ class Path
     /**
      * Like remove(), but does not throw an exception if the file does not exist.
      *
-     * It will still raise a FileExistsException if the target is an existing directory.
+     * It will still raise a `FileExistsException` if the target is an existing directory.
      *
      * @return void
      * @throws IOException
@@ -1220,6 +1232,7 @@ class Path
     /**
      * > Alias for Path->move()
      *
+     * @see move()
      * @throws FileNotFoundException
      * @throws IOException
      * @throws FileExistsException
@@ -1378,8 +1391,7 @@ class Path
     /**
      * > Alias for Path->setPermissions() method
      *
-     * Changes permissions of the file.
-     *
+     * @see setPermissions()
      * @param int $mode The new permissions (octal).
      * @param bool $asOctal
      * @param bool $clearStatCache
@@ -1398,10 +1410,8 @@ class Path
      *
      * @param int|string $user The new owner of the file or directory. Accepts either the user's numeric ID or username.
      * @param bool $clearStatCache Optional. Whether to clear the stat cache before changing the owner. Default is false.
-     *
      * @throws FileNotFoundException If the file or directory does not exist.
      * @throws IOException If an error occurs while changing the owner of the file or directory.
-     *
      * @return void
      */
     public function chown(int|string $user, bool $clearStatCache = false): void
@@ -1486,7 +1496,7 @@ class Path
     /**
      * Checks if the path is a mount point.
      *
-     * @return bool True if the path is a mount point, false otherwise.
+     * @return bool
      */
     public function isMount(): bool
     {
@@ -1498,7 +1508,7 @@ class Path
      *
      * @see https://www.php.net/manual/fr/function.is-readable.php
      *
-     * @return bool True if the file or directory is readable, false otherwise
+     * @return bool
      * @throws FileNotFoundException If the file or directory does not exist
      */
     public function isReadable(): bool
@@ -1513,7 +1523,7 @@ class Path
     /**
      * Determines if the file or directory is writable.
      *
-     * @return bool Returns true if the file or directory is writable, false otherwise.
+     * @return bool
      * @throws FileNotFoundException If the file or directory does not exist.
      *
      */
@@ -1529,7 +1539,7 @@ class Path
     /**
      * Determines if the file or directory is executable.
      *
-     * @return bool Returns true if the file or directory is executable, false otherwise.
+     * @return bool
      * @throws FileNotFoundException If the file or directory does not exist.
      */
     public function isExecutable(): bool
@@ -1626,7 +1636,7 @@ class Path
      * Returns the individual parts of this path.
      * The eventual leading directory separator is kept.
      *
-     * Ex:
+     * Example :
      *
      *     Path('/foo/bar/baz').parts()
      *     >>> '/', 'foo', 'bar', 'baz'
@@ -1653,7 +1663,8 @@ class Path
     }
 
     /**
-     * Compute a version of this path that is relative to another path.
+     * Computes a version of this path that is relative to another path.
+     *
      * This method relies on the php `realpath` method and then requires the path to refer to
      * an existing file.
      *
