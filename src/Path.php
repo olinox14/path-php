@@ -162,7 +162,7 @@ class Path
      *
      * As this method relies on the php `realpath` method, it will fail if the path refers to a
      * non-existing file.
-     * @see https://www.php.net/manual/fr/function.realpath.php
+     * @see https://www.php.net/manual/en/function.realpath.php
      *
      * @return self
      * @throws IOException
@@ -190,7 +190,7 @@ class Path
     /**
      * Retrieves the last access time of a file or directory.
      *
-     * @see https://www.php.net/manual/fr/function.fileatime.php
+     * @see https://www.php.net/manual/en/function.fileatime.php
      *
      * @return int The last access time of the file or directory as a timestamp.
      * @throws IOException
@@ -211,7 +211,7 @@ class Path
     /**
      * Retrieves the creation time of a file or directory.
      *
-     * @see https://www.php.net/manual/fr/function.filectime.php
+     * @see https://www.php.net/manual/en/function.filectime.php
      *
      * @return int The creation time of the file or directory as a timestamp.
      * @throws FileNotFoundException
@@ -232,7 +232,7 @@ class Path
     /**
      * Retrieves the last modified time of a file or directory.
      *
-     * @see https://www.php.net/manual/fr/function.filemtime.php
+     * @see https://www.php.net/manual/en/function.filemtime.php
      *
      * @return int The last modified time of the file or directory as a timestamp.
      * @throws FileNotFoundException
@@ -253,7 +253,7 @@ class Path
     /**
      * Check if the path refers to a regular file.
      *
-     * @see https://www.php.net/manual/fr/function.is-file.php
+     * @see https://www.php.net/manual/en/function.is-file.php
      *
      * @return bool
      */
@@ -265,7 +265,7 @@ class Path
     /**
      * Check if the given path is a directory.
      *
-     * @see https://www.php.net/manual/fr/function.is-dir.php
+     * @see https://www.php.net/manual/en/function.is-dir.php
      *
      * @return bool
      */
@@ -277,7 +277,7 @@ class Path
     /**
      * Get the extension of the given path.
      *
-     * @see https://www.php.net/manual/fr/function.pathinfo.php
+     * @see https://www.php.net/manual/en/function.pathinfo.php
      *
      * @return string Returns the extension of the path as a string if it exists, or an empty string otherwise.
      */
@@ -294,7 +294,7 @@ class Path
      *      Path('path/to/file.ext').basename()
      *      >>> 'file.ext'
      *
-     * @see https://www.php.net/manual/fr/function.pathinfo.php
+     * @see https://www.php.net/manual/en/function.pathinfo.php
      *
      * @return string
      */
@@ -306,7 +306,7 @@ class Path
     /**
      * Changes the current working directory to this path.
      *
-     * @see https://www.php.net/manual/fr/function.chdir.php
+     * @see https://www.php.net/manual/en/function.chdir.php
      *
      * @throws FileNotFoundException
      * @throws IOException
@@ -342,7 +342,7 @@ class Path
      *     Path('path/to/file.ext').name()
      *     >>> 'file'
      *
-     * @see https://www.php.net/manual/fr/function.pathinfo.php
+     * @see https://www.php.net/manual/en/function.pathinfo.php
      *
      * @return string
      */
@@ -434,7 +434,7 @@ class Path
     /**
      * Creates a new directory.
      *
-     * @see https://www.php.net/manual/fr/function.mkdir.php
+     * @see https://www.php.net/manual/en/function.mkdir.php
      *
      * @param int $mode The permissions for the new directory. Default is 0777.
      * @param bool $recursive Indicates whether to create parent directories if they do not exist. Default is false.
@@ -466,8 +466,8 @@ class Path
     /**
      * Deletes a file or a directory (non-recursively).
      *
-     * @see https://www.php.net/manual/fr/function.unlink.php
-     * @see https://www.php.net/manual/fr/function.rmdir.php
+     * @see https://www.php.net/manual/en/function.unlink.php
+     * @see https://www.php.net/manual/en/function.rmdir.php
      *
      * @return void
      * @throws FileNotFoundException
@@ -502,8 +502,8 @@ class Path
      * If $follow_symlinks is true and if $destination is a directory, the newly created file will have the
      * filename of the symlink, and not the one of its target.
      *
-     * @see https://www.php.net/manual/fr/function.copy.php
-     * @see https://www.php.net/manual/fr/function.symlink.php
+     * @see https://www.php.net/manual/en/function.copy.php
+     * @see https://www.php.net/manual/en/function.symlink.php
      *
      * @param string|self $destination The destination path or object to copy the file to.
      * @param bool $follow_symlinks
@@ -606,7 +606,7 @@ class Path
      * Returns the path of the newly created file or directory.
      * If the destination is a directory or a symlink to a directory, the source is moved
      * inside the directory. The destination path must not already exist.
-     * @see https://www.php.net/manual/fr/function.rename.php
+     * @see https://www.php.net/manual/en/function.rename.php
      *
      * @param string|Path $destination The new location where the file or directory should be moved to.
      * @return Path
@@ -668,7 +668,7 @@ class Path
     /**
      * Size of the file, in bytes.
      *
-     * @see https://www.php.net/manual/fr/function.filesize.php
+     * @see https://www.php.net/manual/en/function.filesize.php
      *
      * @return int The size of the file in bytes.
      * @throws FileNotFoundException
@@ -692,7 +692,7 @@ class Path
     /**
      * Retrieves the parent directory of a file or directory path.
      *
-     * @see https://www.php.net/manual/fr/function.dirname.php
+     * @see https://www.php.net/manual/en/function.dirname.php
      *
      * @param int $levels
      * @return self
@@ -779,7 +779,7 @@ class Path
     /**
      * Performs a pattern matching using the `fnmatch()` function.
      *
-     * @see https://www.php.net/manual/fr/function.fnmatch.php
+     * @see https://www.php.net/manual/en/function.fnmatch.php
      *
      * @param string $pattern A filename pattern with wildcards.
      * @return bool True if the path matches the pattern, false otherwise.
@@ -792,7 +792,7 @@ class Path
     /**
      * Retrieves the content of a file.
      *
-     * @see https://www.php.net/manual/fr/function.file-get-contents.php
+     * @see https://www.php.net/manual/en/function.file-get-contents.php
      *
      * @return string The content of the file as a string.
      * @throws FileNotFoundException|IOException
@@ -839,7 +839,7 @@ class Path
     /**
      * Writes contents to a file.
      *
-     * @see https://www.php.net/manual/fr/function.file-put-contents.php
+     * @see https://www.php.net/manual/en/function.file-put-contents.php
      *
      * @param string $content The contents to be written to the file.
      * @param bool $append Append the content to the file's content instead of replacing it
@@ -889,7 +889,7 @@ class Path
     /**
      * Retrieves the permissions of a file or directory.
      *
-     * @see https://www.php.net/manual/fr/function.fileperms.php
+     * @see https://www.php.net/manual/en/function.fileperms.php
      *
      * @param bool $asOctal
      * @return int The permissions of the file or directory
@@ -918,7 +918,7 @@ class Path
     /**
      * Changes the permissions of a file or directory.
      *
-     * @see https://www.php.net/manual/fr/function.chmod.php
+     * @see https://www.php.net/manual/en/function.chmod.php
      *
      * @param int $permissions The new permissions to set.
      * @param bool $asOctal Set to true if permissions are given as octal
@@ -950,7 +950,7 @@ class Path
     /**
      * Retrieves the id of the owner of the file or directory.
      *
-     * @see https://www.php.net/manual/fr/function.fileowner.php
+     * @see https://www.php.net/manual/en/function.fileowner.php
      *
      * @return int The owner identifier of the file or directory
      * @throws FileNotFoundException if the file or directory does not exist
@@ -974,7 +974,7 @@ class Path
     /**
      * Retrieves the name of the owner of the file or directory.
      *
-     * @see https://www.php.net/manual/fr/function.posix-getpwuid.php
+     * @see https://www.php.net/manual/en/function.posix-getpwuid.php
      *
      * @return string The name of the owner
      * @throws IOException
@@ -996,8 +996,8 @@ class Path
     /**
      * Changes ownership of the file.
      *
-     * @see https://www.php.net/manual/fr/function.chown.php
-     * @see https://www.php.net/manual/fr/function.chgrp.php
+     * @see https://www.php.net/manual/en/function.chown.php
+     * @see https://www.php.net/manual/en/function.chgrp.php
      *
      * @param string $user The new owner username.
      * @param string $group The new owner group name.
@@ -1026,7 +1026,7 @@ class Path
     /**
      * Checks if a file or directory exists.
      *
-     * @see https://www.php.net/manual/fr/function.file-exists.php
+     * @see https://www.php.net/manual/en/function.file-exists.php
      *
      * @return bool
      */
@@ -1107,7 +1107,7 @@ class Path
     /**
      * Retrieves a list of files and directories that match a specified pattern.
      *
-     * @see https://www.php.net/manual/fr/function.glob.php
+     * @see https://www.php.net/manual/en/function.glob.php
      *
      * @param string $pattern The pattern to search for.
      * @return array<self> A list of files and directories that match the pattern.
@@ -1137,7 +1137,7 @@ class Path
     /**
      * Removes the file.
      *
-     * @see https://www.php.net/manual/fr/function.unlink.php
+     * @see https://www.php.net/manual/en/function.unlink.php
      *
      * @return void
      * @throws IOException if there was an error while removing the file.
@@ -1285,7 +1285,7 @@ class Path
     /**
      * Opens a file in the specified mode.
      *
-     * @see https://www.php.net/manual/fr/function.fopen.php
+     * @see https://www.php.net/manual/en/function.fopen.php
      *
      * @param string $mode The mode in which to open the file. Defaults to 'r'.
      * @return resource|false Returns a file pointer resource on success, or false on failure.
@@ -1406,7 +1406,7 @@ class Path
     /**
      * Changes the owner of a file or directory.
      *
-     * @see https://www.php.net/manual/fr/function.chown.php
+     * @see https://www.php.net/manual/en/function.chown.php
      *
      * @param int|string $user The new owner of the file or directory. Accepts either the user's numeric ID or username.
      * @param bool $clearStatCache Optional. Whether to clear the stat cache before changing the owner. Default is false.
@@ -1434,7 +1434,7 @@ class Path
     /**
      * Changes the group ownership of a file or directory.
      *
-     * @see https://www.php.net/manual/fr/function.chgrp.php
+     * @see https://www.php.net/manual/en/function.chgrp.php
      *
      * @param int|string $group The group name or ID. If a string is provided, it must be a valid group name.
      *                          If an integer is provided, it must be a valid group ID.
@@ -1464,7 +1464,7 @@ class Path
     /**
      * Changes the root directory of the current process to the specified directory.
      *
-     * @see https://www.php.net/manual/fr/function.chroot.php
+     * @see https://www.php.net/manual/en/function.chroot.php
      *
      * @throws IOException
      * @throws FileNotFoundException
@@ -1484,7 +1484,7 @@ class Path
     /**
      * Checks if the file is a symbolic link.
      *
-     * @see https://www.php.net/manual/fr/function.is-link.php
+     * @see https://www.php.net/manual/en/function.is-link.php
      *
      * @return bool
      */
@@ -1506,7 +1506,7 @@ class Path
     /**
      * Checks if the file or directory is readable.
      *
-     * @see https://www.php.net/manual/fr/function.is-readable.php
+     * @see https://www.php.net/manual/en/function.is-readable.php
      *
      * @return bool
      * @throws FileNotFoundException If the file or directory does not exist
@@ -1554,7 +1554,7 @@ class Path
     /**
      * Create a hard link pointing to this path.
      *
-     * @see https://www.php.net/manual/fr/function.link.php
+     * @see https://www.php.net/manual/en/function.link.php
      *
      * @param string|Path $newLink
      * @return Path
@@ -1586,7 +1586,7 @@ class Path
     /**
      * Gives information about a file or symbolic link
      *
-     * @see https://www.php.net/manual/fr/function.lstat.php
+     * @see https://www.php.net/manual/en/function.lstat.php
      *
      * @return array<string, int|float>
      * @throws IOException
@@ -1603,7 +1603,7 @@ class Path
     /**
      * Creates a symbolic link to the specified destination.
      *
-     * @see https://www.php.net/manual/fr/function.symlink.php
+     * @see https://www.php.net/manual/en/function.symlink.php
      *
      * @param string|self $newLink The path or the instance of the symbolic link to create.
      * @return self The instance of the symbolic link that was created.
