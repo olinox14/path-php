@@ -1634,6 +1634,7 @@ class Path
 
     /**
      * Returns the individual parts of this path.
+     *
      * The eventual leading directory separator is kept.
      *
      * Example :
