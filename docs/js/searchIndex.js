@@ -101,6 +101,11 @@ Search.appendIndex(
             "summary": "\u003E\u0020Alias\u0020for\u0020absPath\u0028\u0029",
             "url": "classes/Path-Path.html#method_realpath"
         },                {
+            "fqsen": "\\Path\\Path\u003A\u003AgetHomeDir\u0028\u0029",
+            "name": "getHomeDir",
+            "summary": "Retrieves\u0020and\u0020returns\u0020the\u0020home\u0020directory\u0020of\u0020the\u0020current\u0020user.",
+            "url": "classes/Path-Path.html#method_getHomeDir"
+        },                {
             "fqsen": "\\Path\\Path\u003A\u003Aatime\u0028\u0029",
             "name": "atime",
             "summary": "Retrieves\u0020the\u0020last\u0020access\u0020time\u0020of\u0020a\u0020file\u0020or\u0020directory.",
