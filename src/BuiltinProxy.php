@@ -10,11 +10,24 @@ class BuiltinProxy
 {
     public static string $DIRECTORY_SEPARATOR = DIRECTORY_SEPARATOR;
 
-    public function getHome(): string
+    public function getServerEnvVar(string $name): ?string
     {
-        return PHP_OS_FAMILY == 'Windows' ?
-            $_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'] :
-            $_SERVER['HOME'];
+        return $_SERVER[$name];
+    }
+
+    public function strncasecmp(string $string1, string $string2, int $length): int
+    {
+        return \strncasecmp($string1, $string2, $length);
+    }
+
+    public function function_exists(string $function): bool
+    {
+        return \function_exists($function);
+    }
+
+    public function exec(string $command): false|string
+    {
+        return \exec($command);
     }
 
     public function date(string $format, int $time): string

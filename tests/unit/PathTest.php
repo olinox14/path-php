@@ -2956,15 +2956,12 @@ class PathTest extends TestCase
         $path = $this->getMock('~/file.ext', 'expandUser');
         $path->method('path')->willReturn('~/file.ext');
 
-        $this->builtin->expects(self::once())->method('getHome')->willReturn('/home/foo');
-
-        $homePath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
-
-        $path->method('cast')->with('/home/foo')->willReturn($homePath);
+        $homeDir = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+        $path->expects(self::once())->method('getHomeDir')->willReturn($homeDir);
 
         $expandedPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
 
-        $homePath
+        $homeDir
             ->expects(self::once())
             ->method('append')
             ->with('file.ext')
@@ -2985,21 +2982,6 @@ class PathTest extends TestCase
             $path,
             $path->expandUser()
         );
-    }
-
-    /**
-     * @throws IOException
-     */
-    public function testExpandUserNoHome(): void
-    {
-        $path = $this->getMock('~/file.ext', 'expandUser');
-        $path->method('path')->willReturn('~/file.ext');
-
-        $this->builtin->expects(self::once())->method('getHome')->willReturn('');
-
-        $this->expectException(IOException::class);
-
-        $path->expandUser();
     }
 
     public function testExpandVars(): void

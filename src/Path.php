@@ -42,12 +42,12 @@ class Path
     public static function join(string|self $path, string|self ...$parts): self
     {
         $path = (string)$path;
-        $parts = array_map(fn ($p) => (string)$p, $parts);
+        $parts = \array_map(fn ($p) => (string)$p, $parts);
 
         foreach ($parts as $part) {
-            if (str_starts_with($part, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
+            if (\str_starts_with($part, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
                 $path = $part;
-            } elseif (!$path || str_ends_with($path, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
+            } elseif (!$path || \str_ends_with($path, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
                 $path .= $part;
             } else {
                 $path .= BuiltinProxy::$DIRECTORY_SEPARATOR . $part;
@@ -78,9 +78,9 @@ class Path
 
         $matches = [];
 
-        preg_match('/(^[a-zA-Z]:)(.*)/', $path, $matches);
+        \preg_match('/(^[a-zA-Z]:)(.*)/', $path, $matches);
         if ($matches) {
-            return array_slice($matches, -2);
+            return \array_slice($matches, -2);
         }
 
         $rx =
@@ -88,9 +88,9 @@ class Path
                 '/(^\/\/[\w\-\s]{2,15}\/[\w\-\s]+)(.*)/' :
                 '/(^\\\\\\\\[\w\-\s]{2,15}\\\[\w\-\s]+)(.*)/';
 
-        preg_match($rx, $path, $matches);
+        \preg_match($rx, $path, $matches);
         if ($matches) {
-            return array_slice($matches, -2);
+            return \array_slice($matches, -2);
         }
 
         return ['', $path];
@@ -185,6 +185,47 @@ class Path
     public function realpath(): self
     {
         return $this->absPath();
+    }
+
+    /**
+     * Retrieves and returns the home directory of the current user.
+     *
+     * @return self The Path instance representing the home directory.
+     * @throws \RuntimeException When unable to determine the home directory.
+     * TODO: move to a utils class and test
+     */
+    public function getHomeDir(): self {
+        $homeDir = $this->builtin->getServerEnvVar('HOME');
+        if (!empty($homeDir)) {
+            return new self($homeDir);
+        }
+
+        $homeDir = $this->builtin->getenv('HOME');
+        if (!empty($homeDir)) {
+            return new self($homeDir);
+        }
+
+        $isWindows = $this->builtin->strncasecmp(PHP_OS, "WIN", 3) === 0;
+
+        if ($isWindows) {
+            $homeDrive = $this->builtin->getServerEnvVar('HOMEDRIVE');
+            $homePath = $this->builtin->getServerEnvVar('HOMEPATH');
+            if ($homeDrive && $homePath) {
+                return new self($homeDrive . $homePath);
+            }
+        }
+
+        if($this->builtin->function_exists('exec')) {
+            $homeDir = $isWindows ?
+                $this->builtin->exec('echo %userprofile%') :
+                $this->builtin->exec('echo ~');
+
+            if ($homeDir) {
+                return new self($homeDir);
+            }
+        }
+
+        throw new \RuntimeException('Unable to determine home directory');
     }
 
     /**
@@ -1073,13 +1114,8 @@ class Path
         if (!str_starts_with($this->path(), '~/')) {
             return $this;
         }
-        $home = $this->builtin->getHome();
+        $home = $this->getHomeDir();
 
-        if (!$home) {
-            throw new IOException("Error while getting home directory");
-        }
-
-        $home = $this->cast($home);
         return $home->append(substr($this->path(), 2));
     }
 
