@@ -194,7 +194,8 @@ class Path
      * @throws \RuntimeException When unable to determine the home directory.
      * TODO: move to a utils class and test
      */
-    public function getHomeDir(): self {
+    public function getHomeDir(): self
+    {
         $homeDir = $this->builtin->getServerEnvVar('HOME');
         if (!empty($homeDir)) {
             return new self($homeDir);
