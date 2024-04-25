@@ -205,7 +205,7 @@ class Path
             return new self($homeDir);
         }
 
-        $isWindows = $this->builtin->strncasecmp(PHP_OS, "WIN", 3) === 0;
+        $isWindows = $this->builtin->strncasecmp(BuiltinProxy::$PHP_OS, "WIN", 3) === 0;
 
         if ($isWindows) {
             $homeDrive = $this->builtin->getServerEnvVar('HOMEDRIVE');

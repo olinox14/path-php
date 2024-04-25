@@ -9,6 +9,7 @@ namespace Path;
 class BuiltinProxy
 {
     public static string $DIRECTORY_SEPARATOR = DIRECTORY_SEPARATOR;
+    public static string $PHP_OS = PHP_OS;
 
     public function getServerEnvVar(string $name): ?string
     {

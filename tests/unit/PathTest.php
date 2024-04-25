@@ -29,6 +29,7 @@ class PathTest extends TestCase
     public function setUp(): void
     {
         BuiltinProxy::$DIRECTORY_SEPARATOR = '/';
+        BuiltinProxy::$PHP_OS = 'Linux';
         $this->builtin = $this->getMockBuilder(BuiltinProxy::class)->getMock();
     }
 
@@ -212,6 +213,184 @@ class PathTest extends TestCase
             Path::join('home', '/user', 'documents'),
             $path->append('/user', 'documents')->path()
         );
+    }
+
+    public function testGetHomeDirExistingServerHomeVar(): void
+    {
+        $path = $this->getMock('./file.ext', 'getHomeDir');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('getServerEnvVar')
+            ->with('HOME')
+            ->willReturn('/home/user');
+
+        $homeDir = $path->getHomeDir();
+
+        $this->assertEquals(
+            '/home/user',
+            $homeDir->path()
+        );
+    }
+
+    public function testGetHomeDirExistingEnvHomeVar(): void
+    {
+        $path = $this->getMock('./file.ext', 'getHomeDir');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('getServerEnvVar')
+            ->with('HOME')
+            ->willReturn(null);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('getenv')
+            ->with('HOME')
+            ->willReturn('/home/user');
+
+        $homeDir = $path->getHomeDir();
+
+        $this->assertEquals(
+            '/home/user',
+            $homeDir->path()
+        );
+    }
+
+    public function testGetHomeDirIsWindowsWithExistingServerVars(): void
+    {
+        $path = $this->getMock('./file.ext', 'getHomeDir');
+
+        $this->builtin
+            ->method('getServerEnvVar')
+            ->willReturnMap([
+                ['HOME', null],
+                ['HOMEDRIVE', 'c:'],
+                ['HOMEPATH', '\\user'],
+            ]);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('getenv')
+            ->with('HOME')
+            ->willReturn(false);
+
+        BuiltinProxy::$PHP_OS = 'WINDOWS';
+        $this->builtin
+            ->expects(self::once())
+            ->method('strncasecmp')
+            ->with('WINDOWS', 'WIN', 3)
+            ->willReturn(0);
+
+        $homeDir = $path->getHomeDir();
+
+        $this->assertEquals(
+            'c:\\user',
+            $homeDir->path()
+        );
+    }
+
+    public function testGetHomeDirFallbackOnExec(): void
+    {
+        $path = $this->getMock('./file.ext', 'getHomeDir');
+
+        $this->builtin
+            ->method('getServerEnvVar')
+            ->willReturnMap([
+                ['HOME', null],
+                ['HOMEDRIVE', null],
+                ['HOMEPATH', null],
+            ]);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('getenv')
+            ->with('HOME')
+            ->willReturn(false);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('strncasecmp')
+            ->with('Linux', 'WIN', 3)
+            ->willReturn(-1);
+
+        $this->builtin->method('function_exists')->with('exec')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('exec')
+            ->with('echo ~')
+            ->willReturn('/home/user');
+
+        $homeDir = $path->getHomeDir();
+
+        $this->assertEquals(
+            '/home/user',
+            $homeDir->path()
+        );
+    }
+
+    public function testGetHomeDirFallbackOnExecOnWindows(): void
+    {
+        $path = $this->getMock('./file.ext', 'getHomeDir');
+
+        $this->builtin
+            ->method('getServerEnvVar')
+            ->willReturnMap([
+                ['HOME', null],
+                ['HOMEDRIVE', null],
+                ['HOMEPATH', null],
+            ]);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('getenv')
+            ->with('HOME')
+            ->willReturn(false);
+
+        BuiltinProxy::$PHP_OS = 'WINDOWS';
+        $this->builtin
+            ->expects(self::once())
+            ->method('strncasecmp')
+            ->with('WINDOWS', 'WIN', 3)
+            ->willReturn(0);
+
+        $this->builtin->method('function_exists')->with('exec')->willReturn(true);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('exec')
+            ->with('echo %userprofile%')
+            ->willReturn('c:\\user');
+
+        $homeDir = $path->getHomeDir();
+
+        $this->assertEquals(
+            'c:\\user',
+            $homeDir->path()
+        );
+    }
+
+    public function testGetHomeDirNotFound(): void
+    {
+        $path = $this->getMock('./file.ext', 'getHomeDir');
+
+        $this->builtin->method('getServerEnvVar')->willReturnMap([
+            ['HOME', null],
+            ['HOMEDRIVE', null],
+            ['HOMEPATH', null],
+        ]);
+        $this->builtin->method('getenv')->with('HOME')->willReturn(false);
+        $this->builtin->method('strncasecmp')->with('Linux', 'WIN', 3)->willReturn(-1);
+        $this->builtin->method('function_exists')->with('exec')->willReturn(true);
+        $this->builtin->method('exec')->willReturnMap([
+           ['echo %userprofile%', false],
+           ['echo ~', false]
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+
+        $path->getHomeDir();
     }
 
     /**
