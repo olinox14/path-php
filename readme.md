@@ -8,6 +8,8 @@
 
 An **intuitive**, **standalone**, and **object-oriented** library for file and path operations.
 
+**See the full documentation here : [Documentation](https://path-php.net/)**
+
 ```php
 <?php
 use Path\Path;
@@ -33,8 +35,6 @@ $path->putContent('new readme content');
 
 // And many more...
 ```
-
-**Full documentation here : [API Documentation](https://path-php.net/)**
 
 
 ## Requirement
