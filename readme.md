@@ -6,10 +6,7 @@
 
 # Path-php
 
-> This library is still under development, **USE WITH CAUTION**.
-
-An **intuitive**, **standalone**, and **object-oriented** library for file and path operations, 
-inspired by the [path python library](https://github.com/jaraco/path).
+An **intuitive**, **standalone**, and **object-oriented** library for file and path operations.
 
 ```php
 <?php
@@ -37,7 +34,7 @@ $path->putContent('new readme content');
 // And many more...
 ```
 
-**Full documentation here : [API Documentation](https://olinox14.github.io/path-php/classes/Path-Path.html)**
+**Full documentation here : [API Documentation](https://path-php.net/)**
 
 
 ## Requirement
@@ -98,7 +95,7 @@ Build your docker container :
 
     docker build -t path .
 
-Run it (name can be changed): 
+Run it (name can be changed):
 
     # On Linux
     docker run -v "$(pwd)":/path --name path path
@@ -106,7 +103,7 @@ Run it (name can be changed):
     # On Windows
     docker run -d -v "%cd%:/path" --name path path
 
-Execute it and install dependencies : 
+Execute it and install dependencies :
 
     docker exec -it path bash
     composer install
@@ -156,10 +153,6 @@ To install and run [phpdoc](https://docs.phpdoc.org/3.0/) :
 If you're on Linux, you could create an alias with :
 
     alias phpdoc="docker run --rm -v $(pwd):/data phpdoc/phpdoc:3"
-
-And then run phpdoc with :
-
-    phpdoc
 
 ## Licence 
 
