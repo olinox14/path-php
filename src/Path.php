@@ -337,6 +337,7 @@ class Path
      *     Path('path/to/file.ext').basename()
      *     >>> 'file.ext'
      *
+     * .
      * @see https://www.php.net/manual/en/function.pathinfo.php
      *
      * @return string
@@ -385,6 +386,7 @@ class Path
      *     Path('path/to/file.ext').name()
      *     >>> 'file'
      *
+     * .
      * @see https://www.php.net/manual/en/function.pathinfo.php
      * @return string
      */
