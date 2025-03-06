@@ -1,4 +1,4 @@
-FROM php:8.2-cli
+FROM php:8.3-cli
 
 # Installer les dépendances pour l'extension zip
 RUN apt-get update && apt-get install -y \
