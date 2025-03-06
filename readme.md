@@ -1,8 +1,8 @@
 [![CI](https://github.com/olinox14/path-php/actions/workflows/php.yml/badge.svg)](https://github.com/olinox14/path-php/actions/workflows/php.yml)
 [![Coverage Status](https://coveralls.io/repos/github/olinox14/path-php/badge.svg?branch=master)](https://coveralls.io/github/olinox14/path-php?branch=master)
-[![Version](http://poser.pugx.org/olinox14/path-php/version)](https://packagist.org/packages/olinox14/path-php)
-[![License](http://poser.pugx.org/olinox14/path-php/license)](https://packagist.org/packages/olinox14/path-php)
-[![PHP Version Require](http://poser.pugx.org/olinox14/path-php/require/php)](https://packagist.org/packages/olinox14/path-php)
+[![Version](https://poser.pugx.org/olinox14/path-php/version)](https://packagist.org/packages/olinox14/path-php)
+[![License](https://poser.pugx.org/olinox14/path-php/license)](https://packagist.org/packages/olinox14/path-php)
+[![PHP Version Require](https://poser.pugx.org/olinox14/path-php/require/php)](https://packagist.org/packages/olinox14/path-php)
 
 # Path-php
 
