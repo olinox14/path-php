@@ -217,7 +217,7 @@ class Path
             }
         }
 
-        if($this->builtin->function_exists('exec')) {
+        if ($this->builtin->function_exists('exec')) {
             $homeDir = $isWindows ?
                 $this->builtin->exec('echo %userprofile%') :
                 $this->builtin->exec('echo ~');
