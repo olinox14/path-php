@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Path;
 
 use Generator;
@@ -203,7 +205,7 @@ class Path
         }
 
         $homeDir = $this->builtin->getenv('HOME');
-        if (!empty($homeDir)) {
+        if (!empty($homeDir) && is_string($homeDir)) {
             return new self($homeDir);
         }
 
@@ -326,6 +328,7 @@ class Path
      */
     public function ext(): string
     {
+        /** @phpstan-ignore return.type */
         return $this->builtin->pathinfo($this->path, PATHINFO_EXTENSION);
     }
 
@@ -344,6 +347,7 @@ class Path
      */
     public function basename(): string
     {
+        /** @phpstan-ignore return.type */
         return $this->builtin->pathinfo($this->path, PATHINFO_BASENAME);
     }
 
@@ -392,6 +396,7 @@ class Path
      */
     public function name(): string
     {
+        /** @phpstan-ignore return.type */
         return $this->builtin->pathinfo($this->path, PATHINFO_FILENAME);
     }
 
@@ -767,6 +772,7 @@ class Path
      *
      * @return array<self>
      * @throws FileNotFoundException
+     * @throws IOException
      */
     public function dirs(): array
     {
@@ -775,8 +781,13 @@ class Path
         }
 
         $dirs = [];
+        $children = $this->builtin->scandir($this->path);
 
-        foreach ($this->builtin->scandir($this->path) as $filename) {
+        if ($children === false) {
+            throw new IOException("An error occurred while reading directory {$this->path}");
+        }
+
+        foreach ($children as $filename) {
             if ($filename === '.' || $filename === '..') {
                 continue;
             }
@@ -794,8 +805,10 @@ class Path
     /**
      * Retrieves an array of files present in the directory.
      *
+     * @param bool $includeSymlinks
      * @return array<self> An array of files present in the directory.
      * @throws FileNotFoundException If the directory specified in the path does not exist.
+     * @throws IOException
      */
     public function files(bool $includeSymlinks = true): array
     {
@@ -804,8 +817,13 @@ class Path
         }
 
         $files = [];
+        $children = $this->builtin->scandir($this->path);
 
-        foreach ($this->builtin->scandir($this->path) as $filename) {
+        if ($children === false) {
+            throw new IOException("An error occurred while reading directory {$this->path}");
+        }
+
+        foreach ($children as $filename) {
             if ($filename === '.' || $filename === '..') {
                 continue;
             }
@@ -977,7 +995,7 @@ class Path
         }
 
         if (!$asOctal) {
-            $permissions = decoct($permissions);
+            $permissions = (int)decoct($permissions);
         }
 
         if ($clearStatCache) {
@@ -1134,8 +1152,13 @@ class Path
     {
         $path = preg_replace_callback(
             '/\$\{([^}]+)}|\$(\w+)/',
-            function ($matches) {
-                return $this->builtin->getenv($matches[1] ?: $matches[2]);
+            function (array $matches): string {
+                $env = $this->builtin->getenv($matches[1] ?: ($matches[2] ?? null));
+                if (!is_string($env)) {
+                    return $matches[0];
+                }
+
+                return $env;
             },
             $this->path()
         );
