@@ -1163,6 +1163,10 @@ class Path
             $this->path()
         );
 
+        if ($path === null) {
+            throw new IOException("An error occurred while expanding variables in path {$this->path()}");
+        }
+
         return $this->cast($path);
     }
 
@@ -1389,6 +1393,7 @@ class Path
         $iterator = $this->builtin->getRecursiveIterator($this->path);
 
         foreach ($iterator as $file) {
+            /** @phpstan-ignore argument.type */
             yield $this->cast($file);
         }
     }
