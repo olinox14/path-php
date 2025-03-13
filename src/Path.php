@@ -1163,10 +1163,7 @@ class Path
             $this->path()
         );
 
-        if ($path === null) {
-            throw new IOException("An error occurred while expanding variables in path {$this->path()}");
-        }
-
+        /** argument.type $path can not be null here */
         return $this->cast($path);
     }
 

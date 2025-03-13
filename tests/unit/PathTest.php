@@ -2350,6 +2350,25 @@ class PathTest extends TestCase
     /**
      * @throws FileNotFoundException
      */
+    public function testDirsErrorOnWalkDirs()
+    {
+        $path = $this->getMock('/foo', 'dirs');
+        $path->method('isDir')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('scandir')
+            ->with('/foo')
+            ->willReturn(false);
+
+        $this->expectException(IOException::class);
+
+        $path->dirs();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
     public function testFiles()
     {
         $path = $this->getMock('/foo', 'files');
@@ -2420,6 +2439,25 @@ class PathTest extends TestCase
             ->willReturn(False);
 
         $this->expectException(FileNotFoundException::class);
+
+        $path->files();
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function testFilesErrorOnWalkFiles()
+    {
+        $path = $this->getMock('/foo', 'files');
+        $path->method('isDir')->willReturn(True);
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('scandir')
+            ->with('/foo')
+            ->willReturn(false);
+
+        $this->expectException(IOException::class);
 
         $path->files();
     }
@@ -3205,6 +3243,31 @@ class PathTest extends TestCase
             ->expects(self::once())
             ->method('cast')
             ->with('/foo/abc/bar')
+            ->willReturn($expandedPath);
+
+        $this->assertEquals(
+            $expandedPath,
+            $path->expandVars()
+        );
+    }
+
+    public function testExpandVarsNonExistingVar(): void
+    {
+        $path = $this->getMock('~/file.ext', 'expandVars');
+        $path->method('path')->willReturn('/foo/$test/bar');
+
+        $this->builtin
+            ->expects(self::once())
+            ->method('getenv')
+            ->with('test')
+            ->willReturn(false);
+
+        $expandedPath = $this->getMockBuilder(TestablePath::class)->disableOriginalConstructor()->getMock();
+
+        $path
+            ->expects(self::once())
+            ->method('cast')
+            ->with('/foo/$test/bar')
             ->willReturn($expandedPath);
 
         $this->assertEquals(
