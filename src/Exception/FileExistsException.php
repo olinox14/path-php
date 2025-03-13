@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Path\Exception;
 
 class FileExistsException extends \Exception
