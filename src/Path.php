@@ -10,6 +10,7 @@ use Throwable;
 
 /**
  * Represents a filesystem path.
+ *
  * Most of the methods rely on the php builtin methods, see each method's documentation for more.
  *
  * @see https://github.com/olinox14/path-php#path-php
@@ -216,7 +217,7 @@ class Path
             }
         }
 
-        if($this->builtin->function_exists('exec')) {
+        if ($this->builtin->function_exists('exec')) {
             $homeDir = $isWindows ?
                 $this->builtin->exec('echo %userprofile%') :
                 $this->builtin->exec('echo ~');
@@ -333,9 +334,10 @@ class Path
      *
      * Example :
      *
-     *      Path('path/to/file.ext').basename()
-     *      >>> 'file.ext'
+     *     Path('path/to/file.ext').basename()
+     *     >>> 'file.ext'
      *
+     * .
      * @see https://www.php.net/manual/en/function.pathinfo.php
      *
      * @return string
@@ -365,7 +367,7 @@ class Path
     }
 
     /**
-     * > Alias for Path->cd($path)
+     * Alias for Path->cd($path)
      *
      * @see cd()
      * @throws FileNotFoundException
@@ -379,13 +381,13 @@ class Path
     /**
      * Get the name of the file or path, without its extension.
      *
-     * Example :
+     * Example:
      *
      *     Path('path/to/file.ext').name()
      *     >>> 'file'
      *
+     * .
      * @see https://www.php.net/manual/en/function.pathinfo.php
-     *
      * @return string
      */
     public function name(): string
@@ -747,7 +749,7 @@ class Path
     }
 
     /**
-     * > Alias for Path->parent() method
+     * Alias for Path->parent() method
      *
      * @see parent()
      * @param int $levels

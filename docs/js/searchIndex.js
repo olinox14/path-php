@@ -148,7 +148,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Achdir\u0028\u0029",
             "name": "chdir",
-            "summary": "\u003E\u0020Alias\u0020for\u0020Path\u002D\u003Ecd\u0028\u0024path\u0029",
+            "summary": "Alias\u0020for\u0020Path\u002D\u003Ecd\u0028\u0024path\u0029",
             "url": "classes/Path-Path.html#method_chdir"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Aname\u0028\u0029",
@@ -208,7 +208,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Adirname\u0028\u0029",
             "name": "dirname",
-            "summary": "\u003E\u0020Alias\u0020for\u0020Path\u002D\u003Eparent\u0028\u0029\u0020method",
+            "summary": "Alias\u0020for\u0020Path\u002D\u003Eparent\u0028\u0029\u0020method",
             "url": "classes/Path-Path.html#method_dirname"
         },                {
             "fqsen": "\\Path\\Path\u003A\u003Adirs\u0028\u0029",
