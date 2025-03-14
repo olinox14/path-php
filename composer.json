@@ -26,7 +26,8 @@
     "ext-posix": "*",
     "php-coveralls/php-coveralls": "^2.7",
     "phpstan/phpstan": "^2.1",
-    "friendsofphp/php-cs-fixer": "^3.70"
+    "friendsofphp/php-cs-fixer": "^3.70",
+    "behat/behat": "^3.19"
   },
   "minimum-stability": "dev",
   "prefer-stable": true
