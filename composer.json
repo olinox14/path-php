@@ -1,7 +1,7 @@
 {
   "name": "olinox14/path-php",
   "description": "Object-oriented file and path operations, inspired by the path.py python library",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "require": { "php": ">=8.0" },
   "type": "library",
   "license": "MIT",
