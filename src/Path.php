@@ -42,8 +42,8 @@ class Path
      */
     public static function join(string|self $path, string|self ...$parts): self
     {
-        $path = (string)$path;
-        $parts = \array_map(fn ($p) => (string)$p, $parts);
+        $path = (string) $path;
+        $parts = \array_map(fn($p) => (string) $p, $parts);
 
         foreach ($parts as $part) {
             if (\str_starts_with($part, BuiltinProxy::$DIRECTORY_SEPARATOR)) {
@@ -75,7 +75,7 @@ class Path
      */
     public static function splitDrive(string|self $path): array
     {
-        $path = (string)$path;
+        $path = (string) $path;
 
         $matches = [];
 
@@ -84,10 +84,10 @@ class Path
             return \array_slice($matches, -2);
         }
 
-        $rx =
-            BuiltinProxy::$DIRECTORY_SEPARATOR === '/' ?
-                '/(^\/\/[\w\-\s]{2,15}\/[\w\-\s]+)(.*)/' :
-                '/(^\\\\\\\\[\w\-\s]{2,15}\\\[\w\-\s]+)(.*)/';
+        $rx
+            = BuiltinProxy::$DIRECTORY_SEPARATOR === '/'
+                ? '/(^\/\/[\w\-\s]{2,15}\/[\w\-\s]+)(.*)/'
+                : '/(^\\\\\\\\[\w\-\s]{2,15}\\\[\w\-\s]+)(.*)/';
 
         \preg_match($rx, $path, $matches);
         if ($matches) {
@@ -101,7 +101,7 @@ class Path
     {
         $this->builtin = new BuiltinProxy();
 
-        $this->path = (string)$path;
+        $this->path = (string) $path;
         $this->handle = null;
     }
 
@@ -218,9 +218,9 @@ class Path
         }
 
         if ($this->builtin->function_exists('exec')) {
-            $homeDir = $isWindows ?
-                $this->builtin->exec('echo %userprofile%') :
-                $this->builtin->exec('echo ~');
+            $homeDir = $isWindows
+                ? $this->builtin->exec('echo %userprofile%')
+                : $this->builtin->exec('echo ~');
 
             if ($homeDir) {
                 return new self($homeDir);
@@ -693,7 +693,7 @@ class Path
      * @return void
      * @throws IOException
      */
-    public function touch(int|\DateTime $time = null, int|\DateTime $atime = null): void
+    public function touch(int|\DateTime|null $time = null, int|\DateTime|null $atime = null): void
     {
         if ($time instanceof \DateTime) {
             $time = $time->getTimestamp();
@@ -744,7 +744,7 @@ class Path
     public function parent(int $levels = 1): self
     {
         return $this->cast(
-            $this->builtin->dirname($this->path ?? ".", $levels)
+            $this->builtin->dirname($this->path ?: ".", $levels)
         );
     }
 
@@ -953,7 +953,7 @@ class Path
         }
 
         if (!$asOctal) {
-            $perms = (int)substr(sprintf('%o', $perms), -4);
+            $perms = (int) substr(sprintf('%o', $perms), -4);
         }
 
         return $perms;
@@ -1058,9 +1058,9 @@ class Path
             $this->builtin->clearstatcache();
         }
 
-        $success =
-            $this->builtin->chown($this->path, $user) &&
-            $this->builtin->chgrp($this->path, $group);
+        $success
+            = $this->builtin->chown($this->path, $user)
+            && $this->builtin->chgrp($this->path, $group);
 
         if ($success === false) {
             throw new IOException("An error occurred while setting owner of " . $this->path);
@@ -1087,7 +1087,7 @@ class Path
      *
      * @throws IOException
      */
-    public function sameFile(string | self $other): bool
+    public function sameFile(string|self $other): bool
     {
         return $this->absPath()->path() === $this->cast($other)->absPath()->path();
     }
@@ -1613,7 +1613,7 @@ class Path
             throw new FileExistsException($newLink . " already exist");
         }
 
-        $success = $this->builtin->link($this->path, (string)$newLink);
+        $success = $this->builtin->link($this->path, (string) $newLink);
 
         if ($success === false) {
             throw new IOException("An error occurred while creating the link from " . $this->path . " to " . $newLink);
@@ -1650,7 +1650,7 @@ class Path
      * @throws FileExistsException If the symbolic link already exists.
      * @throws IOException If there was an error while creating the symbolic link.
      */
-    public function symlink(string | self $newLink): self
+    public function symlink(string|self $newLink): self
     {
         if (!$this->exists()) {
             throw new FileNotFoundException("File or dir does not exist : " . $this);
@@ -1662,7 +1662,7 @@ class Path
             throw new FileExistsException($newLink . " already exist");
         }
 
-        $success = $this->builtin->symlink($this->path, (string)$newLink);
+        $success = $this->builtin->symlink($this->path, (string) $newLink);
 
         if ($success === false) {
             throw new IOException("An error occurred while creating the symbolic link from " . $this->path . " to " . $newLink);
@@ -1719,8 +1719,8 @@ class Path
             throw new FileNotFoundException("{$this->path} is not a file or directory");
         }
 
-        $path = (string)$this->absPath();
-        $basePath = (string)$basePath;
+        $path = (string) $this->absPath();
+        $basePath = (string) $basePath;
 
         $realBasePath = $this->builtin->realpath($basePath);
         if ($realBasePath === false) {
